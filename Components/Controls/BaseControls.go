@@ -287,8 +287,9 @@ func (ctrl *GWinControl) WindowExists(Actrlhandle syscall.Handle) bool {
 	return false
 }
 
-func ExecuteMethod(obj interface{}, MethodName string, params []interface{}) {
+func ExecuteMethod(obj interface{}, MethodName string, params []interface{})(exeOk bool) {
 	pType := reflect.TypeOf(obj)
+	exeOk = false
 	if mnd, ok := pType.MethodByName(MethodName); ok {
 		pType = mnd.Func.Type()
 		paramLen := len(params) + 1
@@ -299,8 +300,10 @@ func ExecuteMethod(obj interface{}, MethodName string, params []interface{}) {
 				in[i+1] = reflect.ValueOf(params[i])
 			}
 			mnd.Func.Call(in)
+			exeOk = true
 		}
 	}
+	return
 }
 
 func (ctrl *GWinControl) CreateParams(params *GCreateParams) {
@@ -455,7 +458,7 @@ func (ctrl *GWinControl) SetVisible(v bool) {
 				}
 				tmparent.UpdateShowing()
 			}
-		} else if ctrl.fIsForm || reflect.TypeOf(ctrl).Name() == "GForm" {
+		} else if ctrl.fIsForm {
 			ctrl.UpdateShowing()
 		}
 	}
@@ -483,10 +486,95 @@ func (ctrl *GWinControl) WndProc(msg uint32, wparam, lparam uintptr) (result uin
 	result = 0
 	switch msg {
 	case WinApi.WM_PAINT:
-
+		//pstruct := new(WinApi.GPaintStruct)
+		//dc := pstruct.BeginPaint(ctrl.fHandle)
+		//defer pstruct.EndPaint(ctrl.fHandle)
+		ctrl.PaintHandler(0)
 	}
 	msgDispatchNext = true
 	return
+}
+
+func (ctrl *GWinControl)ExecuteChildMethod(MethodName string, params []interface{})(exeOk bool)  {
+	exeOk = false
+	for i:=ctrl.SubChildCount()-1;i>=0;i--{
+		subObj := ctrl.SubChild(i)
+		pType := reflect.TypeOf(subObj)
+		stype := pType.String()
+		if stype == "*controls.GWinControl" || stype == "*GWinControl" {
+			break
+		}
+		if mnd, ok := pType.MethodByName(MethodName); ok {
+			pType = mnd.Func.Type()
+			paramLen := len(params) + 1
+			if pType.NumIn() == paramLen && pType.NumOut() == 0 {
+				in := make([]reflect.Value, paramLen)
+				in[0] = reflect.ValueOf(subObj)
+				for i := 0; i < paramLen-1; i++ {
+					in[i+1] = reflect.ValueOf(params[i])
+				}
+				mnd.Func.Call(in)
+				exeOk = true
+			}
+		}
+	}
+	return
+}
+
+//绘制控件的函数
+func (ctrl *GWinControl)PaintWindow(dc WinApi.HDC){
+	//执行默认的绘制函数
+	Brush := WinApi.CreateSolidBrush(Graphics.ClWhite)
+	r := new(WinApi.Rect)
+	r.Right = ctrl.Width()
+	r.Bottom =ctrl.Height()
+	WinApi.FillRect(dc,r,Brush)
+	WinApi.DeleteObject(uintptr(Brush))
+}
+
+func (ctrl *GWinControl)PaintHandler(dc WinApi.HDC)  {
+	if dc == 0{
+		pstruct := new(WinApi.GPaintStruct)
+		dc =pstruct.BeginPaint(ctrl.fHandle)
+		defer pstruct.EndPaint(ctrl.fHandle)
+	}
+	graphicControlCount :=ctrl.ControlCount();
+	if graphicControlCount==0{
+		//找到最后一个有Paint
+		inParams := make([]interface{},1)
+		inParams[0] = dc
+		if ctrl.ExecuteChildMethod("PaintWindow",inParams){
+			return
+		}
+	}else{
+		//裁剪掉GraphcControls的区域不绘制，然后
+		SaveIndex := WinApi.SaveDC(dc)
+		Clip := WinApi.SIMPLEREGION
+		//defer WinApi.RestoreDC(dc,SaveIndex)
+		for i := 0;i<graphicControlCount;i++{
+			ictrl := ctrl.Controls(i)
+			Clip =WinApi.ExcludeClipRect(dc,int(ictrl.Left()),int(ictrl.Top()),
+				int(ictrl.Left()+ictrl.Width()),int(ictrl.Top()+ictrl.Height()))
+			if Clip == WinApi.NULLREGION {
+				break
+			}
+		}
+		if Clip!=WinApi.NULLREGION{
+			//找到最后一个有Paint
+			inParams := make([]interface{},1)
+			inParams[0] = dc
+			if ctrl.ExecuteChildMethod("PaintWindow",inParams){
+				return
+			}
+		}
+		WinApi.RestoreDC(dc,SaveIndex)
+		//绘制GraphicControls
+		ctrl.PaintGraphicControls(dc)
+	}
+}
+
+func (ctrl *GWinControl)PaintGraphicControls(dc WinApi.HDC)  {
+	fmt.Println("PaintGraphicControls")
 }
 
 func (ctrl *GWinControl) InitSubclassParams(Params *GCreateParams, subclassName string) {

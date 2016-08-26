@@ -667,7 +667,3 @@ func init() {
 	fnUpdateICMRegKeyA, _ = syscall.GetProcAddress(libgdi32, "UpdateICMRegKeyA")
 	fnWidenPath, _ = syscall.GetProcAddress(libgdi32, "WidenPath")
 }
-
-type POINT struct {
-	X, Y int32
-}

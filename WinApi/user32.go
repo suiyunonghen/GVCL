@@ -3,55 +3,9 @@ package WinApi
 import (
 	"syscall"
 	"unsafe"
+	"DxSoft/GVCL/Graphics"
 )
 
-type HMENU uintptr
-type HINST uintptr
-type ATOM uint16
-type HICON uintptr
-type HCURSOR uintptr
-type HBRUSH uintptr
-
-type tagWNDCLASSW struct {
-	Style         uint
-	FnWndProc     uintptr
-	CbClsExtra    int
-	CbWndExtra    int
-	HInstance     HINST
-	HIcon         HICON
-	HCursor       HCURSOR
-	HbrBackground HBRUSH
-	LpszMenuName  *uint16
-	LpszClassName *uint16
-}
-
-type GWndClass tagWNDCLASSW
-
-type tagWNDCLASSEXW struct {
-	CbSize        uint32
-	Style         uint32
-	FnWndProc     uintptr
-	CbClsExtra    int32
-	CbWndExtra    int32
-	HInstance     HINST
-	HIcon         HICON
-	HCursor       HCURSOR
-	HbrBackground HBRUSH
-	LpszMenuName  *uint16
-	LpszClassName *uint16
-	HIconSm       HICON
-}
-
-type GWndClassEx tagWNDCLASSEXW
-
-type MSG struct {
-	HWnd    syscall.Handle
-	Message uint32
-	WParam  uintptr
-	LParam  uintptr
-	Time    uint32
-	Pt      POINT
-}
 
 var (
 	libuser32                            syscall.Handle
@@ -167,6 +121,7 @@ var (
 	fnDrawStateA                         uintptr
 	fnDrawTextExW                        uintptr
 	fnDrawTextExA                        uintptr
+	fnDrawTextW                          uintptr
 	fnEmptyClipboard                     uintptr
 	fnEnableMenuItem                     uintptr
 	fnEnableScrollBar                    uintptr
@@ -704,6 +659,7 @@ func init() {
 	fnDrawStateA, _ = syscall.GetProcAddress(libuser32, "DrawStateA")
 	fnDrawTextExW, _ = syscall.GetProcAddress(libuser32, "DrawTextExW")
 	fnDrawTextExA, _ = syscall.GetProcAddress(libuser32, "DrawTextExA")
+	fnDrawTextW,_=syscall.GetProcAddress(libuser32, "DrawTextW")
 	fnEmptyClipboard, _ = syscall.GetProcAddress(libuser32, "EmptyClipboard")
 	fnEnableMenuItem, _ = syscall.GetProcAddress(libuser32, "EnableMenuItem")
 	fnEnableScrollBar, _ = syscall.GetProcAddress(libuser32, "EnableScrollBar")
@@ -1117,6 +1073,14 @@ func init() {
 	fnWINNLSEnableIME, _ = syscall.GetProcAddress(libuser32, "WINNLSEnableIME")
 }
 
+func BoolToUint(value bool) uint8 {
+	if value {
+		return 1
+	}
+
+	return 0
+}
+
 func MessageBox(hwnd syscall.Handle, lpText string, lpCaption string, uType uint) int {
 	r, _, _ := syscall.Syscall6(fnMessageBoxW, 4, uintptr(hwnd),
 		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpText))),
@@ -1348,4 +1312,254 @@ func GetWindowText(hwnd syscall.Handle) string {
 		uintptr(unsafe.Pointer(&mp[0])),
 		retlen+1)
 	return syscall.UTF16ToString(mp)
+}
+
+func GetWindowLong(hwnd syscall.Handle, nIdex int32) int {
+	ret, _, _ := syscall.Syscall(fnGetWindowLongW, 2, uintptr(hwnd), uintptr(nIdex), 0)
+	return int(ret)
+}
+
+func ActivateKeyboardLayout(hkl HKL, Flags uint) HKL {
+	ret, _, _ := syscall.Syscall(fnActivateKeyboardLayout, 2, uintptr(hkl), uintptr(Flags), 0)
+	return HKL(ret)
+}
+
+func AnyPopup()bool  {
+	ret, _, _ := syscall.Syscall(fnAnyPopup, 0, 0, 0, 0)
+	return  ret!=0
+}
+
+func AppendMenu(hMenu HMENU,uFlags uint, uIDNewItem uintptr, lpNewItem string) bool{
+	ret, _, _ := syscall.Syscall6(fnAppendMenuW, 4, uintptr(hMenu),
+		uintptr(uFlags),uIDNewItem,uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpNewItem))),0,0)
+	return  ret!=0
+}
+
+func ArrangeIconicWindows(hwnd syscall.Handle)uint  {
+	ret, _, _ := syscall.Syscall(fnArrangeIconicWindows, 1, uintptr(hwnd), 0, 0)
+	return  uint(ret)
+}
+
+func AttachThreadInput(idAttach, idAttachTo uint32,fAttach bool)uint  {
+	ret, _, _ := syscall.Syscall(fnAttachThreadInput, 3, uintptr(idAttach), uintptr(idAttachTo), uintptr(BoolToUint(fAttach)))
+	return  uint(ret)
+}
+
+func BeginDeferWindowPos(nNumWindows int)syscall.Handle  {
+	ret, _, _ := syscall.Syscall(fnBeginDeferWindowPos, 1, uintptr(nNumWindows),0,0)
+	return  syscall.Handle(ret)
+}
+
+func BeginPaint(hWnd syscall.Handle, lpPaint *GPaintStruct) HDC{
+	ret, _, _ := syscall.Syscall(fnBeginPaint, 2, uintptr(hWnd),uintptr(unsafe.Pointer(lpPaint)),0)
+	return  HDC(ret)
+}
+
+func EndPaint(hWnd syscall.Handle,pstruct *GPaintStruct) bool{
+	ret, _, _ := syscall.Syscall(fnEndPaint, 2, uintptr(hWnd),uintptr(unsafe.Pointer(pstruct)),0)
+	return  ret!=0
+}
+
+func BringWindowToTop(hwnd syscall.Handle) bool{
+	ret, _, _ := syscall.Syscall(fnBringWindowToTop, 1, uintptr(hwnd),0,0)
+	return  ret!=0
+}
+
+func BroadcastSystemMessage(Flags uint32, Recipients uintptr, uiMessage uint, wParam uintptr, lParam uintptr)int32{
+	ret, _, _ := syscall.Syscall6(fnBroadcastSystemMessageW, 5, uintptr(Flags),Recipients,
+		uintptr(uiMessage),wParam,lParam,0)
+	return  int32(ret)
+}
+
+func CallMsgFilter(lpmsg *MSG,nCode int32)bool{
+	ret,_,_:=syscall.Syscall(fnCallMsgFilterW,2,uintptr(unsafe.Pointer(lpmsg)),uintptr(nCode),0)
+	return ret!=0
+}
+
+func CallNextHookEx(hhk HOOK,nCode int,wParam,lParam uintptr)  LRESULT{
+	ret,_,_:=syscall.Syscall6(fnCallNextHookEx,4,uintptr(hhk),uintptr(nCode),wParam,lParam,0,0)
+	return LRESULT(ret)
+}
+
+
+func CascadeWindows(hwndParent syscall.Handle,wHow uint,lpRect *Rect,ckids uint,lpkids unsafe.Pointer) uint16 {
+	ret,_,_:=syscall.Syscall6(fnCascadeWindows,5,uintptr(hwndParent),uintptr(wHow),
+		uintptr(unsafe.Pointer(lpRect)),uintptr(ckids),uintptr(lpkids),0)
+	return uint16(ret)
+}
+
+func ChangeWindowMessageFilter(message uint,dwFlag uint32)bool  {
+	ret,_,_:=syscall.Syscall(fnChangeWindowMessageFilter,2,uintptr(message),uintptr(dwFlag),0)
+	return ret!=0
+}
+
+func ChangeClipboardChain(hWndRemove, hWndNewNext syscall.Handle)bool  {
+	ret,_,_:=syscall.Syscall(fnChangeClipboardChain,2,uintptr(hWndRemove),uintptr(hWndNewNext),0)
+	return ret!=0
+}
+
+func ChangeDisplaySettings(lpDevMode *GdevicemodeW,dwFlags uint32)int32  {
+	ret,_,_ := syscall.Syscall(fnChangeDisplaySettingsW,2,uintptr(unsafe.Pointer(lpDevMode)),uintptr(dwFlags),0)
+	return int32(ret)
+}
+func ChangeDisplaySettingsEx(lpszDeviceName string,lpDevMode *GdevicemodeW,wnd syscall.Handle,dwFlags uint32,lParam uintptr)int32  {
+	ret,_,_ := syscall.Syscall6(fnChangeDisplaySettingsExW,5,
+		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpszDeviceName))),
+		uintptr(unsafe.Pointer(lpDevMode)),uintptr(wnd), uintptr(dwFlags),lParam,0)
+	return int32(ret)
+}
+
+func ChangeMenu(hMenu HMENU,cmd uint,lpszNewItem string,cmdInsert uint,flags uint)bool{
+	ret,_,_ := syscall.Syscall6(fnChangeMenuW,5,
+		uintptr(hMenu),uintptr(cmd),
+		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpszNewItem))),
+		uintptr(cmdInsert),uintptr(flags),0)
+	return ret!=0
+}
+
+
+func CheckDlgButton(hdlg syscall.Handle,nIdButton int32,uCheck uint)bool  {
+	ret,_,_:=syscall.Syscall(fnCheckDlgButton,3,uintptr(hdlg),uintptr(nIdButton),uintptr(uCheck))
+	return ret!=0
+}
+
+func DeleteMenu(hMenu HMENU,uPosition, uFlags uint)bool  {
+	ret,_,_:=syscall.Syscall(fnDeleteMenu,3,uintptr(hMenu),uintptr(uPosition),uintptr(uFlags))
+	return ret!=0
+}
+
+func DestroyCaret()bool{
+	ret,_,_:=syscall.Syscall(fnDestroyCaret,0,0,0,0)
+	return ret!=0
+}
+
+func DestroyCursor(cursor HCURSOR)bool{
+	ret,_,_:=syscall.Syscall(fnDestroyCursor,1,uintptr(cursor),0,0)
+	return ret!=0
+}
+
+func DestroyIcon(icon HICON)bool{
+	ret,_,_:=syscall.Syscall(fnDestroyIcon,1,uintptr(icon),0,0)
+	return ret!=0
+}
+
+func DestroyMenu(menu HMENU)bool{
+	ret,_,_:=syscall.Syscall(fnDestroyMenu,1,uintptr(menu),0,0)
+	return ret!=0
+}
+
+func DestroyWindow(wnd syscall.Handle)bool{
+	ret,_,_:=syscall.Syscall(fnDestroyWindow,1,uintptr(wnd),0,0)
+	return ret!=0
+}
+
+func DrawCaption(p1 syscall.Handle,p2 HDC,p3 *Rect,p4 uint)bool  {
+	ret,_,_:=syscall.Syscall6(fnDrawCaption,4,uintptr(p1),uintptr(p2),uintptr(unsafe.Pointer(p3)),uintptr(p4),0,0)
+	return ret!=0
+}
+
+func DrawEdge(hdc HDC,qrc *Rect,edge uint,grfFlags uint)bool  {
+	ret,_,_:=syscall.Syscall6(fnDrawEdge,4,uintptr(hdc),uintptr(unsafe.Pointer(qrc)),uintptr(edge),uintptr(grfFlags),0,0)
+	return ret!=0
+}
+
+func DrawFocusRect(hdc HDC,rpc *Rect)bool  {
+	ret,_,_:=syscall.Syscall(fnDrawFocusRect,2,uintptr(hdc),uintptr(unsafe.Pointer(rpc)),0)
+	return ret!=0
+}
+
+
+func DrawFrameControl(dc HDC,rect *Rect,utype,ustate uint) bool {
+	ret,_,_:=syscall.Syscall6(fnDrawFrameControl,4,uintptr(dc),uintptr(unsafe.Pointer(rect)),uintptr(utype),uintptr(ustate),0,0)
+	return ret!=0
+}
+
+//function DrawIcon(hDC: HDC; X, Y: Integer; hIcon: HICON): BOOL; stdcall;
+func DrawIcon(dc HDC,x,y int,hIcon HICON) bool {
+	ret,_,_:=syscall.Syscall6(fnDrawIcon,4,uintptr(dc),uintptr(x),uintptr(y),uintptr(hIcon),0,0)
+	return ret!=0
+}
+
+func DrawIconEx(dc HDC,xLeft, yTop int,hIcon HICON,cxWidth, cyWidth int,istepIfAniCur uint,hbrFlickerFreeDraw HBRUSH,diFlags uint) bool {
+	ret,_,_:=syscall.Syscall9(fnDrawIcon,4,uintptr(dc),uintptr(xLeft),uintptr(yTop),uintptr(hIcon),uintptr(cxWidth),
+		uintptr(cyWidth),uintptr(istepIfAniCur),uintptr(hbrFlickerFreeDraw),uintptr(diFlags))
+	return ret!=0
+}
+
+func DrawMenuBar(hWnd syscall.Handle)bool  {
+	ret,_,_:=syscall.Syscall(fnDrawMenuBar,1,uintptr(hWnd),0,0)
+	return ret!=0
+}
+
+func DrawTextEx(dc HDC,text string,textlen int,textrect *Rect,dwDTFormat uint,DTParams *GDrawTextParams)int  {
+	ret,_,_:=syscall.Syscall6(fnDrawTextExW,6,uintptr(dc),
+		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(text))),
+		uintptr(textlen),uintptr(unsafe.Pointer(textrect)),
+		uintptr(dwDTFormat),uintptr(unsafe.Pointer(DTParams)))
+	return int(ret)
+}
+
+func DrawText(dc HDC,text string,textlen int,textrect *Rect,uFormat uint)int  {
+	ret,_,_:=syscall.Syscall6(fnDrawTextW,6,uintptr(dc),
+		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(text))),
+		uintptr(textlen),uintptr(unsafe.Pointer(textrect)),
+		uintptr(uFormat),0)
+	return int(ret)
+}
+
+func FrameRect(hdc HDC,lprc *Rect,hbr HBRUSH)int  {
+	ret,_,_:=syscall.Syscall(fnFrameRect,3,uintptr(hdc),uintptr(unsafe.Pointer(lprc)),uintptr(hbr))
+	return int(ret)
+}
+
+func InvertRect(hdc HDC,rc *Rect)bool  {
+	ret,_,_:=syscall.Syscall(fnFrameRect,2,uintptr(hdc),uintptr(unsafe.Pointer(rc)),0)
+	return ret!=0
+}
+
+func FillRect(hdc HDC,lprc *Rect,hbr HBRUSH)int  {
+	ret,_,_:=syscall.Syscall(fnFillRect,3,uintptr(hdc),uintptr(unsafe.Pointer(lprc)),uintptr(hbr))
+	return int(ret)
+}
+
+func InflateRect(rc *Rect,dx,dy int)bool  {
+	ret,_,_:=syscall.Syscall(fnInflateRect,3,uintptr(unsafe.Pointer(rc)),uintptr(dx),uintptr(dy))
+	return ret!=0
+}
+
+
+func EnableMenuItem(hMenu HMENU,uIDEnableItem, uEnable uint)bool  {
+	ret,_,_:=syscall.Syscall(fnEnableMenuItem,3,uintptr(hMenu),uintptr(uIDEnableItem),uintptr(uEnable))
+	return ret!=0
+}
+
+func EnableWindow(hWnd syscall.Handle, bEnable bool) bool {
+	ret,_,_:=syscall.Syscall(fnEnableWindow,2,uintptr(hWnd),uintptr(BoolToUint(bEnable)),0)
+	return ret!=0
+}
+
+func CreateSolidBrush(color Graphics.GColorValue)HBRUSH  {
+	ret,_,_:=syscall.Syscall(fnCreateSolidBrush,1,uintptr(color),0,0)
+	return HBRUSH(ret)
+}
+
+func SaveDC(dc HDC)int  {
+	ret,_,_:=syscall.Syscall(fnSaveDC,1,uintptr(dc),0,0)
+	return int(ret)
+}
+
+func RestoreDC(dc HDC,restIndex int)bool  {
+	ret,_,_:=syscall.Syscall(fnRestoreDC,2,uintptr(dc),uintptr(restIndex),0)
+	return ret!=0
+}
+
+func ExcludeClipRect(dc HDC,LeftRect, TopRect, RightRect, BottomRect int) int{
+	ret,_,_:=syscall.Syscall6(fnExcludeClipRect,5,uintptr(dc),uintptr(LeftRect),
+		uintptr(TopRect),uintptr(RightRect),uintptr(BottomRect),0)
+	return int(ret)
+}
+
+func DeleteObject(Hgdiobj uintptr)bool  {
+	ret,_,_:=syscall.Syscall(fnDeleteObject,1,Hgdiobj,0,0)
+	return ret!=0
 }

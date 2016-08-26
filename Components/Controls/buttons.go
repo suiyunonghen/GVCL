@@ -35,6 +35,16 @@ func (btn *GButton) CreateParams(params *GCreateParams) {
 	}
 }
 
+func (btn *GButton) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool) {
+	result = 0
+	switch msg {
+	case WinApi.WM_PAINT:
+
+	}
+	msgDispatchNext = true
+	return
+}
+
 func NewButton(aParent Components.IWincontrol) *GButton {
 	pType := reflect.TypeOf(aParent)
 	hasWincontrol := false

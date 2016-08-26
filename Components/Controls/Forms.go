@@ -107,7 +107,7 @@ func (app *WApplication) ProcessMessage(msg *WinApi.MSG) bool {
 			println("异常")
 		}
 	}()
-	if WinApi.PeekMessage(msg, 0, 0, 0, WinApi.PM_REMOVE) {
+	if msg.PeekMessage(0, 0, 0, WinApi.PM_REMOVE) {
 		result = true
 		if msg.Message != WinApi.WM_QUIT {
 			handled := false
@@ -115,8 +115,8 @@ func (app *WApplication) ProcessMessage(msg *WinApi.MSG) bool {
 				app.OnMessage(app, msg, &handled)
 			}
 			if !handled {
-				WinApi.TranslateMessage(msg)
-				WinApi.DispatchMessage(msg)
+				msg.TranslateMessage()
+				msg.DispatchMessage()
 			} else {
 				app.idleMsg(msg)
 			}
