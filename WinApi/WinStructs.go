@@ -16,6 +16,14 @@ type HDC uintptr
 type HOOK uintptr
 type LRESULT int
 
+func HiWord(L uint32) uint16 {
+	return uint16(L >> 16)
+}
+
+func LoWord(L uint32)uint16  {
+	return uint16(L)
+}
+
 type POINT struct {
 	X, Y int32
 }

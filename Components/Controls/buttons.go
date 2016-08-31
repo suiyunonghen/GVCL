@@ -9,6 +9,7 @@ import (
 type GButton struct {
 	GWinControl
 	fDefault bool
+	OnClick NotifyEvent
 }
 
 func (btn *GButton) SetDefault(v bool) {
@@ -37,11 +38,16 @@ func (btn *GButton) CreateParams(params *GCreateParams) {
 
 func (btn *GButton) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool) {
 	result = 0
-	switch msg {
-	case WinApi.WM_PAINT:
-
-	}
 	msgDispatchNext = true
+	switch msg {
+	case WinApi.WM_COMMAND: //按钮事件
+	    	notifycode := WinApi.HiWord(uint32(wparam))
+		if notifycode == uint16(WinApi.BN_CLICKED){
+			if btn.OnClick != nil{
+				btn.OnClick(btn)
+			}
+		}
+	}
 	return
 }
 

@@ -3,7 +3,6 @@ package WinApi
 import (
 	"syscall"
 	"unsafe"
-	"DxSoft/GVCL/Graphics"
 )
 
 
@@ -538,6 +537,7 @@ var (
 	fnDispatchMessageA                   uintptr
 	fnDispatchMessageW                   uintptr
 	fnPeekMessageW                       uintptr
+	fnSendMessageW			     uintptr
 )
 
 func init() {
@@ -548,6 +548,7 @@ func init() {
 	fnDispatchMessageA, _ = syscall.GetProcAddress(libuser32, "DispatchMessageA")
 	fnDispatchMessageW, _ = syscall.GetProcAddress(libuser32, "DispatchMessageW")
 	fnPeekMessageW, _ = syscall.GetProcAddress(libuser32, "PeekMessageW")
+	fnSendMessageW, _ = syscall.GetProcAddress(libuser32, "SendMessageW")
 	fnActivateKeyboardLayout, _ = syscall.GetProcAddress(libuser32, "ActivateKeyboardLayout")
 	fnAdjustWindowRect, _ = syscall.GetProcAddress(libuser32, "AdjustWindowRect")
 	fnAdjustWindowRectEx, _ = syscall.GetProcAddress(libuser32, "AdjustWindowRectEx")
@@ -1538,7 +1539,7 @@ func EnableWindow(hWnd syscall.Handle, bEnable bool) bool {
 	return ret!=0
 }
 
-func CreateSolidBrush(color Graphics.GColorValue)HBRUSH  {
+func CreateSolidBrush(color uint32)HBRUSH  {
 	ret,_,_:=syscall.Syscall(fnCreateSolidBrush,1,uintptr(color),0,0)
 	return HBRUSH(ret)
 }
@@ -1562,4 +1563,34 @@ func ExcludeClipRect(dc HDC,LeftRect, TopRect, RightRect, BottomRect int) int{
 func DeleteObject(Hgdiobj uintptr)bool  {
 	ret,_,_:=syscall.Syscall(fnDeleteObject,1,Hgdiobj,0,0)
 	return ret!=0
+}
+
+func IsIconic(hwnd syscall.Handle)bool  {
+	ret,_,_:=syscall.Syscall(fnIsIconic,1,uintptr(hwnd),0,0)
+	return ret!=0
+}
+
+func GetWindowRect(hwnd syscall.Handle,lpRect *Rect)bool  {
+	ret,_,_:=syscall.Syscall(fnGetWindowRect,2,uintptr(hwnd),uintptr(unsafe.Pointer(lpRect)),0)
+	return ret!=0
+}
+
+func ScreenToClient(hwnd syscall.Handle,lpoint *POINT)bool  {
+	ret,_,_:=syscall.Syscall(fnScreenToClient,2,uintptr(hwnd),uintptr(unsafe.Pointer(lpoint)),0)
+	return ret!=0
+}
+
+func GetSysColor(coloridx int32)uint32  {
+	ret,_,_:=syscall.Syscall(fnGetSysColor,1,uintptr(coloridx),0,0)
+	return uint32(ret)
+}
+
+func GetSysColorBrush(coloridx int32)HBRUSH  {
+	ret,_,_:=syscall.Syscall(fnGetSysColorBrush,1,uintptr(coloridx),0,0)
+	return HBRUSH(ret)
+}
+
+func SendMessage(hwnd syscall.Handle,msg uint,wparam,lparam uintptr) LRESULT {
+	ret,_,_:=syscall.Syscall6(fnSendMessageW,1,uintptr(hwnd),uintptr(msg),wparam,lparam,0,0)
+	return LRESULT(ret)
 }

@@ -3,6 +3,7 @@ package controls
 import (
 	"DxSoft/GVCL/Components"
 	"DxSoft/GVCL/WinApi"
+	"DxSoft/GVCL/Graphics"
 )
 
 var (
@@ -46,15 +47,6 @@ func (app *WApplication) Run() {
 	app.fRunning = false
 }
 
-func formCreateParams(ctrl interface{}, params *GCreateParams) {
-	nstyle := ^(WinApi.WS_CHILD | WinApi.WS_GROUP | WinApi.WS_TABSTOP)
-	params.Style = uint32(int(params.Style) & nstyle)
-	params.WinClassName = "GForm"
-	params.Style = params.Style | WinApi.WS_OVERLAPPEDWINDOW | WinApi.WS_CAPTION | WinApi.WS_THICKFRAME | WinApi.WS_MINIMIZEBOX | WinApi.WS_MAXIMIZEBOX | WinApi.WS_SYSMENU
-	nstyle = ^(WinApi.CS_HREDRAW | WinApi.CS_VREDRAW)
-	params.WindowClass.Style = uint32(int(params.WindowClass.Style) & nstyle)
-	params.ExStyle = params.ExStyle | WinApi.WS_EX_APPWINDOW
-}
 
 func formCreateWndOkHandler(ctrl interface{}) {
 	WinApi.UpdateWindow(ctrl.(*GWinControl).fHandle)
@@ -72,12 +64,32 @@ func (frm *GForm) CreateParams(params *GCreateParams) {
 	params.ExStyle = params.ExStyle | WinApi.WS_EX_APPWINDOW
 }
 
+func (frm *GForm)PaintWindow(dc WinApi.HDC)int32{
+	return frm.GWinControl.PaintWindow(dc)
+}
+
+func (frm *GForm)PaintBack(dc WinApi.HDC)int32  {
+	//frm.GWinControl.paintBackGround(dc)
+	return 1
+}
+
+func (frm *GForm)Close()  {
+	if application.fMainForm == frm{
+		application.fTerminate = true
+		WinApi.PostQuitMessage(0)
+	}else{
+		WinApi.SendMessage(frm.fHandle,WinApi.WM_CLOSE,0,0)
+		frm.fVisible = false
+	}
+}
+
 func NewForm() *GForm {
 	frm := new(GForm)
 	frm.SubInit()
 	frm.fIsForm = true
-	frm.SetWidth(400)
-	frm.SetHeight(300)
+	frm.fColor = Graphics.ClBtnFace
+	frm.fwidth = 400
+	frm.fheight = 300
 	frm.SetCreateWndOkHandler(formCreateWndOkHandler)
 	return frm
 }
