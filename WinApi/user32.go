@@ -1188,8 +1188,8 @@ func DefWindowProc(hWnd syscall.Handle, Msg uint32, wParam, lParam uintptr) uint
 	return ret
 }
 
-func SetWindowPos(hWnd, hWndInsertAfter syscall.Handle, x, y, cx, cy int, uFlags uint32) bool {
-	ret, _, _ := syscall.Syscall9(fnDefWindowProcW, 7,
+func SetWindowPos(hWnd, hWndInsertAfter syscall.Handle, x, y, cx, cy int32, uFlags uint32) bool {
+	ret, _, _ := syscall.Syscall9(fnSetWindowPos, 7,
 		uintptr(hWnd),
 		uintptr(hWndInsertAfter),
 		uintptr(x), uintptr(y),
@@ -1593,4 +1593,44 @@ func GetSysColorBrush(coloridx int32)HBRUSH  {
 func SendMessage(hwnd syscall.Handle,msg uint,wparam,lparam uintptr) LRESULT {
 	ret,_,_:=syscall.Syscall6(fnSendMessageW,1,uintptr(hwnd),uintptr(msg),wparam,lparam,0,0)
 	return LRESULT(ret)
+}
+
+func InvalidateRect(hwnd syscall.Handle,r *Rect,bErase bool)bool  {
+	ret,_,_:=syscall.Syscall(fnInvalidateRect,3,uintptr(hwnd),uintptr(unsafe.Pointer(r)),uintptr(BoolToUint(bErase)))
+	return ret!=0
+}
+
+func SetActiveWindow(hwnd syscall.Handle) syscall.Handle {
+	ret,_,_:=syscall.Syscall(fnSetActiveWindow,1,uintptr(hwnd),0,0)
+	return syscall.Handle(ret)
+}
+
+func GetActiveWindow() syscall.Handle {
+	ret,_,_:=syscall.Syscall(fnGetActiveWindow,0,0,0,0)
+	return syscall.Handle(ret)
+}
+
+func EnumThreadWindows(dwThreadId uint32,lpfn uintptr,lParam uintptr)bool  {
+	ret,_,_:=syscall.Syscall(fnEnumThreadWindows,3,uintptr(dwThreadId),lpfn,lParam)
+	return ret!=0
+}
+
+func GetCurrentThreadID() uint32  {
+	ret,_,_:=syscall.Syscall(fnGetCurrentThreadId,0,0,0,0)
+	return uint32(ret)
+}
+
+func GetCurrentThread() syscall.Handle  {
+	ret,_,_:=syscall.Syscall(fnGetCurrentThread,0,0,0,0)
+	return syscall.Handle(ret)
+}
+
+func IsWindowVisible(hwnd syscall.Handle)bool  {
+	ret,_,_:=syscall.Syscall(fnIsWindowVisible,1,uintptr(hwnd),0,0)
+	return ret!=0
+}
+
+func IsWindowEnabled(hwnd syscall.Handle)bool  {
+	ret,_,_:=syscall.Syscall(fnIsWindowEnabled,1,uintptr(hwnd),0,0)
+	return ret!=0
 }

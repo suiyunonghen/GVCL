@@ -81,7 +81,6 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 type MessageEventHandler func(sender interface{}, msg *WinApi.MSG, handled *bool)
 type MessageDispatch func(sender interface{}, msg uint32, wparam, lparam uintptr) uintptr
 type NotifyEvent func(sender interface{})
-type CreateWndOkHandler func(ctrl interface{})
 type GBaseControl struct {
 	Components.GComponent
 	fColor             Graphics.GColorValue //Graphics.GColor
@@ -92,6 +91,7 @@ type GBaseControl struct {
 	fheight            int32
 	fVisible           bool
 	fMessageHandlerMap map[uint32]MessageDispatch
+	OnResize NotifyEvent
 }
 
 func (ctrl *GBaseControl) Left() int32 {
@@ -115,17 +115,52 @@ func (ctrl *GBaseControl) Width() int32 {
 }
 
 func (ctrl *GBaseControl) SetWidth(w int32) {
-	ctrl.fwidth = w
+	if ctrl.fwidth != w{
+		ctrl.fwidth = w
+		ctrl.changeBands()
+	}
+}
+
+func (ctrl *GBaseControl)changeBands()  {
+	for i:=ctrl.SubChildCount()-1;i>=0;i--{
+		subObj := ctrl.SubChild(i)
+		pType := reflect.TypeOf(subObj)
+		stype := pType.String()
+		if stype == "*controls.GBaseControl" || stype == "*GBaseControl" {
+			break
+		}
+		if mnd, ok := pType.MethodByName("SetBounds"); ok {
+			pType = mnd.Func.Type()
+			if pType.NumIn() == 5 && pType.NumOut() == 0 {
+				in := make([]reflect.Value, 5)
+				in[0] = reflect.ValueOf(subObj)
+				in[1] = reflect.ValueOf(ctrl.fleft)
+				in[2] = reflect.ValueOf(ctrl.ftop)
+				in[3] = reflect.ValueOf(ctrl.fwidth)
+				in[4] = reflect.ValueOf(ctrl.fheight)
+				mnd.Func.Call(in)
+			}
+		}
+	}
 }
 
 func (ctrl *GBaseControl) SetLeft(l int32) {
-	ctrl.fleft = l
+	if ctrl.fleft != l{
+		ctrl.fleft = l
+		ctrl.changeBands()
+	}
 }
 func (ctrl *GBaseControl) SetTop(t int32) {
-	ctrl.ftop = t
+	if ctrl.ftop != t{
+		ctrl.ftop = t
+		ctrl.changeBands()
+	}
 }
 func (ctrl *GBaseControl) SetHeight(h int32) {
-	ctrl.fheight = h
+	if ctrl.fheight != h{
+		ctrl.fheight = h
+		ctrl.changeBands()
+	}
 }
 
 func (ctrl *GBaseControl) GetColor() Graphics.GColorValue {
@@ -136,9 +171,37 @@ func (ctrl *GBaseControl) SetColor(c Graphics.GColorValue) {
 	ctrl.fColor = c
 }
 
-func (ctrl *GBaseControl) Invalidate() {
-
+func (ctrl *GBaseControl)BoundsRect()*WinApi.Rect  {
+	result := new(WinApi.Rect)
+	result.Left = ctrl.fleft
+	result.Top = ctrl.ftop
+	result.Right = ctrl.fleft + ctrl.fwidth
+	result.Bottom = ctrl.ftop + ctrl.fheight
+	return result
 }
+
+func (ctrl *GBaseControl) Invalidate() {
+	if ctrl.fParent!=nil {
+		handle := ctrl.fParent.GetWindowHandle()
+		if handle!=0{
+			r := ctrl.BoundsRect()
+			WinApi.InvalidateRect(handle,r,false)
+		}
+	}
+}
+
+func (ctrl *GBaseControl)Visible()bool  {
+	return ctrl.fVisible
+}
+
+func (ctrl *GBaseControl)SetBounds(ALeft, ATop, AWidth, AHeight int32)  {
+	ctrl.fleft = ALeft
+	ctrl.ftop= ATop
+	ctrl.fwidth = AWidth
+	ctrl.fheight = AHeight
+	ctrl.Invalidate()
+}
+
 
 func (ctrl *GBaseControl) GetParent() Components.IWincontrol {
 	return ctrl.fParent
@@ -186,7 +249,7 @@ type GWinControl struct {
 	fHandle             syscall.Handle
 	fIsForm             bool
 	fCaption            string
-	fCreateWndOkHandler CreateWndOkHandler
+	//fCreateWndOkHandler CreateWndOkHandler
 	FDefWndProc         uintptr
 }
 
@@ -217,8 +280,15 @@ func (ctrl *GWinControl) SetParent(AParent Components.IWincontrol) {
 	}
 }
 
-func (ctrl *GWinControl) SetCreateWndOkHandler(handler CreateWndOkHandler) {
-	ctrl.fCreateWndOkHandler = handler
+func (ctrl *GWinControl)SetBounds(ALeft, ATop, AWidth, AHeight int32)  {
+	ctrl.fleft = ALeft
+	ctrl.ftop= ATop
+	ctrl.fwidth = AWidth
+	ctrl.fheight = AHeight
+	if ctrl.fHandle != 0{
+		WinApi.SetWindowPos(ctrl.fHandle, 0, ALeft, ATop, AWidth, AHeight,
+			WinApi.SWP_NOZORDER + WinApi.SWP_NOACTIVATE)
+	}
 }
 
 func (ctrl *GWinControl) SetCaption(v string) {
@@ -238,6 +308,16 @@ func (ctrl *GWinControl) GetText() string {
 
 func (ctrl *GWinControl) GetWindowHandle() syscall.Handle {
 	return ctrl.fHandle
+}
+
+func (ctrl *GWinControl) Invalidate() {
+	if ctrl.fHandle != 0{
+		WinApi.InvalidateRect(ctrl.fHandle,nil,true)
+		//刷新GraphicControl控件
+		for _,v := range ctrl.fControls{
+			v.Invalidate()
+		}
+	}
 }
 
 func (ctrl *GWinControl) RemoveChildWinCtrl(Actrl Components.IWincontrol) {
@@ -386,9 +466,9 @@ func (ctrl *GWinControl) CreateWnd() {
 		WinApi.SetProp(ctrl.fHandle, uintptr(windowAtom), uintptr(unsafe.Pointer(ctrl)))
 		if !ctrl.fIsForm {
 			if ctrl.fVisible {
-				WinApi.ShowWindow(ctrl.fHandle, WinApi.SW_SHOWNORMAL)
+				WinApi.SetWindowPos(ctrl.fHandle, 0, 0, 0, 0, 0,  WinApi.ShowFlagsVisible)
 			} else {
-				WinApi.ShowWindow(ctrl.fHandle, WinApi.SW_HIDE)
+				WinApi.SetWindowPos(ctrl.fHandle, 0, 0, 0, 0, 0,  WinApi.ShowFlagsHide)
 			}
 		}
 	}
@@ -490,8 +570,11 @@ func (ctrl *GWinControl) UpdateShowing() {
 			ctrl.fWincontrols[i].UpdateShowing()
 		}
 	}
-	if hasCreatewnd && ctrl.fCreateWndOkHandler != nil {
-		ctrl.fCreateWndOkHandler(ctrl)
+	if hasCreatewnd {
+		if ctrl.fIsForm && ctrl.fHandle == application.fMainForm.fHandle{
+			WinApi.UpdateWindow(ctrl.fHandle)
+		}
+		WinApi.ShowWindow(ctrl.fHandle, WinApi.SW_SHOWNORMAL)
 	}
 }
 
@@ -631,7 +714,7 @@ func (ctrl *GWinControl)PaintHandler(dc WinApi.HDC)uintptr  {
 		//绘制GraphicControls
 		ctrl.PaintGraphicControls(dc)
 	}
-	return 0
+	return 1
 }
 
 func (ctrl *GWinControl)PaintGraphicControls(dc WinApi.HDC)  {
