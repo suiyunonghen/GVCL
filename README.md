@@ -2,7 +2,7 @@
 Golang Windows GUI Bindings Like Delphi VCL   
 Windows的GUI界面Go语言封装，目标是实现一个类似Delphi VCL版本效果的界面库   
 # 使用方法  
-##### `test.go`
+##### `msgbox.go`
 
 ```go
 type GForm1 struct {
