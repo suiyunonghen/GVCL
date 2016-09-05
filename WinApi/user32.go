@@ -3,6 +3,7 @@ package WinApi
 import (
 	"syscall"
 	"unsafe"
+	"runtime"
 )
 
 
@@ -1633,4 +1634,18 @@ func IsWindowVisible(hwnd syscall.Handle)bool  {
 func IsWindowEnabled(hwnd syscall.Handle)bool  {
 	ret,_,_:=syscall.Syscall(fnIsWindowEnabled,1,uintptr(hwnd),0,0)
 	return ret!=0
+}
+
+func IsAMD64()bool  {
+	return runtime.GOARCH == "amd64"
+}
+
+func SetWindowLong(hWnd syscall.Handle,nIndex int,dwNewLong int)int  {
+	ret,_,_:=syscall.Syscall(fnSetWindowLongW,3,uintptr(hWnd),uintptr(nIndex),uintptr(dwNewLong))
+	return int(ret)
+}
+
+func SetWindowLongPtr(hWnd syscall.Handle,nIndex int,dwNewLong int64)int64  {
+	ret,_,_:=syscall.Syscall(fnSetWindowLongPtrW,3,uintptr(hWnd),uintptr(nIndex),uintptr(dwNewLong))
+	return int64(ret)
 }

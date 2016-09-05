@@ -83,10 +83,10 @@ func (rc *Rect)OffsetRect(dx,dy int)bool{
 }
 
 type tagWNDCLASSW struct {
-	Style         uint
+	Style         uint32
 	FnWndProc     uintptr
-	CbClsExtra    int
-	CbWndExtra    int
+	CbClsExtra    int32
+	CbWndExtra    int32
 	HInstance     HINST
 	HIcon         HICON
 	HCursor       HCURSOR

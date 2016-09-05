@@ -4,6 +4,7 @@ import (
 	"DxSoft/GVCL/Components"
 	"DxSoft/GVCL/WinApi"
 	"reflect"
+	"unsafe"
 )
 
 type GButton struct {
@@ -36,9 +37,27 @@ func (btn *GButton) CreateParams(params *GCreateParams) {
 	}
 }
 
+func (btn *GButton)CreateWindowHandle(params *GCreateParams)(result bool)  {
+	btn.fHandle = WinApi.CreateWindowEx(params.ExStyle, "BUTTON",
+		btn.fCaption, params.Style, params.X, params.Y,
+		params.Width, params.Height, params.WndParent, 0, params.WindowClass.HInstance,
+		unsafe.Pointer(params.Param))
+	result = btn.fHandle !=0
+	if result{
+		if WinApi.IsAMD64(){
+			//指定窗口过程
+			btn.FDefWndProc = uintptr(WinApi.SetWindowLongPtr(btn.fHandle,WinApi.GWL_WNDPROC,int64(InitWndprocCallBack)))
+		}else{
+			btn.FDefWndProc = uintptr(WinApi.SetWindowLong(btn.fHandle,WinApi.GWL_WNDPROC,int(InitWndprocCallBack)))
+		}
+	}
+	return
+}
+
+
 func (btn *GButton) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool) {
 	result = 0
-	msgDispatchNext = true
+	msgDispatchNext = false
 	switch msg {
 	case WinApi.WM_COMMAND: //按钮事件
 	    	notifycode := WinApi.HiWord(uint32(wparam))
@@ -47,6 +66,8 @@ func (btn *GButton) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr,
 				btn.OnClick(btn)
 			}
 		}
+	default:
+		result = WinApi.CallWindowProc(btn.FDefWndProc, btn.fHandle, msg, wparam, lparam)
 	}
 	return
 }

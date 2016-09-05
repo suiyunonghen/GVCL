@@ -12,10 +12,22 @@ var (
 	application *WApplication
 	unActiveFormList *unActiveFormNode
 )
+const(
+	CANone=iota
+	CAHide
+	CAFree
+	CAMinimize
+)
+
+type OnFormCloseEvent func(sender interface{},closAction *int8)
 
 type GForm struct {
 	GWinControl
-	ModalResult int8
+	isSetModalresult bool
+	fModalResult int8
+	fisModalform bool
+	OnClose OnFormCloseEvent
+	OnCreate NotifyEvent
 }
 
 const(
@@ -34,6 +46,14 @@ const(
 func (frm *GForm) SubInit() {
 	frm.GWinControl.SubInit()
 	frm.GComponent.SubInit(frm)
+	frm.BindMessageMpas()
+	frm.fIsForm = true
+	frm.fColor = Graphics.ClBtnFace
+	frm.fwidth = 400
+	frm.fheight = 300
+	if frm.OnCreate!=nil{
+		frm.OnCreate(frm)
+	}
 }
 
 type unActiveFormNode struct {
@@ -73,16 +93,15 @@ func (app *WApplication) Run() {
 
 func (frm *GForm) CreateParams(params *GCreateParams) {
 	frm.GWinControl.CreateParams(params)
-	nstyle := ^(WinApi.WS_CHILD | WinApi.WS_GROUP | WinApi.WS_TABSTOP)
-	params.Style = uint32(int(params.Style) & nstyle)
+	nstyle := int32(^(WinApi.WS_CHILD | WinApi.WS_GROUP | WinApi.WS_TABSTOP))
+	params.Style = uint32(int32(params.Style) & nstyle)
 	if application.fMainForm != nil{
 		params.WndParent = application.fMainForm.fHandle
 	}
-
 	params.WinClassName = "GForm"
 	params.Style = params.Style | WinApi.WS_OVERLAPPEDWINDOW | WinApi.WS_CAPTION | WinApi.WS_THICKFRAME | WinApi.WS_MINIMIZEBOX | WinApi.WS_MAXIMIZEBOX | WinApi.WS_SYSMENU
 	nstyle = ^(WinApi.CS_HREDRAW | WinApi.CS_VREDRAW)
-	params.WindowClass.Style = uint32(int(params.WindowClass.Style) & nstyle)
+	params.WindowClass.Style = uint32(int32(params.WindowClass.Style) & nstyle)
 	if frm == application.fMainForm{
 		params.ExStyle = params.ExStyle | WinApi.WS_EX_APPWINDOW
 	}
@@ -108,6 +127,8 @@ func (frm *GForm)Close()  {
 }
 
 func (frm *GForm)Show()  {
+	frm.isSetModalresult = false
+	frm.fisModalform = false
 	frm.SetVisible(true)
 	WinApi.SetWindowPos(frm.fHandle, WinApi.HWND_TOP, 0, 0, 0, 0,
 		WinApi.SWP_NOMOVE + WinApi.SWP_NOSIZE);
@@ -137,7 +158,7 @@ func EnableDisableWindow()  {
 	}
 }
 
-func (frm *GForm)ShowModal()  {
+func (frm *GForm)ShowModal() int8 {
 	//首先应该将所有后置的窗体都EnableFalse
 	OldActiveForm := application.ActiveForm
 	var oldActiveWnd syscall.Handle
@@ -146,13 +167,14 @@ func (frm *GForm)ShowModal()  {
 	}else{
 		oldActiveWnd = OldActiveForm.fHandle
 	}
-	frm.ModalResult = MrNone
+	frm.fModalResult = MrNone
 	enumproc := syscall.NewCallback(DoDisableWindow)
 	WinApi.EnumThreadWindows(WinApi.GetCurrentThreadID(),enumproc,0)
 	frm.Show()
+	frm.fisModalform = true
 	for{
 		application.HandleMessage()
-		if frm.ModalResult != MrNone{
+		if frm.fModalResult != MrNone{
 			break
 		}
 	}
@@ -161,6 +183,17 @@ func (frm *GForm)ShowModal()  {
 	if OldActiveForm != nil{
 		application.ActiveForm = OldActiveForm
 	}
+	return frm.fModalResult
+}
+
+func (frm *GForm)SetModalResult(v int8)  {
+	frm.fModalResult = v
+	frm.isSetModalresult = true
+	frm.Close()
+}
+
+func (frm *GForm)ModalResult()int8  {
+	return frm.fModalResult
 }
 
 func (frm *GForm) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool) {
@@ -168,7 +201,33 @@ func (frm *GForm) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, m
 	msgDispatchNext = true
 	switch msg {
 	case WinApi.WM_CLOSE:
-		frm.ModalResult = MrClose
+		msgDispatchNext = false
+		var closeAction int8 = CAHide
+		if frm.OnClose != nil{
+			frm.OnClose(frm,&closeAction)
+		}
+		switch closeAction {
+		case CANone:
+			if frm.fisModalform {
+				frm.SetVisible(false)
+			}
+			return
+		case CAHide:
+			frm.SetVisible(false)
+		case CAFree:
+			msgDispatchNext = true
+		case CAMinimize:
+			if frm.fisModalform {
+				frm.SetVisible(false)
+				return
+			}
+			WinApi.ShowWindow(frm.GetWindowHandle(),WinApi.SW_SHOWMINIMIZED)
+		}
+		if frm.isSetModalresult{
+
+		}else{
+			frm.fModalResult = MrClose
+		}
 	case WinApi.WM_SETFOCUS:
 		application.ActiveForm = frm
 	default:
@@ -180,10 +239,6 @@ func (frm *GForm) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, m
 func NewForm() *GForm {
 	frm := new(GForm)
 	frm.SubInit()
-	frm.fIsForm = true
-	frm.fColor = Graphics.ClBtnFace
-	frm.fwidth = 400
-	frm.fheight = 300
 	return frm
 }
 
