@@ -632,6 +632,23 @@ func (ctrl *GWinControl) SetVisible(v bool) {
 }
 
 func (ctrl *GWinControl)CreateWindowHandle(params *GCreateParams)bool  {
+	if params.WindowClass.LpszClassName!=nil && params.WinClassName == WinApi.UTF16Ptr2String(params.WindowClass.LpszClassName,256){
+		//两者类名一致，一般WinSDK绑定
+		ctrl.fHandle = WinApi.CreateWindowExptr(params.ExStyle, params.WindowClass.LpszClassName,
+			syscall.StringToUTF16Ptr(ctrl.fCaption), params.Style, params.X, params.Y,
+			params.Width, params.Height, params.WndParent, 0, params.WindowClass.HInstance,
+			unsafe.Pointer(params.Param))
+		result := ctrl.fHandle !=0
+		if result{
+			if WinApi.IsAMD64(){
+				//指定窗口过程
+				ctrl.FDefWndProc = uintptr(WinApi.SetWindowLongPtr(ctrl.fHandle,WinApi.GWL_WNDPROC,int64(InitWndprocCallBack)))
+			}else{
+				ctrl.FDefWndProc = uintptr(WinApi.SetWindowLong(ctrl.fHandle,WinApi.GWL_WNDPROC,int(InitWndprocCallBack)))
+			}
+		}
+		return result
+	}
 	tmpWndClass := new(WinApi.GWndClass)
 	classRegisted := WinApi.GetClassInfo(Hinstance, params.WinClassName, tmpWndClass)
 	if !classRegisted || tmpWndClass.FnWndProc != InitWndprocCallBack {
@@ -711,12 +728,6 @@ func (ctrl *GWinControl) WndProc(msg uint32, wparam, lparam uintptr) (result uin
 	result = 0
 	msgDispatchNext = true
 	switch msg {
-	//case WinApi.WM_PAINT:
-	//	//pstruct := new(WinApi.GPaintStruct)
-	//	//dc := pstruct.BeginPaint(ctrl.fHandle)
-	//	//defer pstruct.EndPaint(ctrl.fHandle)
-	//	result = ctrl.PaintHandler(0)
-	//	msgDispatchNext = result == 0
 	case WinApi.WM_ERASEBKGND:
 		//背景绘制
 	        result = ctrl.paintBackGround(WinApi.HDC(wparam))
@@ -850,6 +861,7 @@ func (ctrl *GWinControl) InitSubclassParams(Params *GCreateParams, subclassName 
 		WinApi.GetClassInfo(SaveInstance, subclassName, &Params.WindowClass)
 	}
 	Params.WindowClass.HInstance = SaveInstance
+	Params.WinClassName = subclassName
 	CS_OFF := uint32(WinApi.CS_OWNDC | WinApi.CS_CLASSDC | WinApi.CS_PARENTDC | WinApi.CS_GLOBALCLASS)
 	CS_ON := uint32(WinApi.CS_VREDRAW | WinApi.CS_HREDRAW)
 	Params.WindowClass.Style = Params.WindowClass.Style & ^CS_OFF | CS_ON

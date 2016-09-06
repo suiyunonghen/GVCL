@@ -4,6 +4,7 @@ import (
 	"syscall"
 	"unsafe"
 	"runtime"
+	"unicode/utf16"
 )
 
 
@@ -1257,7 +1258,23 @@ func CreateWindowEx(dwExStyle uint32, lpClassName, lpWindowName string, dwStyle 
 		uintptr(hMenu),
 		uintptr(hInstance),
 		uintptr(lpParam))
+	return syscall.Handle(ret)
+}
 
+func CreateWindowExptr(dwExStyle uint32, lpClassName, lpWindowName *uint16, dwStyle uint32, x, y, nWidth, nHeight int32, hWndParent syscall.Handle, hMenu HMENU, hInstance HINST, lpParam unsafe.Pointer) syscall.Handle {
+	ret, _, _ := syscall.Syscall12(fnCreateWindowExW, 12,
+		uintptr(dwExStyle),
+		uintptr(unsafe.Pointer(lpClassName)),
+		uintptr(unsafe.Pointer(lpWindowName)),
+		uintptr(dwStyle),
+		uintptr(x),
+		uintptr(y),
+		uintptr(nWidth),
+		uintptr(nHeight),
+		uintptr(hWndParent),
+		uintptr(hMenu),
+		uintptr(hInstance),
+		uintptr(lpParam))
 	return syscall.Handle(ret)
 }
 
@@ -1648,4 +1665,18 @@ func SetWindowLong(hWnd syscall.Handle,nIndex int,dwNewLong int)int  {
 func SetWindowLongPtr(hWnd syscall.Handle,nIndex int,dwNewLong int64)int64  {
 	ret,_,_:=syscall.Syscall(fnSetWindowLongPtrW,3,uintptr(hWnd),uintptr(nIndex),uintptr(dwNewLong))
 	return int64(ret)
+}
+
+func UTF16Ptr2String(ptr *uint16,ptrLen uint)string  {
+	if ptr != nil {
+		us := make([]uint16, 0, ptrLen)
+		for p := uintptr(unsafe.Pointer(ptr)); ; p += 2 {
+			u := *(*uint16)(unsafe.Pointer(p))
+			if u == 0 {
+				return string(utf16.Decode(us))
+			}
+			us = append(us, u)
+		}
+	}
+	return ""
 }
