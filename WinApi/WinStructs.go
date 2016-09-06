@@ -256,9 +256,31 @@ type GdevicemodeW struct {
 }
 
 type GDrawTextParams struct {
-	CbSize uint
-	TabLength int
-	LeftMargin int
-	RightMargin int
-	LengthDrawn uint
+	CbSize uint32
+	TabLength int32
+	LeftMargin int32
+	RightMargin int32
+	LengthDrawn uint32
+}
+
+type GLOGFONT struct {
+	Height int32
+	Width  int32
+	Escapement int32
+	Orientation int32
+	Weight int32
+	Italic byte
+	Underline byte
+	StrikeOut byte
+	CharSet byte
+	OutPrecision byte
+	ClipPrecision byte
+	Quality byte
+	PitchAndFamily byte
+	FaceName [32]uint16
+}
+
+func (logFont *GLOGFONT)CreateFont()syscall.Handle  {
+	ret,_,_ := syscall.Syscall(fnCreateFontIndirectW,1,uintptr(unsafe.Pointer(logFont)),0,0)
+	return syscall.Handle(ret)
 }

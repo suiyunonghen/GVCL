@@ -8,7 +8,9 @@ import (
 )
 
 
+
 var (
+	ScreenLogPixels			     int32
 	libuser32                            syscall.Handle
 	fnActivateKeyboardLayout             uintptr
 	fnAdjustWindowRect                   uintptr
@@ -1074,6 +1076,8 @@ func init() {
 	fnSetGestureConfig, _ = syscall.GetProcAddress(libuser32, "SetGestureConfig")
 	fnGetGestureConfig, _ = syscall.GetProcAddress(libuser32, "GetGestureConfig")
 	fnWINNLSEnableIME, _ = syscall.GetProcAddress(libuser32, "WINNLSEnableIME")
+
+	InitScreenLogPixels()
 }
 
 func BoolToUint(value bool) uint8 {
@@ -1672,11 +1676,34 @@ func UTF16Ptr2String(ptr *uint16,ptrLen uint)string  {
 		us := make([]uint16, 0, ptrLen)
 		for p := uintptr(unsafe.Pointer(ptr)); ; p += 2 {
 			u := *(*uint16)(unsafe.Pointer(p))
-			if u == 0 {
+			if u == 0 || uint(p - uintptr(unsafe.Pointer(ptr))) >= ptrLen{
 				return string(utf16.Decode(us))
 			}
 			us = append(us, u)
 		}
 	}
 	return ""
+}
+
+func GetDeviceCaps(dc HDC,Index int)int  {
+	ret,_,_:=syscall.Syscall(fnGetDeviceCaps,2,uintptr(dc),uintptr(Index),0)
+	return int(ret)
+}
+
+func GetDC(wnd syscall.Handle)HDC  {
+	ret,_,_:=syscall.Syscall(fnGetDC,1,uintptr(wnd),0,0)
+	return HDC(ret)
+}
+
+func ReleaseDC(DC HDC)int  {
+	ret,_,_:=syscall.Syscall(fnReleaseDC,1,uintptr(DC),0,0)
+	return int(ret)
+}
+
+
+func InitScreenLogPixels()  {
+	DC := GetDC(0)
+	ScreenLogPixels = int32(GetDeviceCaps(DC, LOGPIXELSY))
+	ReleaseDC(DC)
+
 }

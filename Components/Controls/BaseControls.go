@@ -123,6 +123,7 @@ type GBaseControl struct {
 	fheight            int32
 	fVisible           bool
 	fMessageHandlerMap map[uint32]*GMsgDispatchObj
+	Font               Graphics.GFont
 	OnResize NotifyEvent
 }
 
@@ -164,6 +165,10 @@ func (ctrl *GBaseControl) Left() int32 {
 
 func (ctrl *GBaseControl) SubInit() {
 	ctrl.GComponent.SubInit(ctrl)
+	ctrl.Font.BeginUpdate()
+	ctrl.Font.FontName = "宋体"
+	ctrl.Font.SetSize(9)
+	ctrl.Font.EndUpdate()
 }
 
 func (ctrl *GBaseControl) Top() int32 {
@@ -540,7 +545,7 @@ func (ctrl *GWinControl) CreateWnd() {
 			WinApi.SetWindowPos(ctrl.fHandle, WinApi.HWND_TOP, 0, 0, 0, 0,
 				WinApi.SWP_NOMOVE + WinApi.SWP_NOSIZE + WinApi.SWP_NOACTIVATE)
 		}
-		//ctrl.Perform(WinApi.WM_SETFONT, ctrl.fontHandle, 1);
+		ctrl.Perform(WinApi.WM_SETFONT, uintptr(ctrl.Font.FontHandle), 1)
 	}else{
 		panic("Create Handle Failed")
 	}

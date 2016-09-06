@@ -1378,3 +1378,9 @@ func GlobalDeleteAtom(atom ATOM) bool {
 	r1, _, _ := syscall.Syscall(fnGlobalDeleteAtom, 1, uintptr(atom), 0, 0)
 	return r1 != 0
 }
+
+func MulDiv(nNumber, nNumerator, nDenominator int32)int32  {
+	initKernel32()
+	r1, _, _ := syscall.Syscall(fnMulDiv, 3, uintptr(nNumber), uintptr(nNumerator), uintptr(nDenominator))
+	return int32(r1)
+}
