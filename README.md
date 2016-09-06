@@ -90,3 +90,14 @@ Then either compile the manifest using the [rsrc tool](https://github.com/akavel
 	rsrc -manifest test.manifest -o rsrc.syso
 
 or rename the `test.manifest` file to `test.exe.manifest` and distribute it with the application instead.
+
+使用Go Build 建立文件，会将这个manifest资源包含进去，以使用系统皮肤
+
+### Font使用   
+
+```go
+	b1.Font.BeginUpdate()
+	b1.Font.SetSize(10)
+	b1.Font.Underline = 1
+	b1.Font.EndUpdate()
+```
