@@ -68,7 +68,12 @@ const (
 	ClRed   GColorValue = 0xFF
 	ClWhite GColorValue = 0xFFFFFF
 	ClBlack GColorValue = 0x000000
+	ClGray GColorValue = 0x808080
+	ClDkGray GColorValue = 0x808080
+	ClLtGray GColorValue = 0xC0C0C0
+	ClDarkGray GColorValue = 0xA9A9A9
 )
+
 
 var
 (
@@ -78,6 +83,17 @@ var
 	ClBtnShadow,ClGrayText,ClBtnText,ClInactiveCaptionText,ClBtnHighlight GColorValue
 	Cl3DDkShadow,Cl3DLight,ClInfoText,ClInfoBk,ClHotLight,ClGradientActiveCaption GColorValue
 	ClGradientInactiveCaption,ClMenuHighlight,ClMenuBar GColorValue
+
+	WhiteBrush WinApi.HBRUSH
+	EmptyBrush WinApi.HBRUSH
+	BlackBrush WinApi.HBRUSH
+	LtGrayBrush WinApi.HBRUSH
+	GrayBrush WinApi.HBRUSH
+	DkGrayBrush WinApi.HBRUSH
+
+	WhitePen WinApi.HPEN
+	BlackPen WinApi.HPEN
+	EmptyPen WinApi.HPEN
 )
 func init()  {
 	ClBtnFace = GColorValue(WinApi.GetSysColor(BTNFACE))
@@ -110,6 +126,18 @@ func init()  {
 	ClGradientInactiveCaption  = GColorValue(WinApi.GetSysColor(cGRADIENTINACTIVECAPTION))
 	ClMenuHighlight  = GColorValue(WinApi.GetSysColor(cMENUHILIGHT))
 	ClMenuBar  = GColorValue(WinApi.GetSysColor(cMENUBAR))
+
+
+	WhiteBrush = WinApi.HBRUSH(WinApi.GetStockObject(WinApi.WHITE_BRUSH))
+	EmptyBrush  = WinApi.HBRUSH(WinApi.GetStockObject(WinApi.HOLLOW_BRUSH))
+	BlackBrush  = WinApi.HBRUSH(WinApi.GetStockObject(WinApi.BLACK_BRUSH))
+	LtGrayBrush  = WinApi.HBRUSH(WinApi.GetStockObject(WinApi.LTGRAY_BRUSH))
+	GrayBrush  = WinApi.HBRUSH(WinApi.GetStockObject(WinApi.GRAY_BRUSH))
+	DkGrayBrush  = WinApi.HBRUSH(WinApi.GetStockObject(WinApi.DKGRAY_BRUSH))
+
+	WhitePen = WinApi.HPEN(WinApi.GetStockObject(WinApi.WHITE_PEN))
+	BlackPen = WinApi.HPEN(WinApi.GetStockObject(WinApi.BLACK_PEN))
+	EmptyPen = WinApi.HPEN(WinApi.GetStockObject(WinApi.NULL_PEN))
 }
 
 func RGB(R, G, B byte) (ret GColorValue) {
@@ -134,40 +162,124 @@ func Uint32ToGColor(ClValue uint32) *GColor {
 }
 
 var(
-	FontManager *GFontManager=new(GFontManager)
+	gdiManager *gGDIManager=new(gGDIManager)
 )
 
-type GFontManager struct {
+type gGDIManager struct {
 	fFonts map[string]*gFontData
+	fBrushs map[string]*gBrushData
+	fPens map[string]*gPenData
 }
 
-func (fntMsg *GFontManager)createFontData(fntdata *gFontData)  {
+
+func (BrushMng *gGDIManager)createPenData(pdata *gPenData)  {
+	pdata.createPen()
+	pdata.frefCount++
+	pdata.fHashCode = pdata.getHashCode()
+	BrushMng.fPens[pdata.fHashCode] = pdata
+}
+
+func (fntMng *gGDIManager)AllocPenData(pdata *gPenData)  {
+	if fntMng.fPens == nil{
+		fntMng.fPens = make(map[string]*gPenData)
+		fntMng.createPenData(pdata)
+		return
+	}
+	hash := pdata.getHashCode()
+	if hash != pdata.fHashCode{ //有变动
+		if pdata.fHashCode != ""{//先移除以前的
+			if v,ok := fntMng.fPens[pdata.fHashCode];ok{
+				v.frefCount--
+				pdata.fHashCode = ""
+				if v.frefCount == 0{
+					if v.Handle != BlackPen && v.Handle != EmptyPen && v.Handle != WhitePen{
+						WinApi.DeleteObject(uintptr(v.Handle))
+					}
+					delete(fntMng.fPens,hash)
+				}
+			}
+		}
+		if v,ok := fntMng.fPens[hash];ok{ //新的
+			v.frefCount++
+			pdata.Handle = v.Handle
+			pdata.fHashCode = hash
+		}else{
+			fntMng.createPenData(pdata)
+		}
+	}
+}
+
+func (fntMsg *gGDIManager)createFontData(fntdata *gFontData)  {
 	fntdata.createFont()
 	fntdata.frefCount++
-	fntMsg.fFonts[fntdata.getFontHashCode()] = fntdata
+	fntdata.fHashCode = fntdata.getFontHashCode()
+	fntMsg.fFonts[fntdata.fHashCode] = fntdata
 }
 
-func (fntMng *GFontManager)AllocFontData(fntData *gFontData)  {
+func (BrushMng *gGDIManager)createBrushData(brushdata *gBrushData)  {
+	brushdata.createBrush()
+	brushdata.frefCount++
+	brushdata.fHashCode = brushdata.getHashCode()
+	BrushMng.fBrushs[brushdata.fHashCode] = brushdata
+}
+
+func (fntMng *gGDIManager)AllocFontData(fntData *gFontData)  {
 	if fntMng.fFonts == nil{
 		fntMng.fFonts = make(map[string]*gFontData)
 		fntMng.createFontData(fntData)
 		return
 	}
 	hash := fntData.getFontHashCode()
-	if v,ok := fntMng.fFonts[hash];ok && fntData.FontHandle != v.FontHandle{
-		if fntData.FontHandle != 0{
-			hash = fntData.getFontHashCode()
-			if v,ok = fntMng.fFonts[hash];ok{
+	if hash != fntData.fHashCode{ //有变动
+		if fntData.fHashCode != ""{//先移除以前的
+			if v,ok := fntMng.fFonts[fntData.fHashCode];ok{
 				v.frefCount--
+				fntData.fHashCode = ""
 				if v.frefCount == 0{
+					WinApi.DeleteObject(uintptr(v.FontHandle))
 					delete(fntMng.fFonts,hash)
 				}
 			}
 		}
-		fntData.FontHandle = v.FontHandle
-		v.frefCount++
-	}else{
-		fntMng.createFontData(fntData)
+		if v,ok := fntMng.fFonts[hash];ok{ //新的
+			v.frefCount++
+			fntData.FontHandle = v.FontHandle
+			fntData.fHashCode = hash
+		}else{
+			fntMng.createFontData(fntData)
+		}
+	}
+}
+
+func (BrushMng *gGDIManager)AllocBrushData(brushData *gBrushData)  {
+	if BrushMng.fBrushs == nil{
+		BrushMng.fBrushs = make(map[string]*gBrushData)
+		BrushMng.createBrushData(brushData)
+		return
+	}
+	hash := brushData.getHashCode()
+	if hash != brushData.fHashCode{ //有变动
+		if brushData.fHashCode != ""{//先移除以前的
+			if v,ok := BrushMng.fBrushs[brushData.fHashCode];ok{
+				v.frefCount--
+				brushData.fHashCode = ""
+				if v.frefCount == 0{
+					if v.Handle != EmptyBrush && v.Handle != WhiteBrush &&
+						v.Handle != GrayBrush && v.Handle != DkGrayBrush &&
+						v.Handle != BlackBrush && v.Handle != LtGrayBrush{
+						WinApi.DeleteObject(uintptr(v.Handle))
+					}
+					delete(BrushMng.fBrushs,hash)
+				}
+			}
+		}
+		if v,ok := BrushMng.fBrushs[hash];ok{ //新的
+			v.frefCount++
+			brushData.Handle = v.Handle
+			brushData.fHashCode = hash
+		}else{
+			BrushMng.createBrushData(brushData)
+		}
 	}
 }
 
@@ -180,29 +292,158 @@ type gFontData struct{
 	Underline byte
 	StrikeOut byte
 	FontName string
+	Weight  int32
 	frefCount int32
+	fHashCode string
+}
+
+//BrushStyle
+const(
+	BSSolid=iota
+	BSClear
+	BSHorizontal
+	BSVertical
+	BSFDiagonal
+	BSBDiagonal
+	BSCross
+	BSDiagCross
+)
+
+type gBrushData struct{
+	Handle WinApi.HBRUSH
+	Color  GColorValue
+	BrushStyle uint8
+	frefCount int32
+	fHashCode string
+}
+
+//PenStyle
+const (
+	PSSolid=iota
+	PSDash
+	PSDot
+	PSDashDot
+	PSDashDotDot
+	PSClear
+	PSInsideFrame
+	PSUserStyle
+	PSAlternate
+)
+
+//PenMode
+const (
+	PMBlack=iota
+	PMWhite
+	PMNop
+	PMNot
+	PMCopy
+	PMNotCopy
+	PMMergePenNot
+	PMMaskPenNot
+	PMMergeNotPen
+	PMMaskNotPen
+	PMMerge
+	PMNotMerge
+	PMMask
+	PMNotMask
+	PMXor
+	PMNotXor
+)
+type gPenData struct {
+	Handle WinApi.HPEN
+	Color  GColorValue
+	Width  int32
+	Style  uint8
+	frefCount int32
+	fHashCode string
+}
+
+func (pdata *gPenData)getHashCode()string{
+	return fmt.Sprintf("%d&%d&%d",pdata.Color,pdata.Width,pdata.Style)
+}
+
+func (pdata *gPenData)createPen()  {
+	if pdata.Style == PSSolid{
+		if pdata.Color == ClWhite{
+			pdata.Handle = WhitePen
+		}else if pdata.Color == ClBlack{
+			pdata.Handle = BlackPen
+		}else{
+			pdata.Handle = 0
+		}
+	}else if pdata.Style == PSClear{
+		pdata.Handle = EmptyPen
+	}else {
+		pdata.Handle = 0
+	}
+	if pdata.Handle != 0{
+		return
+	}
+	logPen := new(WinApi.GLOGPEN)
+	logPen.Color = uint32(pdata.Color)
+	logPen.Width.X = pdata.Width
+	logPen.Style = uint32(pdata.Style)
+	pdata.Handle = logPen.CreatePen()
+}
+
+func (bdata *gBrushData)getHashCode()string{
+   return fmt.Sprintf("%d&%d",bdata.Color,bdata.BrushStyle)
+}
+
+func (bdata *gBrushData)createBrush()  {
+	if bdata.BrushStyle == BSSolid{
+		switch bdata.Color {
+		case ClWhite:
+			bdata.Handle = WhiteBrush
+		case ClGray:
+			bdata.Handle = GrayBrush
+		case ClDarkGray:
+			bdata.Handle = DkGrayBrush
+		case ClBlack:
+			bdata.Handle = BlackBrush
+		case ClLtGray:
+			bdata.Handle = LtGrayBrush
+		default:
+			bdata.Handle = 0
+		}
+
+	}else if bdata.BrushStyle == BSClear{
+		bdata.Handle = EmptyBrush
+	}else{
+		bdata.Handle = 0
+	}
+	if bdata.Handle !=0{
+		return
+	}
+	logBrush := new(WinApi.GLogBrush)
+	logBrush.Color = uint32(bdata.Color)
+	switch bdata.BrushStyle {
+	case BSClear:
+		logBrush.Style = WinApi.BS_HOLLOW
+	case BSSolid:
+		logBrush.Style = WinApi.BS_SOLID
+	default:
+		logBrush.Style = WinApi.BS_HATCHED
+		logBrush.Hatch = uintptr(bdata.BrushStyle - BSHorizontal)
+	}
+	bdata.Handle = logBrush.CreateBrush()
 }
 
 func (fdata *gFontData)getFontHashCode()string  {
-	return fmt.Sprintf("%d&%d&%d&%d&%d&%d&%s",fdata.Color,fdata.Height,fdata.Escapement,fdata.Italic,fdata.Underline,fdata.StrikeOut,fdata.FontName)
+	return fmt.Sprintf("%d&%d&%d&%d&%d&%d&%s%d",fdata.Color,fdata.Height,fdata.Escapement,fdata.Italic,fdata.Underline,fdata.StrikeOut,fdata.FontName,fdata.Weight)
 }
 
 func (fdata *gFontData)createFont()  {
 	logfont := new(WinApi.GLOGFONT)
 	logfont.Escapement = fdata.Escapement
 	if fdata.FontName !=""{
-		m := syscall.StringToUTF16(fdata.FontName)
-		ml := len(m)
-		if ml > 32{
-			copy(logfont.FaceName[0:0],m[0:32])
-		}else{
-			copy(logfont.FaceName[0:0],m[0:ml])
-		}
+		copy(logfont.FaceName[0:32],syscall.StringToUTF16(fdata.FontName))
 	}
 	logfont.Height = fdata.Height
 	logfont.Italic = fdata.Italic
 	logfont.Underline = fdata.Underline
 	logfont.StrikeOut = fdata.StrikeOut
+	logfont.Weight = fdata.Weight
 	fdata.FontHandle = logfont.CreateFont()
 }
 
@@ -210,6 +451,20 @@ type GFont struct {
 	gFontData
 	fsize int32
 	fupcount int32
+}
+
+func (fnt *GFont)Destroy()  {
+	if fnt.FontHandle!=0{
+		if v,ok := gdiManager.fFonts[fnt.fHashCode];ok{
+			v.frefCount--
+			if v.frefCount == 0{
+				WinApi.DeleteObject(uintptr(v.FontHandle))
+				delete(gdiManager.fFonts,fnt.fHashCode)
+			}
+		}
+		fnt.FontHandle = 0
+	}
+	fnt.fHashCode = ""
 }
 
 func (fnt *GFont)SetName(fontName string)  {
@@ -221,7 +476,7 @@ func (fnt *GFont)SetName(fontName string)  {
 
 func (fnt *GFont)Change()  {
 	if fnt.fupcount == 0{
-		FontManager.AllocFontData(&fnt.gFontData)
+		gdiManager.AllocFontData(&fnt.gFontData)
 	}
 }
 
@@ -242,5 +497,67 @@ func (fnt *GFont)EndUpdate()  {
 	if fnt.fupcount<=0{
 		fnt.fupcount = 0
 		fnt.Change()
+	}
+}
+
+func (fnt *GFont)SetBold(v bool)  {
+	if fnt.Weight == WinApi.FW_BOLD != v{
+		if v{
+			fnt.Weight = WinApi.FW_BOLD
+		}else{
+			fnt.Weight = WinApi.FW_NORMAL
+		}
+		fnt.Change()
+	}
+}
+
+func (fnt *GFont)Bold()bool  {
+	return fnt.Weight == WinApi.FW_BOLD
+}
+
+type GBrush struct {
+	gBrushData
+	fupcount int32
+}
+
+func (brush *GBrush)BeginUpdate()  {
+	brush.fupcount ++
+}
+
+func (brush *GBrush)Change()  {
+	if brush.fupcount == 0{
+		gdiManager.AllocBrushData(&brush.gBrushData)
+	}
+}
+
+func (brush *GBrush)EndUpdate()  {
+	brush.fupcount--
+	if brush.fupcount<=0{
+		brush.fupcount = 0
+		brush.Change()
+	}
+}
+
+type GPen struct {
+	gPenData
+	fupcount int32
+	PenMode uint8
+}
+
+func (pen *GPen)BeginUpdate()  {
+	pen.fupcount ++
+}
+
+func (pen *GPen)Change()  {
+	if pen.fupcount == 0{
+		gdiManager.AllocPenData(&pen.gPenData)
+	}
+}
+
+func (pen *GPen)EndUpdate()  {
+	pen.fupcount--
+	if pen.fupcount<=0{
+		pen.fupcount = 0
+		pen.Change()
 	}
 }

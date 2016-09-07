@@ -36,11 +36,29 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 		switch msg {
 		case WinApi.WM_CLOSE:
 			if hwnd == application.fMainForm.fHandle {
-				application.fTerminate = true
-				WinApi.PostQuitMessage(0)
+				//先释放资源
+				var closeAction int8
+				closeAction = CAFree
+				if application.fMainForm.OnClose!=nil{
+					application.fMainForm.OnClose(application.fForms,&closeAction)
+				}
+				if closeAction == CAFree{
+					for _,frm := range application.fForms{
+						if frm != application.fMainForm{
+							WinApi.DestroyWindow(frm.fHandle)
+						}
+					}
+					WinApi.DestroyWindow(application.fMainForm.fHandle)
+				}
 			}
 		case WinApi.WM_DESTROY:
 			control.DestoryWnd()
+			if hwnd == application.fMainForm.fHandle {
+				application.fTerminate = true
+				WinApi.PostQuitMessage(0)
+			}
+			control.fHandle = 0
+
 		case WinApi.WM_SIZE:
 		case WinApi.WM_COMMAND:
 			if lparam==0{ //点击的是菜单或者快捷加速
@@ -57,6 +75,9 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 				}
 			}
 		}
+	}else if msg == WinApi.WM_DESTROY{
+		control.DestoryWnd()
+		return
 	}
 	if control.fMessageHandlerMap != nil {
 		if vhandler,OK := control.fMessageHandlerMap[msg];OK{
@@ -269,6 +290,11 @@ func (ctrl *GBaseControl)SetBounds(ALeft, ATop, AWidth, AHeight int32)  {
 	ctrl.fwidth = AWidth
 	ctrl.fheight = AHeight
 	ctrl.Invalidate()
+}
+
+func (ctrl *GBaseControl)Destroy()  {
+	//释放
+	ctrl.Font.Destroy()
 }
 
 
@@ -552,9 +578,21 @@ func (ctrl *GWinControl) CreateWnd() {
 }
 
 func (ctrl *GWinControl) DestoryWnd() {
+	if ctrl.fControls!=nil{
+		for _,v := range ctrl.fControls{
+			v.Free() //释放对应的资源
+		}
+		ctrl.fControls = nil
+	}
+	if ctrl.fWincontrols != nil{
+		for _,v := range ctrl.fWincontrols{
+			WinApi.DestroyWindow(v.GetWindowHandle())
+		}
+		ctrl.fWincontrols = nil
+	}
+	ctrl.Free()//释放资源
 	WinApi.RemoveProp(ctrl.fHandle, uintptr(controlAtom))
 	WinApi.RemoveProp(ctrl.fHandle, uintptr(windowAtom))
-	ctrl.fHandle = 0
 	ctrl.fRealWndprocObj = nil
 }
 

@@ -1705,5 +1705,9 @@ func InitScreenLogPixels()  {
 	DC := GetDC(0)
 	ScreenLogPixels = int32(GetDeviceCaps(DC, LOGPIXELSY))
 	ReleaseDC(DC)
+}
 
+func GetStockObject(Index int)uintptr  {
+	ret,_,_:=syscall.Syscall(fnGetStockObject,1,uintptr(Index),0,0)
+	return ret
 }

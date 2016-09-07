@@ -11,6 +11,7 @@ type ATOM uint16
 type HICON uintptr
 type HCURSOR uintptr
 type HBRUSH uintptr
+type HPEN uintptr
 type HKL uintptr
 type HDC uintptr
 type HOOK uintptr
@@ -283,4 +284,26 @@ type GLOGFONT struct {
 func (logFont *GLOGFONT)CreateFont()syscall.Handle  {
 	ret,_,_ := syscall.Syscall(fnCreateFontIndirectW,1,uintptr(unsafe.Pointer(logFont)),0,0)
 	return syscall.Handle(ret)
+}
+
+type GLogBrush struct {
+	Style uint32
+	Color uint32
+	Hatch uintptr
+}
+
+func (logbrush *GLogBrush)CreateBrush()HBRUSH  {
+	ret,_,_ := syscall.Syscall(fnCreateBrushIndirect,1,uintptr(unsafe.Pointer(logbrush)),0,0)
+	return HBRUSH(ret)
+}
+
+type GLOGPEN struct {
+	Style uint32
+	Width POINT
+	Color uint32
+}
+
+func (logpen *GLOGPEN)CreatePen()HPEN  {
+	ret,_,_ := syscall.Syscall(fnCreatePenIndirect,1,uintptr(unsafe.Pointer(logpen)),0,0)
+	return HPEN(ret)
 }

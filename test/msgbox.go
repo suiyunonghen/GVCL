@@ -66,6 +66,11 @@ func main() {
 
 	b1 := controls.NewButton(m)
 	b1.SetCaption("关闭")
+	b1.Font.BeginUpdate()
+	b1.Font.SetSize(10)
+	b1.Font.Underline = 1
+	b1.Font.SetBold(true)
+	b1.Font.EndUpdate()
 	b1.SetLeft(100)
 	b1.SetTop(40)
 	b1.OnClick = func(sender interface{}) {
