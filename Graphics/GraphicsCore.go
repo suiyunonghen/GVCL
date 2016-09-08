@@ -363,7 +363,7 @@ func (pdata *gPenData)getHashCode()string{
 }
 
 func (pdata *gPenData)createPen()  {
-	if pdata.Style == PSSolid{
+	if pdata.Style == PSSolid && pdata.Width == 1{
 		if pdata.Color == ClWhite{
 			pdata.Handle = WhitePen
 		}else if pdata.Color == ClBlack{
@@ -520,6 +520,7 @@ type GBrush struct {
 	fupcount int32
 }
 
+
 func (brush *GBrush)BeginUpdate()  {
 	brush.fupcount ++
 }
@@ -537,6 +538,51 @@ func (brush *GBrush)EndUpdate()  {
 		brush.Change()
 	}
 }
+
+func (brush *GBrush)Destroy()  {
+	if brush.Handle!=0{
+		if v,ok := gdiManager.fBrushs[brush.fHashCode];ok{
+			v.frefCount--
+			if v.frefCount == 0{
+				WinApi.DeleteObject(uintptr(v.Handle))
+				delete(gdiManager.fBrushs,brush.fHashCode)
+			}
+		}
+		brush.Handle = 0
+	}
+	brush.fHashCode = ""
+}
+
+func (fnt *GFont)Assign(newfnd *GFont)  {
+	fnt.BeginUpdate()
+	defer fnt.EndUpdate()
+	fnt.Color = newfnd.Color
+	fnt.Escapement = newfnd.Escapement
+	fnt.FontName = newfnd.FontName
+	fnt.fsize = newfnd.fsize
+	fnt.Height = newfnd.Height
+	fnt.Weight = newfnd.Weight
+	fnt.Italic = newfnd.Italic
+	fnt.StrikeOut = newfnd.StrikeOut
+	fnt.Underline = newfnd.Underline
+}
+
+func (pen *GPen)Assign(newpen *GPen)  {
+	pen.BeginUpdate()
+	defer pen.EndUpdate()
+	pen.Color = newpen.Color
+	pen.PenMode = newpen.PenMode
+	pen.Style = newpen.Style
+	pen.Width = newpen.Width
+}
+
+func (brush *GBrush)Assign(newBrush *GBrush)  {
+	brush.BeginUpdate()
+	defer brush.EndUpdate()
+	brush.Color = newBrush.Color
+	brush.BrushStyle = newBrush.BrushStyle
+}
+
 
 type GPen struct {
 	gPenData
@@ -560,4 +606,45 @@ func (pen *GPen)EndUpdate()  {
 		pen.fupcount = 0
 		pen.Change()
 	}
+}
+
+func (pen *GPen)Destroy()  {
+	if pen.Handle!=0{
+		if v,ok := gdiManager.fPens[pen.fHashCode];ok{
+			v.frefCount--
+			if v.frefCount == 0{
+				WinApi.DeleteObject(uintptr(v.Handle))
+				delete(gdiManager.fPens,pen.fHashCode)
+			}
+		}
+		pen.Handle = 0
+	}
+	pen.fHashCode = ""
+}
+
+
+func NewBrush()*GBrush{
+	brush := new(GBrush)
+	brush.Color = ClWhite
+	brush.BrushStyle = BSSolid
+	brush.Change()
+	return brush
+}
+
+func NewFont()*GFont{
+	fnt := new(GFont)
+	fnt.Color = ClWhite
+	fnt.FontName = "宋体"
+	fnt.SetSize(9)
+	return fnt
+}
+
+
+func NewPen()*GPen{
+	pen := new(GPen)
+	pen.Color = ClBlack
+	pen.Style = PSSolid
+	pen.Width = 1
+	pen.Change()
+	return pen
 }

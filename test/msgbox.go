@@ -9,12 +9,22 @@ import (
 	_ "reflect"
 	_"time"
 	"DxSoft/GVCL/WinApi"
+	"DxSoft/GVCL/Graphics"
 )
 
 type GForm1 struct {
 	controls.GForm
 	Button1 *controls.GButton
 	Edit1 *controls.GEdit
+}
+
+type GLabel struct {
+	controls.GBaseControl
+}
+
+func (lbl *GLabel)Paint(cvs Graphics.ICanvas)  {
+	r := WinApi.Rect{0,0,lbl.Width(),lbl.Height()}
+	cvs.FillRect(&r)
 }
 
 func NewForm1(app *controls.WApplication)*GForm1{
@@ -46,6 +56,20 @@ func main() {
 	m.SetTop(50)
 	m.SetCaption("测试窗体")
 
+	lbl := new(GLabel)
+	lbl.GBaseControl.SubInit()
+	lbl.GComponent.SubInit(lbl)
+	lbl.SetColor(Graphics.ClRed)
+	lbl.SetVisible(true)
+	lbl.SetLeft(20)
+	lbl.SetTop(30)
+	lbl.SetWidth(100)
+	lbl.SetHeight(100)
+	lbl.SetParent(m)
+
+
+
+
 	e := controls.NewEdit(m)
 	e.SetName("Edit1")
 	e.SetLeft(10)
@@ -57,11 +81,12 @@ func main() {
 	b.SetLeft(120)
 	b.SetCaption("创建窗体")
 	b.OnClick = func(sender interface{}) {
-		tmpm := NewForm1(app)
-		tmpm.SetCaption(e.GetText())
-		if tmpm.ShowModal() == controls.MrOK{
-			WinApi.MessageBox(tmpm.GetWindowHandle(),"程序确定退出","消息",64)
-		}
+		//tmpm := NewForm1(app)
+		//tmpm.SetCaption(e.GetText())
+		//if tmpm.ShowModal() == controls.MrOK{
+		//	WinApi.MessageBox(tmpm.GetWindowHandle(),"程序确定退出","消息",64)
+		//}
+		b.SetWidth(b.Width() + 1)
 	}
 
 	b1 := controls.NewButton(m)
@@ -74,8 +99,21 @@ func main() {
 	b1.SetLeft(100)
 	b1.SetTop(40)
 	b1.OnClick = func(sender interface{}) {
-		b.SetVisible(!b.Visible())
-		b.SetCaption("测试")
+		//b.SetVisible(!b.Visible())
+		//b.SetCaption("测试")
+		cvs := new(controls.GControlCanvas)
+		cvs.SubInit()
+		cvs.SetControl(m)
+		brsh := cvs.Brush()
+		brsh.Color = Graphics.ClRed
+		brsh.BrushStyle = Graphics.BSCross
+		brsh.Change()
+		r :=  new(WinApi.Rect)
+		r.Left = 20
+		r.Top = 20
+		r.Right = 150
+		r.Bottom = 150
+		cvs.FillRect(r)
 	}
 
 	app.Run()

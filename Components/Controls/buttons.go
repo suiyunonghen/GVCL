@@ -25,7 +25,7 @@ func (btn *GButton) SubInit() {
 	btn.GComponent.SubInit(btn)
 }
 
-func (btn *GButton) CreateParams(params *GCreateParams) {
+func (btn *GButton) CreateParams(params *Components.GCreateParams) {
 	btn.GWinControl.CreateParams(params)
 	btn.InitSubclassParams(params, "BUTTON")
 	if btn.fDefault {

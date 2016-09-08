@@ -91,7 +91,7 @@ func (app *WApplication) Run() {
 
 
 
-func (frm *GForm) CreateParams(params *GCreateParams) {
+func (frm *GForm) CreateParams(params *Components.GCreateParams) {
 	frm.GWinControl.CreateParams(params)
 	nstyle := int32(^(WinApi.WS_CHILD | WinApi.WS_GROUP | WinApi.WS_TABSTOP))
 	params.Style = uint32(int32(params.Style) & nstyle)

@@ -1695,8 +1695,8 @@ func GetDC(wnd syscall.Handle)HDC  {
 	return HDC(ret)
 }
 
-func ReleaseDC(DC HDC)int  {
-	ret,_,_:=syscall.Syscall(fnReleaseDC,1,uintptr(DC),0,0)
+func ReleaseDC(wnd syscall.Handle,DC HDC)int  {
+	ret,_,_:=syscall.Syscall(fnReleaseDC,2,uintptr(wnd),uintptr(DC),0)
 	return int(ret)
 }
 
@@ -1704,7 +1704,7 @@ func ReleaseDC(DC HDC)int  {
 func InitScreenLogPixels()  {
 	DC := GetDC(0)
 	ScreenLogPixels = int32(GetDeviceCaps(DC, LOGPIXELSY))
-	ReleaseDC(DC)
+	ReleaseDC(0,DC)
 }
 
 func GetStockObject(Index int)uintptr  {

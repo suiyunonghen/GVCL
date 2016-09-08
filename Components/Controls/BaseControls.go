@@ -32,7 +32,14 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 	if control == nil {
 		return WinApi.DefWindowProc(hwnd, msg, wparam, lparam)
 	}
-	if control.fIsForm{
+	if msg == WinApi.WM_DESTROY{
+		control.DestoryWnd()
+		if hwnd == application.fMainForm.fHandle {
+			application.fTerminate = true
+			WinApi.PostQuitMessage(0)
+		}
+		control.fHandle = 0
+	}else if control.fIsForm{
 		switch msg {
 		case WinApi.WM_CLOSE:
 			if hwnd == application.fMainForm.fHandle {
@@ -51,14 +58,6 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 					WinApi.DestroyWindow(application.fMainForm.fHandle)
 				}
 			}
-		case WinApi.WM_DESTROY:
-			control.DestoryWnd()
-			if hwnd == application.fMainForm.fHandle {
-				application.fTerminate = true
-				WinApi.PostQuitMessage(0)
-			}
-			control.fHandle = 0
-
 		case WinApi.WM_SIZE:
 		case WinApi.WM_COMMAND:
 			if lparam==0{ //点击的是菜单或者快捷加速
@@ -75,9 +74,6 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 				}
 			}
 		}
-	}else if msg == WinApi.WM_DESTROY{
-		control.DestoryWnd()
-		return
 	}
 	if control.fMessageHandlerMap != nil {
 		if vhandler,OK := control.fMessageHandlerMap[msg];OK{
@@ -91,32 +87,16 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 			}
 		}
 	}
-	if control.fRealWndprocObj == nil{
-		for i := control.SubChildCount() - 1; i >= 0; i-- {
-			subObj := control.SubChild(i)
-			pType := reflect.TypeOf(subObj)
-			if mnd, ok := pType.MethodByName("WndProc"); ok {
-				pType = mnd.Func.Type()
-				if pType.NumIn() == 4 && pType.NumOut() == 2 {
-					control.fRealWndprocObj = new(GMsgDispatchObj)
-					control.fRealWndprocObj.DispatchHandler = mnd.Func
-					control.fRealWndprocObj.TargetObject = subObj
-					break
-				}
-			}
-		}
+	var TargetObject interface{}
+	if i := control.SubChildCount() - 1;i>=0{
+		TargetObject = control.SubChild(i)
+	}else{
+		TargetObject = control
 	}
-	if control.fRealWndprocObj != nil{
-		in := make([]reflect.Value, 4)
-		in[0] = reflect.ValueOf(control.fRealWndprocObj.TargetObject)
-		in[1] = reflect.ValueOf(msg)
-		in[2] = reflect.ValueOf(wparam)
-		in[3] = reflect.ValueOf(lparam)
-		calrsult := control.fRealWndprocObj.DispatchHandler.Call(in)
-		if !calrsult[1].Bool() { //不往下传递
-			return uintptr(calrsult[0].Uint())
-		}
+	if result,dispatchNext := TargetObject.(Components.IWincontrol).WndProc(msg,wparam,lparam);!dispatchNext{
+		return result
 	}
+
 	if control.FDefWndProc == 0 {
 		result = WinApi.DefWindowProc(hwnd, msg, wparam, lparam)
 	}else{
@@ -129,10 +109,6 @@ type MessageEventHandler func(sender interface{}, msg *WinApi.MSG, handled *bool
 type MessageDispatch func(sender interface{}, msg uint32, wparam, lparam uintptr) uintptr
 type NotifyEvent func(sender interface{})
 
-type GMsgDispatchObj struct {
-	TargetObject interface{}
-	DispatchHandler reflect.Value
-}
 
 type GBaseControl struct {
 	Components.GComponent
@@ -143,14 +119,14 @@ type GBaseControl struct {
 	fwidth             int32
 	fheight            int32
 	fVisible           bool
-	fMessageHandlerMap map[uint32]*GMsgDispatchObj
+	fMessageHandlerMap map[uint32]*Graphics.GDispatchObj
 	Font               Graphics.GFont
 	OnResize NotifyEvent
 }
 
 func (ctrl *GBaseControl)BindMessageMpas()  {
 	if ctrl.fMessageHandlerMap == nil{
-		ctrl.fMessageHandlerMap = make(map[uint32]*GMsgDispatchObj)
+		ctrl.fMessageHandlerMap = make(map[uint32]*Graphics.GDispatchObj)
 	}
 	hasInControl := false
 	for i:=0;i<ctrl.SubChildCount()-1;i++{
@@ -168,7 +144,7 @@ func (ctrl *GBaseControl)BindMessageMpas()  {
 			if mnd, ok := pType.MethodByName(v); ok{
 				pType = mnd.Func.Type()
 				if pType.NumIn()==3 && pType.NumOut() == 2{
-					msgobj := new(GMsgDispatchObj)
+					msgobj := new(Graphics.GDispatchObj)
 					msgobj.TargetObject = subObj
 					msgobj.DispatchHandler = mnd.Func
 					ctrl.fMessageHandlerMap[k] = msgobj
@@ -185,11 +161,22 @@ func (ctrl *GBaseControl) Left() int32 {
 }
 
 func (ctrl *GBaseControl) SubInit() {
-	ctrl.GComponent.SubInit(ctrl)
+	ctrl.GObject.SubInit(ctrl)
 	ctrl.Font.BeginUpdate()
 	ctrl.Font.FontName = "宋体"
 	ctrl.Font.SetSize(9)
 	ctrl.Font.EndUpdate()
+}
+
+func (ctrl *GBaseControl)GetDeviceContext()(dc WinApi.HDC,ctrlHandle syscall.Handle){
+	if ctrl.fParent!=nil{
+		dc,ctrlHandle = ctrl.fParent.(*GWinControl).GetDeviceContext()
+	}
+	if dc != 0{
+		WinApi.SetViewportOrgEx(dc, int(ctrl.fleft), int(ctrl.ftop), nil)
+		WinApi.IntersectClipRect(dc, 0, 0, ctrl.fwidth, ctrl.fheight)
+	}
+	return
 }
 
 func (ctrl *GBaseControl) Top() int32 {
@@ -212,26 +199,33 @@ func (ctrl *GBaseControl) SetWidth(w int32) {
 }
 
 func (ctrl *GBaseControl)changeBands()  {
-	for i:=ctrl.SubChildCount()-1;i>=0;i--{
-		subObj := ctrl.SubChild(i)
-		pType := reflect.TypeOf(subObj)
-		stype := pType.String()
-		if stype == "*controls.GBaseControl" || stype == "*GBaseControl" {
-			break
-		}
-		if mnd, ok := pType.MethodByName("SetBounds"); ok {
-			pType = mnd.Func.Type()
-			if pType.NumIn() == 5 && pType.NumOut() == 0 {
-				in := make([]reflect.Value, 5)
-				in[0] = reflect.ValueOf(subObj)
-				in[1] = reflect.ValueOf(ctrl.fleft)
-				in[2] = reflect.ValueOf(ctrl.ftop)
-				in[3] = reflect.ValueOf(ctrl.fwidth)
-				in[4] = reflect.ValueOf(ctrl.fheight)
-				mnd.Func.Call(in)
-			}
-		}
+	//for i:=ctrl.SubChildCount()-1;i>=0;i--{
+	//	subObj := ctrl.SubChild(i)
+	//	pType := reflect.TypeOf(subObj)
+	//	stype := pType.String()
+	//	if stype == "*controls.GBaseControl" || stype == "*GBaseControl" {
+	//		break
+	//	}
+	//	if mnd, ok := pType.MethodByName("SetBounds"); ok {
+	//		pType = mnd.Func.Type()
+	//		if pType.NumIn() == 5 && pType.NumOut() == 0 {
+	//			in := make([]reflect.Value, 5)
+	//			in[0] = reflect.ValueOf(subObj)
+	//			in[1] = reflect.ValueOf(ctrl.fleft)
+	//			in[2] = reflect.ValueOf(ctrl.ftop)
+	//			in[3] = reflect.ValueOf(ctrl.fwidth)
+	//			in[4] = reflect.ValueOf(ctrl.fheight)
+	//			mnd.Func.Call(in)
+	//		}
+	//	}
+	//}
+	var TargetObj interface{}
+	if i:=ctrl.SubChildCount()-1;i>=0{
+		TargetObj = ctrl.SubChild(i)
+	}else{
+		TargetObj =ctrl
 	}
+	TargetObj.(Components.IControl).SetBounds(ctrl.fleft,ctrl.ftop,ctrl.fwidth,ctrl.fheight)
 }
 
 func (ctrl *GBaseControl) SetLeft(l int32) {
@@ -246,6 +240,11 @@ func (ctrl *GBaseControl) SetTop(t int32) {
 		ctrl.changeBands()
 	}
 }
+
+func (ctrl *GBaseControl)IsWindowControl()bool  {
+	return false
+}
+
 func (ctrl *GBaseControl) SetHeight(h int32) {
 	if ctrl.fheight != h{
 		ctrl.fheight = h
@@ -312,23 +311,34 @@ func (ctrl *GBaseControl) SetParent(AParent Components.IWincontrol) {
 	}
 }
 
+func (ctrl *GBaseControl)PaintControl(dc WinApi.HDC)  {
+	//执行绘制
+	var cvs Graphics.ICanvas
+	cvs = Graphics.NewCanvas()
+	defer cvs.(*Graphics.GCanvas).Destroy()
+	defer cvs.SetHandle(0)
+	cvs.SetHandle(dc)
+	brsh := cvs.Brush()
+	brsh.Color = ctrl.fColor
+	brsh.Change()
+	cvs.Font().Assign(&ctrl.Font)
+	i := ctrl.SubChildCount() - 1
+	var fPaintHandlerTarget interface{}
+	if i >= 0{
+		fPaintHandlerTarget = ctrl.SubChild(i)
+	}else{
+		fPaintHandlerTarget = ctrl
+	}
+	fPaintHandlerTarget.(Components.IControl).Paint(cvs)
+}
+
+func (ctrl *GBaseControl)Paint(cvs Graphics.ICanvas)  {
+	r := WinApi.Rect{0,0,ctrl.Width(),ctrl.Height()}
+	cvs.FillRect(&r)
+}
 
 func (ctrl *GBaseControl) SetVisible(v bool) {
 	ctrl.fVisible = v
-}
-
-type GCreateParams struct {
-	Caption      string
-	Style        uint32
-	ExStyle      uint32
-	X            int32
-	Y            int32
-	Width        int32
-	Height       int32
-	WndParent    syscall.Handle
-	Param        uintptr
-	WindowClass  WinApi.GWndClass
-	WinClassName string
 }
 
 type GWinControl struct {
@@ -339,7 +349,6 @@ type GWinControl struct {
 	fIsForm             bool
 	fCaption            string
 	FDefWndProc         uintptr
-	fRealWndprocObj     *GMsgDispatchObj
 }
 
 func (ctrl *GWinControl) SubInit() {
@@ -351,33 +360,15 @@ func (ctrl *GWinControl)Perform(msg uint32,wparam, lparam uintptr)(result WinApi
 	if ctrl.fHandle != 0{
 		return WinApi.LRESULT(initWndProc(ctrl.fHandle,msg,wparam,lparam))
 	}
-	if ctrl.fRealWndprocObj == nil{
-		for i := ctrl.SubChildCount() - 1; i >= 0; i-- {
-			subObj := ctrl.SubChild(i)
-			pType := reflect.TypeOf(subObj)
-			if mnd, ok := pType.MethodByName("WndProc"); ok {
-				pType = mnd.Func.Type()
-				if pType.NumIn() == 4 && pType.NumOut() == 2 {
-					ctrl.fRealWndprocObj = new(GMsgDispatchObj)
-					ctrl.fRealWndprocObj.DispatchHandler = mnd.Func
-					ctrl.fRealWndprocObj.TargetObject = subObj
-					break
-				}
-			}
-		}
+	var TargetObject interface{}
+	i := ctrl.SubChildCount() - 1
+	if i >= 0{
+		TargetObject = ctrl.SubChild(i)
+	}else{
+		TargetObject = ctrl
 	}
-	if ctrl.fRealWndprocObj != nil{
-		in := make([]reflect.Value, 4)
-		in[0] = reflect.ValueOf(ctrl.fRealWndprocObj.TargetObject)
-		in[1] = reflect.ValueOf(msg)
-		in[2] = reflect.ValueOf(wparam)
-		in[3] = reflect.ValueOf(lparam)
-		calrsult := ctrl.fRealWndprocObj.DispatchHandler.Call(in)
-		if !calrsult[1].Bool() { //不往下传递
-			return WinApi.LRESULT(calrsult[0].Uint())
-		}
-	}
-	return 0
+	ret,_ := TargetObject.(Components.IWincontrol).WndProc(msg,wparam,lparam)
+	return WinApi.LRESULT(ret)
 }
 
 
@@ -522,7 +513,7 @@ func ExecuteMethod(obj interface{}, MethodName string, params []interface{})(exe
 	return
 }
 
-func (ctrl *GWinControl) CreateParams(params *GCreateParams) {
+func (ctrl *GWinControl) CreateParams(params *Components.GCreateParams) {
 	params.Style = WinApi.WS_CHILD | WinApi.WS_CLIPSIBLINGS | WinApi.WS_TABSTOP
 	params.ExStyle = WinApi.WS_EX_CONTROLPARENT
 	params.X = ctrl.fleft
@@ -541,30 +532,38 @@ func (ctrl *GWinControl) CreateParams(params *GCreateParams) {
 }
 
 func (ctrl *GWinControl) CreateWnd() {
-	params := new(GCreateParams)
-	stype := ""
-	for i := ctrl.SubChildCount() - 1; i >= 0; i-- {
-		subObj := ctrl.SubChild(i)
-		pType := reflect.TypeOf(subObj)
-		stype = pType.String()
-		if stype == "*controls.GWinControl" || stype == "*GWinControl" {
-			break
-		}
-		//模拟执行继承功能的操作
-		if mnd, ok := pType.MethodByName("CreateParams"); ok {
-			pType = mnd.Func.Type()
-			if pType.NumIn() == 2 && pType.NumOut() == 0 {
-				in := make([]reflect.Value, 2)
-				in[0] = reflect.ValueOf(subObj)
-				in[1] = reflect.ValueOf(params)
-				mnd.Func.Call(in)
-				break
-			}
-		}
+	params := new(Components.GCreateParams)
+	//stype := ""
+	//for i := ctrl.SubChildCount() - 1; i >= 0; i-- {
+	//	subObj := ctrl.SubChild(i)
+	//	pType := reflect.TypeOf(subObj)
+	//	stype = pType.String()
+	//	if stype == "*controls.GWinControl" || stype == "*GWinControl" {
+	//		break
+	//	}
+	//	//模拟执行继承功能的操作
+	//	if mnd, ok := pType.MethodByName("CreateParams"); ok {
+	//		pType = mnd.Func.Type()
+	//		if pType.NumIn() == 2 && pType.NumOut() == 0 {
+	//			in := make([]reflect.Value, 2)
+	//			in[0] = reflect.ValueOf(subObj)
+	//			in[1] = reflect.ValueOf(params)
+	//			mnd.Func.Call(in)
+	//			break
+	//		}
+	//	}
+	//}
+	var TargetObject interface{}
+	if i := ctrl.SubChildCount() - 1; i >= 0{
+		TargetObject = ctrl.SubChild(i)
+	}else{
+		TargetObject = ctrl
 	}
+	TargetObject.(Components.IWincontrol).CreateParams(params)
 	ctrl.FDefWndProc = params.WindowClass.FnWndProc
 
-	if exeOk,retv := ctrl.ExecuteChildMethod("CreateWindowHandle",params);exeOk && retv.Bool(){
+	//if exeOk,retv := ctrl.ExecuteChildMethod("CreateWindowHandle",params);exeOk && retv.Bool(){
+	if TargetObject.(Components.IWincontrol).CreateWindowHandle(params){
 		WinApi.SetProp(ctrl.fHandle, uintptr(controlAtom), uintptr(unsafe.Pointer(ctrl)))
 		WinApi.SetProp(ctrl.fHandle, uintptr(windowAtom), uintptr(unsafe.Pointer(ctrl)))
 		if ctrl.fParent!=nil{
@@ -593,7 +592,6 @@ func (ctrl *GWinControl) DestoryWnd() {
 	ctrl.Free()//释放资源
 	WinApi.RemoveProp(ctrl.fHandle, uintptr(controlAtom))
 	WinApi.RemoveProp(ctrl.fHandle, uintptr(windowAtom))
-	ctrl.fRealWndprocObj = nil
 }
 
 func (ctrl *GWinControl) Focused() bool {
@@ -674,7 +672,7 @@ func (ctrl *GWinControl) SetVisible(v bool) {
 	}
 }
 
-func (ctrl *GWinControl)CreateWindowHandle(params *GCreateParams)bool  {
+func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool  {
 	if params.WindowClass.LpszClassName!=nil && params.WinClassName == WinApi.UTF16Ptr2String(params.WindowClass.LpszClassName,256){
 		//两者类名一致，一般WinSDK绑定
 		ctrl.fHandle = WinApi.CreateWindowExptr(params.ExStyle, params.WindowClass.LpszClassName,
@@ -748,10 +746,10 @@ func (ctrl *GWinControl) UpdateShowing() {
 	}
 }
 
-func (ctrl *GWinControl)paintBackGround(dc WinApi.HDC)uintptr  {
-	if exeok,ret := ctrl.ExecuteChildMethod("PaintBack",dc);exeok{
-		return uintptr(ret.Int())
-	}
+func (ctrl *GWinControl)PaintBack(dc WinApi.HDC)int32  {
+	//if exeok,ret := ctrl.ExecuteChildMethod("PaintBack",dc);exeok{
+	//	return uintptr(ret.Int())
+	//}
 	Brush := WinApi.CreateSolidBrush(uint32(ctrl.fColor))
 	r := new(WinApi.Rect)
 	r.Right = ctrl.Width()
@@ -773,7 +771,14 @@ func (ctrl *GWinControl) WndProc(msg uint32, wparam, lparam uintptr) (result uin
 	switch msg {
 	case WinApi.WM_ERASEBKGND:
 		//背景绘制
-	        result = ctrl.paintBackGround(WinApi.HDC(wparam))
+	        //result = ctrl.paintBackGround(WinApi.HDC(wparam))
+		var targetobj interface{}
+		if i := ctrl.SubChildCount() -1;i>=0{
+			targetobj = ctrl.SubChild(i)
+		}else{
+			targetobj = ctrl
+		}
+		result = uintptr(targetobj.(Components.IWincontrol).PaintBack(WinApi.HDC(wparam)))
 		msgDispatchNext = result == 0
 	case WinApi.WM_SIZE:
 		rect := new(WinApi.Rect)
@@ -849,18 +854,28 @@ func (ctrl *GWinControl)PaintWindow(dc WinApi.HDC)int32{
 	return 0
 }
 
-func (ctrl *GWinControl)PaintHandler(dc WinApi.HDC)uintptr  {
+func (ctrl *GWinControl)PaintHandler(dc WinApi.HDC)(result uintptr)  {
 	if dc == 0{
 		pstruct := new(WinApi.GPaintStruct)
 		dc =pstruct.BeginPaint(ctrl.fHandle)
 		defer pstruct.EndPaint(ctrl.fHandle)
 	}
-	graphicControlCount :=ctrl.ControlCount();
+	result = 1
+	var targetObj interface{}
+	if i := ctrl.SubChildCount() - 1;i>=0{
+		targetObj = ctrl.SubChild(i)
+	}else{
+		targetObj = ctrl
+	}
+	graphicControlCount :=ctrl.ControlCount()
 	if graphicControlCount==0{
 		//找到最后一个有Paint
-		if exeOk,ret := ctrl.ExecuteChildMethod("PaintWindow",dc);exeOk{
-			return uintptr(ret.Int())
-		}
+		//if exeOk,ret := ctrl.ExecuteChildMethod("PaintWindow",dc);exeOk{
+		//	result = uintptr(ret.Int())
+		//	return
+		//}
+		result = uintptr(targetObj.(Components.IWincontrol).PaintWindow(dc))
+		return
 	}else{
 		//裁剪掉GraphcControls的区域不绘制，然后
 		SaveIndex := WinApi.SaveDC(dc)
@@ -876,22 +891,38 @@ func (ctrl *GWinControl)PaintHandler(dc WinApi.HDC)uintptr  {
 		}
 		if Clip!=WinApi.NULLREGION{
 			//找到最后一个有Paint
-			if exeok,ret := ctrl.ExecuteChildMethod("PaintWindow",dc);exeok{
-				return uintptr(ret.Int())
-			}
+			//if exeok,ret := ctrl.ExecuteChildMethod("PaintWindow",dc);exeok{
+			//	result = uintptr(ret.Int())
+			//}
+			result = uintptr(targetObj.(Components.IWincontrol).PaintWindow(dc))
 		}
 		WinApi.RestoreDC(dc,SaveIndex)
 		//绘制GraphicControls
 		ctrl.PaintGraphicControls(dc)
 	}
-	return 1
+	return
 }
 
 func (ctrl *GWinControl)PaintGraphicControls(dc WinApi.HDC)  {
-	fmt.Println("PaintGraphicControls")
+	bndrect := new(WinApi.Rect)
+	for i := 0;i<ctrl.ControlCount();i++{
+		ictrl := ctrl.Controls(i)
+		bndrect.Left,bndrect.Top = ictrl.Left(),ictrl.Top()
+		bndrect.Right = ictrl.Width()+bndrect.Left
+		bndrect.Bottom = ictrl.Height() + bndrect.Top
+		if ictrl.Visible() && WinApi.RectVisible(dc,bndrect){
+			SaveIndex := WinApi.SaveDC(dc)
+			WinApi.MoveWindowOrg(dc,bndrect.Left,bndrect.Top)
+			WinApi.IntersectClipRect(dc,0,0,bndrect.Width(),bndrect.Height())
+			//执行绘制
+			ictrl.PaintControl(dc)
+			WinApi.RestoreDC(dc,SaveIndex)
+		}
+	}
+
 }
 
-func (ctrl *GWinControl) InitSubclassParams(Params *GCreateParams, subclassName string) {
+func (ctrl *GWinControl) InitSubclassParams(Params *Components.GCreateParams, subclassName string) {
 	if subclassName == "" {
 		return
 	}
@@ -909,3 +940,49 @@ func (ctrl *GWinControl) InitSubclassParams(Params *GCreateParams, subclassName 
 	CS_ON := uint32(WinApi.CS_VREDRAW | WinApi.CS_HREDRAW)
 	Params.WindowClass.Style = Params.WindowClass.Style & ^CS_OFF | CS_ON
 }
+
+func (ctrl *GWinControl)GetDeviceContext()(WinApi.HDC,syscall.Handle){
+	if ctrl.fHandle !=0{
+		return WinApi.GetDC(ctrl.fHandle),ctrl.fHandle
+	}
+	return 0,0
+}
+
+func (ctrl *GWinControl)IsWindowControl()bool  {
+	return true
+}
+
+
+type GControlCanvas struct {
+	Graphics.GCanvas
+	fctrl Components.IControl
+	fDeviceContext WinApi.HDC
+	fWindowHandle syscall.Handle
+}
+
+func (cvs *GControlCanvas)SubInit()  {
+	cvs.GCanvas.SubInit()
+	cvs.GObject.SubInit(cvs)
+}
+
+
+func (cvs *GControlCanvas)SetControl(ctrl Components.IControl)  {
+	if cvs.fctrl != ctrl{
+		if cvs.fWindowHandle != 0{
+			cvs.SetHandle(0)
+			WinApi.ReleaseDC(cvs.fWindowHandle, cvs.fDeviceContext)
+			cvs.fDeviceContext = 0
+		}
+		cvs.fctrl = ctrl
+	}
+}
+
+func (cvs *GControlCanvas)CreateHandle()  {
+	cvs.fDeviceContext,cvs.fWindowHandle = cvs.fctrl.GetDeviceContext()
+	if cvs.fDeviceContext == 0{
+		return
+	}
+	cvs.SetHandle(cvs.fDeviceContext)
+	cvs.GCanvas.CreateHandle()
+}
+

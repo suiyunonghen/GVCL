@@ -2,6 +2,7 @@ package WinApi
 
 import (
 	"syscall"
+	"unsafe"
 )
 
 var (
@@ -666,4 +667,80 @@ func init() {
 	fnUpdateICMRegKeyW, _ = syscall.GetProcAddress(libgdi32, "UpdateICMRegKeyW")
 	fnUpdateICMRegKeyA, _ = syscall.GetProcAddress(libgdi32, "UpdateICMRegKeyA")
 	fnWidenPath, _ = syscall.GetProcAddress(libgdi32, "WidenPath")
+}
+
+func GetCurrentPositionEx(dc HDC,pt *POINT)bool{
+	ret,_,_ := syscall.Syscall(fnGetCurrentPositionEx,2,uintptr(dc),uintptr(unsafe.Pointer(pt)),0)
+	return ret !=0
+}
+
+func MoveToEx(dc HDC,p1,p2 int32,pt *POINT)bool  {
+	ret,_,_ := syscall.Syscall6(fnMoveToEx,4,uintptr(dc),uintptr(p1),uintptr(p2),uintptr(unsafe.Pointer(pt)),0,0)
+	return ret !=0
+}
+
+func GetClipBox(dc HDC,rect *Rect)int  {
+	ret,_,_ := syscall.Syscall(fnGetClipBox,2,uintptr(dc),uintptr(unsafe.Pointer(rect)),0)
+	return int(ret)
+}
+
+func SelectObject(dc HDC,gdiobj uintptr) uintptr {
+	ret,_,_ := syscall.Syscall(fnSelectObject,2,uintptr(dc),gdiobj,0)
+	return ret
+}
+
+func LineTo(dc HDC,x,y int) bool {
+	ret,_,_ := syscall.Syscall(fnLineTo,3,uintptr(dc),uintptr(x),uintptr(y))
+	return ret !=0
+}
+
+func IntersectClipRect(dc HDC, X1, Y1, X2, Y2 int32) int  {
+	ret,_,_ := syscall.Syscall6(fnIntersectClipRect,5,uintptr(dc),uintptr(X1),uintptr(Y1),uintptr(X2),uintptr(Y2),0)
+	return int(ret)
+}
+
+func SetViewportOrgEx(dc HDC, X, Y int, Point *POINT)bool  {
+	ret,_,_ := syscall.Syscall6(fnIntersectClipRect,4,uintptr(dc),uintptr(X),uintptr(Y),uintptr(unsafe.Pointer(Point)),0,0)
+	return ret != 0
+}
+
+func UnrealizeObject(gdihandle uintptr)bool  {
+	ret,_,_ := syscall.Syscall(fnUnrealizeObject,1,gdihandle,0,0)
+	return ret !=0
+}
+
+func SetBkColor(dc HDC,color uint32) uint32 {
+	ret,_,_ := syscall.Syscall(fnSetBkColor,2,uintptr(dc),uintptr(color),0)
+	return uint32(ret)
+}
+
+func SetBkMode(dc HDC,BkMode int32) int32 {
+	ret,_,_ := syscall.Syscall(fnSetBkMode,2,uintptr(dc),uintptr(BkMode),0)
+	return int32(ret)
+}
+
+func SetTextColor(dc HDC,color uint32) uint32 {
+	ret,_,_ := syscall.Syscall(fnSetTextColor,2,uintptr(dc),uintptr(color),0)
+	return uint32(ret)
+}
+
+func SetWindowOrgEx(dc HDC,x,y int,oldpt *POINT)bool  {
+	ret,_,_ := syscall.Syscall6(fnSetWindowOrgEx,4,uintptr(dc),uintptr(x),uintptr(y),uintptr(unsafe.Pointer(oldpt)),0,0)
+	return ret != 0
+}
+
+func GetWindowOrgEx(dc HDC,pt *POINT)bool  {
+	ret,_,_ := syscall.Syscall(fnGetWindowOrgEx,2,uintptr(dc),uintptr(unsafe.Pointer(pt)),0)
+	return ret !=0
+}
+
+func MoveWindowOrg(dc HDC,dx,dy int32)  {
+	p := new(POINT)
+	syscall.Syscall(fnGetWindowOrgEx,2,uintptr(dc),uintptr(unsafe.Pointer(p)),0)
+	syscall.Syscall6(fnSetWindowOrgEx,4,uintptr(dc),uintptr(p.X - dx),uintptr(p.Y-dy),0,0,0)
+}
+
+func RectVisible(dc HDC,rect *Rect)bool  {
+	ret,_,_ := syscall.Syscall(fnRectVisible,2,uintptr(dc),uintptr(unsafe.Pointer(rect)),0)
+	return ret !=0
 }

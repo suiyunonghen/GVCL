@@ -3,7 +3,7 @@ package Components
 import (
 	"DxSoft/GVCL/Graphics"
 	"syscall"
-	"reflect"
+	"DxSoft/GVCL/WinApi"
 )
 
 type IComponent interface {
@@ -30,11 +30,31 @@ type IControl interface {
 	SetHeight(h int32)
 	GetParent() IWincontrol
 	Free() //释放数据
+	GetDeviceContext()(WinApi.HDC,syscall.Handle)
+	Visible() bool
+	PaintControl(dc WinApi.HDC) //执行绘制
+	Paint(cvs Graphics.ICanvas)
+	SetBounds(ALeft, ATop, AWidth, AHeight int32)
+	IsWindowControl()bool
 }
 
 type IApplication interface {
 	Run()
 	Active() bool
+}
+
+type GCreateParams struct {
+	Caption      string
+	Style        uint32
+	ExStyle      uint32
+	X            int32
+	Y            int32
+	Width        int32
+	Height       int32
+	WndParent    syscall.Handle
+	Param        uintptr
+	WindowClass  WinApi.GWndClass
+	WinClassName string
 }
 
 type IWincontrol interface {
@@ -52,54 +72,26 @@ type IWincontrol interface {
 	ControlExists(ctrl IControl) bool
 	WindowExists(handle syscall.Handle) bool
 	UpdateShowing()
+	WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool)
+	CreateParams(params *GCreateParams)
+	PaintWindow(dc WinApi.HDC)int32
+	CreateWindowHandle(params *GCreateParams)bool
+	PaintBack(dc WinApi.HDC)int32
 }
 
-type GDispatchObj struct {
-	TargetObject interface{}
-	DispatchHandler reflect.Value
-}
+
 /**
 **基本组件
 **/
 type GComponent struct {
+	Graphics.GObject
 	fname      string `json:"Name"`
 	ftag       int    `json:"Tag"`
 	fTagetData uintptr
-	fSubChilds []interface{} //子对象
-	fRealFreeDispatch *GDispatchObj
 }
 
 func (cmp *GComponent) GetName() string {
 	return cmp.fname
-}
-
-func (cmp *GComponent) SubInit(subObj interface{}) {
-	if cmp.fSubChilds == nil {
-		cmp.fSubChilds = make([]interface{}, 0)
-	}
-	for _, v := range cmp.fSubChilds {
-		if v == subObj {
-			return
-		}
-	}
-	cmp.fSubChilds = append(cmp.fSubChilds, subObj)
-}
-
-func (cmp *GComponent) SubChild(idx int) interface{} {
-	if cmp.fSubChilds == nil {
-		return nil
-	}
-	if idx >= 0 && idx < len(cmp.fSubChilds) {
-		return cmp.fSubChilds[idx]
-	}
-	return nil
-}
-
-func (cmp *GComponent) SubChildCount() int {
-	if cmp.fSubChilds == nil {
-		return 0
-	}
-	return len(cmp.fSubChilds)
 }
 
 func (cmp *GComponent) SetName(fName string) {
@@ -122,26 +114,4 @@ func (cmp *GComponent) SetTag(fdata int) {
 	cmp.ftag = fdata
 }
 
-func (cmp *GComponent)Free()  {
-	//执行Destroy过程
-	if cmp.fRealFreeDispatch == nil{
-		for i := cmp.SubChildCount() - 1; i >= 0; i-- {
-			subObj := cmp.SubChild(i)
-			pType := reflect.TypeOf(subObj)
-			if mnd, ok := pType.MethodByName("Destroy"); ok {
-				pType = mnd.Func.Type()
-				if pType.NumIn() == 1 && pType.NumOut() == 0 {
-					cmp.fRealFreeDispatch = new(GDispatchObj)
-					cmp.fRealFreeDispatch.DispatchHandler = mnd.Func
-					cmp.fRealFreeDispatch.TargetObject = subObj
-					break
-				}
-			}
-		}
-	}
-	if cmp.fRealFreeDispatch!=nil{
-		in := make([]reflect.Value, 1)
-		in[0] = reflect.ValueOf(cmp.fRealFreeDispatch.TargetObject)
-		 cmp.fRealFreeDispatch.DispatchHandler.Call(in)
-	}
-}
+

@@ -17,7 +17,7 @@ func (edt *GEdit) SubInit() {
 	edt.GComponent.SubInit(edt)
 }
 
-func (edt *GEdit) CreateParams(params *GCreateParams) {
+func (edt *GEdit) CreateParams(params *Components.GCreateParams) {
 	edt.GWinControl.CreateParams(params)
 	edt.InitSubclassParams(params, "EDIT")
 	params.Style = params.Style | WinApi.ES_AUTOHSCROLL | WinApi.ES_AUTOVSCROLL | WinApi.ES_LEFT
