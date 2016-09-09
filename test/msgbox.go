@@ -18,14 +18,6 @@ type GForm1 struct {
 	Edit1 *controls.GEdit
 }
 
-type GLabel struct {
-	controls.GBaseControl
-}
-
-func (lbl *GLabel)Paint(cvs Graphics.ICanvas)  {
-	r := WinApi.Rect{0,0,lbl.Width(),lbl.Height()}
-	cvs.FillRect(&r)
-}
 
 func NewForm1(app *controls.WApplication)*GForm1{
 	frm := new(GForm1)
@@ -56,17 +48,12 @@ func main() {
 	m.SetTop(50)
 	m.SetCaption("测试窗体")
 
-	lbl := new(GLabel)
-	lbl.GBaseControl.SubInit()
-	lbl.GComponent.SubInit(lbl)
-	lbl.SetColor(Graphics.ClRed)
-	lbl.SetVisible(true)
-	lbl.SetLeft(20)
-	lbl.SetTop(30)
-	lbl.SetWidth(100)
-	lbl.SetHeight(100)
-	lbl.SetParent(m)
+	lbl := controls.NewLabel(m)
+	lbl.SetCaption("说明 ")
 
+	lbl.SetAutoSize(true)
+	lbl.SetColor(Graphics.ClRed)
+	lbl.SetTop(40)
 
 
 

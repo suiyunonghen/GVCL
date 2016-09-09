@@ -23,6 +23,9 @@ type ICanvas interface {
 	Pen()*GPen
 	Font()*GFont
 	CreateHandle()
+	TextExtent(str string,size *WinApi.GSize)bool
+	TextWidth(str string)(int32,bool)
+	TextHeight(str string)(int32,bool)
 }
 
 func NewCanvas()*GCanvas  {
@@ -33,6 +36,41 @@ func NewCanvas()*GCanvas  {
 
 func (cvs *GCanvas) SubInit() {
 	cvs.GObject.SubInit(cvs)
+}
+
+func (cvs *GCanvas) TextExtent(str string,size *WinApi.GSize)bool {
+	if cvs.GetHandle() != 0{
+		r := new(WinApi.Rect)
+		r.Right = 10000
+		r.Bottom = 10000
+		WinApi.DrawText(cvs.fHandle,str,-1,r,WinApi.DT_LEFT | WinApi.DT_TOP | WinApi.DT_CALCRECT)
+		size.CX = r.Width()
+		size.CY = r.Height()
+		return  true
+	}
+	return false
+}
+
+func (cvs *GCanvas) TextWidth(str string)(w int32,b bool) {
+	w = 0
+	b = cvs.GetHandle() != 0
+	if b{
+		r := new(WinApi.Rect)
+		WinApi.DrawText(cvs.fHandle,str,-1,r,WinApi.DT_LEFT | WinApi.DT_TOP)
+		w = r.Width()
+	}
+	return
+}
+
+func (cvs *GCanvas) TextHeight(str string)(h int32, b bool) {
+	h = 0
+	b = cvs.GetHandle() != 0
+	if b{
+		r := new(WinApi.Rect)
+		WinApi.DrawText(cvs.fHandle,str,-1,r,WinApi.DT_LEFT | WinApi.DT_TOP)
+		h = r.Width()
+	}
+	return
 }
 
 func (cvs *GCanvas)CreateHandle()  {

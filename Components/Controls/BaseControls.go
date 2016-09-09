@@ -260,6 +260,26 @@ func (ctrl *GBaseControl) SetColor(c Graphics.GColorValue) {
 	ctrl.fColor = c
 }
 
+func (ctrl *GBaseControl)GetTargetCanvas(cvs *Graphics.GCanvas)(TargetHandle syscall.Handle)  {
+	var targetObj interface{}
+	if i := ctrl.SubChildCount() -1;i>=0{
+		targetObj = ctrl.SubChild(i)
+	}else{
+		targetObj = ctrl
+	}
+	if targetObj.(Components.IControl).IsWindowControl(){
+		TargetHandle = targetObj.(Components.IWincontrol).GetWindowHandle()
+	}else if ctrl.fParent != nil {
+		TargetHandle = ctrl.fParent.GetWindowHandle()
+	}else{
+		TargetHandle = 0
+	}
+	if TargetHandle != 0{
+		cvs.SetHandle(WinApi.GetDC(TargetHandle))
+	}
+	return
+}
+
 func (ctrl *GBaseControl)BoundsRect()*WinApi.Rect  {
 	result := new(WinApi.Rect)
 	result.Left = ctrl.fleft
@@ -339,6 +359,14 @@ func (ctrl *GBaseControl)Paint(cvs Graphics.ICanvas)  {
 
 func (ctrl *GBaseControl) SetVisible(v bool) {
 	ctrl.fVisible = v
+}
+
+func (ctrl *GBaseControl)AfterParentWndCreate()  {
+	if i := ctrl.SubChildCount() - 1;i>=0{
+		ctrl.SubChild(i).(Components.IControl).AfterParentWndCreate()
+	}else {
+		fmt.Println("AfterParentWndCreate")
+	}
 }
 
 type GWinControl struct {
@@ -731,6 +759,9 @@ func (ctrl *GWinControl) UpdateShowing() {
 		}
 	}
 	if hasCreatewnd {
+		for i := 0;i < len(ctrl.fControls);i++{
+			ctrl.fControls[i].AfterParentWndCreate()
+		}
 		if ctrl.fIsForm {
 			if ctrl.fHandle == application.fMainForm.fHandle{
 				WinApi.UpdateWindow(ctrl.fHandle)

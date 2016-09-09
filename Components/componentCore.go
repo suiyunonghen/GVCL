@@ -36,6 +36,7 @@ type IControl interface {
 	Paint(cvs Graphics.ICanvas)
 	SetBounds(ALeft, ATop, AWidth, AHeight int32)
 	IsWindowControl()bool
+	AfterParentWndCreate()
 }
 
 type IApplication interface {

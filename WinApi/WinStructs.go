@@ -39,6 +39,10 @@ type Rect struct {
 	Right,Bottom int32
 }
 
+type GSize struct {
+	CX,CY int32
+}
+
 func (rect *Rect)Width()int32{
 	return rect.Right-rect.Left
 }
