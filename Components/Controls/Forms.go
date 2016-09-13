@@ -27,7 +27,7 @@ type GForm struct {
 	fModalResult int8
 	fisModalform bool
 	OnClose OnFormCloseEvent
-	OnCreate NotifyEvent
+	OnCreate Graphics.NotifyEvent
 }
 
 const(

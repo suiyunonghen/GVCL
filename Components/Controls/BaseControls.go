@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"unsafe"
 	"fmt"
+	"DxSoft/GVCL/Components/NVisbleControls"
+	"math"
 )
 
 var (
@@ -39,7 +41,19 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 			WinApi.PostQuitMessage(0)
 		}
 		control.fHandle = 0
-	}else if control.fIsForm{
+	}else if msg == WinApi.WM_CONTEXTMENU{
+		if control.PopupMenu != nil{
+			pt := new(WinApi.POINT)
+			pt.Y = int32(WinApi.HiWord(uint32(lparam)))
+			pt.X = int32(WinApi.LoWord(uint32(lparam)))
+			if pt.X<=0 || pt.Y <= 0 || pt.X >= math.MaxInt16 || pt.Y>=math.MaxInt16{
+				pt.X = 0
+				pt.Y = 0
+				WinApi.ClientToScreen(hwnd,pt)
+			}
+			control.PopupMenu.PopUp(pt.X,pt.Y)
+		}
+	} else if control.fIsForm{
 		switch msg {
 		case WinApi.WM_CLOSE:
 			if hwnd == application.fMainForm.fHandle {
@@ -63,7 +77,8 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 			if lparam==0{ //点击的是菜单或者快捷加速
 				ctrlId := WinApi.LoWord(uint32(wparam))
 				if WinApi.HiWord(uint32(wparam))==0{ //菜单ID
-					fmt.Println("菜单ID",ctrlId)
+					mitem := NVisbleControls.PopList.MenuItemById(ctrlId)
+					mitem.Click()
 				}else{//快捷键ID
 					fmt.Println("快捷键ID",ctrlId)
 				}
@@ -107,7 +122,6 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 
 type MessageEventHandler func(sender interface{}, msg *WinApi.MSG, handled *bool)
 type MessageDispatch func(sender interface{}, msg uint32, wparam, lparam uintptr) uintptr
-type NotifyEvent func(sender interface{})
 
 
 type GBaseControl struct {
@@ -121,7 +135,8 @@ type GBaseControl struct {
 	fVisible           bool
 	fMessageHandlerMap map[uint32]*Graphics.GDispatchObj
 	Font               Graphics.GFont
-	OnResize NotifyEvent
+	OnResize Graphics.NotifyEvent
+	PopupMenu      	   *NVisbleControls.GPopupMenu
 }
 
 func (ctrl *GBaseControl)BindMessageMpas()  {
@@ -314,6 +329,7 @@ func (ctrl *GBaseControl)SetBounds(ALeft, ATop, AWidth, AHeight int32)  {
 func (ctrl *GBaseControl)Destroy()  {
 	//释放
 	ctrl.Font.Destroy()
+	ctrl.GObject.Destroy()
 }
 
 
@@ -737,6 +753,12 @@ func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool
 			ctrl.fCaption, params.Style, params.X, params.Y,
 			params.Width, params.Height, params.WndParent, 0, params.WindowClass.HInstance,
 			unsafe.Pointer(params.Param))
+	}
+	if ctrl.fHandle == application.fMainForm.fHandle{
+		if NVisbleControls.PopList == nil{
+			NVisbleControls.PopList = new(NVisbleControls.GPopList)
+			NVisbleControls.PopList.WindowHandle = ctrl.fHandle
+		}
 	}
 	return ctrl.fHandle !=0
 }

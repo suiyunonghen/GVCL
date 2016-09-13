@@ -16,6 +16,7 @@ type HKL uintptr
 type HDC uintptr
 type HOOK uintptr
 type LRESULT int
+type HBITMAP uintptr
 
 func HiWord(L uint32) uint16 {
 	return uint16(L >> 16)
@@ -283,6 +284,21 @@ type GLOGFONT struct {
 	Quality byte
 	PitchAndFamily byte
 	FaceName [32]uint16
+}
+
+type GMenuItemInfo struct{
+	CbSize uint32
+	FMask  uint32
+	FType  uint32
+	FState uint32
+	WID    uint32
+	HSubMenu HMENU
+	HbmpChecked HBITMAP
+	HbmpUnchecked HBITMAP
+	DwItemData uintptr
+	DwTypeData uintptr
+	Cch  uint32
+	HbmpItem HBITMAP
 }
 
 func (logFont *GLOGFONT)CreateFont()syscall.Handle  {

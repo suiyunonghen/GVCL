@@ -1551,11 +1551,6 @@ func InflateRect(rc *Rect,dx,dy int)bool  {
 }
 
 
-func EnableMenuItem(hMenu HMENU,uIDEnableItem, uEnable uint)bool  {
-	ret,_,_:=syscall.Syscall(fnEnableMenuItem,3,uintptr(hMenu),uintptr(uIDEnableItem),uintptr(uEnable))
-	return ret!=0
-}
-
 func EnableWindow(hWnd syscall.Handle, bEnable bool) bool {
 	ret,_,_:=syscall.Syscall(fnEnableWindow,2,uintptr(hWnd),uintptr(BoolToUint(bEnable)),0)
 	return ret!=0
@@ -1599,6 +1594,11 @@ func GetWindowRect(hwnd syscall.Handle,lpRect *Rect)bool  {
 
 func ScreenToClient(hwnd syscall.Handle,lpoint *POINT)bool  {
 	ret,_,_:=syscall.Syscall(fnScreenToClient,2,uintptr(hwnd),uintptr(unsafe.Pointer(lpoint)),0)
+	return ret!=0
+}
+
+func ClientToScreen(hwnd syscall.Handle,lpoint *POINT)bool  {
+	ret,_,_:=syscall.Syscall(fnClientToScreen,2,uintptr(hwnd),uintptr(unsafe.Pointer(lpoint)),0)
 	return ret!=0
 }
 
@@ -1710,4 +1710,75 @@ func InitScreenLogPixels()  {
 func GetStockObject(Index int)uintptr  {
 	ret,_,_:=syscall.Syscall(fnGetStockObject,1,uintptr(Index),0,0)
 	return ret
+}
+
+func GetSubMenu(hMenu HMENU,npos int)HMENU  {
+	ret,_,_:=syscall.Syscall(fnGetSubMenu,2,uintptr(hMenu),uintptr(npos),0)
+	return HMENU(ret)
+}
+
+func EnableMenuItem(hMenu HMENU,npos int,uEnable bool)bool  {
+	var nflag uint=MF_BYPOSITION
+	if uEnable{
+		nflag = nflag | MF_ENABLED
+	}else{
+		nflag = nflag | MF_DISABLED
+	}
+	ret,_,_:=syscall.Syscall(fnEnableMenuItem,3,uintptr(hMenu),uintptr(npos),uintptr(nflag))
+	return ret!=0
+}
+
+
+func GetMenuItemID(hmenu HMENU,npos int32)uint  {
+	ret,_,_:=syscall.Syscall(fnGetMenuItemID,2,uintptr(hmenu),uintptr(npos),0)
+	return uint(ret)
+}
+
+func GetMenuItemCount(hMenu HMENU) int {
+	ret,_,_:=syscall.Syscall(fnGetMenuItemCount,2,uintptr(hMenu),0,0)
+	return int(ret)
+}
+
+func GetMenuString(hMenu HMENU,npos int32)string  {
+	var uflag uint=MF_BYPOSITION
+	ret,_,_:=syscall.Syscall6(fnGetMenuStringW,5,uintptr(hMenu),uintptr(npos),0,0,uintptr(uflag),0)
+	mp := make([]uint16,ret+1)
+	ret,_,_ = syscall.Syscall6(fnGetMenuStringW,5,uintptr(hMenu),uintptr(npos),uintptr(unsafe.Pointer(&mp[0])),0,uintptr(uflag),0)
+	return syscall.UTF16ToString(mp)
+}
+
+func CreateMenu()HMENU  {
+	ret,_,_:=syscall.Syscall(fnCreateMenu,0,0,0,0)
+	return HMENU(ret)
+}
+
+func CreatePopupMenu()HMENU  {
+	ret,_,_:=syscall.Syscall(fnCreatePopupMenu,0,0,0,0)
+	return HMENU(ret)
+}
+
+
+func GetSystemMenu(hWnd syscall.Handle,bRevert bool)HMENU  {
+	ret,_,_:=syscall.Syscall(fnGetSystemMenu,2,uintptr(hWnd),uintptr(BoolToUint(bRevert)),0)
+	return HMENU(ret)
+}
+
+func AppendMenuW(hMenu HMENU,lpNewItem string,MenuId uint16)bool  {
+	var uflags uint=MF_STRING
+	ret,_,_:=syscall.Syscall6(fnAppendMenuW,4,uintptr(hMenu),uintptr(uflags),uintptr(MenuId),
+		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpNewItem))),0,0)
+	return ret!=0
+}
+
+func TrackPopupMenu(hMenu HMENU,uflags uint,x,y,nReserved int,hwnd syscall.Handle,prRect *Rect)bool  {
+	ret,_,_:=syscall.Syscall9(fnTrackPopupMenu,7,uintptr(hMenu),uintptr(uflags),uintptr(x),
+		uintptr(y),uintptr(nReserved),
+		uintptr(hwnd),uintptr(unsafe.Pointer(prRect)),0,0)
+	return ret!=0
+}
+
+func InsertMenuItem(hmenu HMENU,nposID uint,ispos bool,iteminfo *GMenuItemInfo)bool  {
+	ret,_,_:=syscall.Syscall6(fnInsertMenuItemW,4,uintptr(hmenu),uintptr(nposID),uintptr(BoolToUint(ispos)),
+		uintptr(unsafe.Pointer(iteminfo)),0,0)
+	return ret!=0
 }

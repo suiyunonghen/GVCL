@@ -10,6 +10,7 @@ import (
 	_"time"
 	"DxSoft/GVCL/WinApi"
 	"DxSoft/GVCL/Graphics"
+	"DxSoft/GVCL/Components/NVisbleControls"
 )
 
 type GForm1 struct {
@@ -55,6 +56,19 @@ func main() {
 	lbl.SetColor(Graphics.ClRed)
 	lbl.SetTop(40)
 
+	//菜单
+	pop := NVisbleControls.NewPopupMenu(m)
+	tmpitem := pop.Items().AddItem("测试1")
+	citem := tmpitem.AddItem("子测试1")
+	citem.OnClick = func(sender interface{}) {
+		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+	}
+	citem = pop.Items().AddItem("测试2")
+	citem.OnClick = func(sender interface{}) {
+		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+	}
+	m.PopupMenu = pop
+
 
 
 	e := controls.NewEdit(m)
@@ -68,12 +82,11 @@ func main() {
 	b.SetLeft(120)
 	b.SetCaption("创建窗体")
 	b.OnClick = func(sender interface{}) {
-		//tmpm := NewForm1(app)
-		//tmpm.SetCaption(e.GetText())
-		//if tmpm.ShowModal() == controls.MrOK{
-		//	WinApi.MessageBox(tmpm.GetWindowHandle(),"程序确定退出","消息",64)
-		//}
-		b.SetWidth(b.Width() + 1)
+		tmpm := NewForm1(app)
+		tmpm.SetCaption(e.GetText())
+		if tmpm.ShowModal() == controls.MrOK{
+			WinApi.MessageBox(tmpm.GetWindowHandle(),"程序确定退出","消息",64)
+		}
 	}
 
 	b1 := controls.NewButton(m)

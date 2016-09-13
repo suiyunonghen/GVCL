@@ -1384,3 +1384,9 @@ func MulDiv(nNumber, nNumerator, nDenominator int32)int32  {
 	r1, _, _ := syscall.Syscall(fnMulDiv, 3, uintptr(nNumber), uintptr(nNumerator), uintptr(nDenominator))
 	return int32(r1)
 }
+
+func GetLastError()uint32  {
+	initKernel32()
+	r1, _, _ := syscall.Syscall(fnGetLastError, 0, 0,0,0)
+	return uint32(r1)
+}

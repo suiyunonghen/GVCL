@@ -4,12 +4,13 @@ import (
 	"reflect"
 	_"fmt"
 	"DxSoft/GVCL/WinApi"
+	"DxSoft/GVCL/Graphics"
 )
 
 type GEdit struct {
 	GWinControl
 	fDefault bool
-	OnChange NotifyEvent
+	OnChange Graphics.NotifyEvent
 }
 
 func (edt *GEdit) SubInit() {

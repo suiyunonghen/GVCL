@@ -1,7 +1,10 @@
 package Graphics
 
-import "reflect"
+import (
+	"reflect"
+)
 
+type NotifyEvent func(sender interface{})
 type GDispatchObj struct {
 	TargetObject interface{}
 	DispatchHandler reflect.Value
@@ -10,41 +13,99 @@ type GDispatchObj struct {
 type IInheritedObject interface {
 	SubChild(idx int) interface{}
 	SubChildCount() int
-	SubInit(subObj interface{})
 	Destroy()
+	Owner()interface{}
+	OwnerChildCount()int
+	OwnerChild(idx int)interface{}
+	RemoveOwnerChild(obj interface{})
+	SetOwner(aowner interface{})
+	AddOwnerChild(obj interface{})
 }
 
 type GObject struct {
 	fSubChilds []interface{} //子对象
-	fRealFreeDispatch *GDispatchObj
+	fOwner     interface{}
+	fOwnerList []interface{}
+}
+
+func (obj *GObject)SetOwner(aowner interface{})  {
+	var targetobj interface{}
+	if i := obj.SubChildCount() - 1; i >= 0{
+		targetobj = obj.SubChild(i)
+	}else{
+		targetobj = obj
+	}
+	if obj.fOwner != nil{
+		obj.fOwner.(IInheritedObject).RemoveOwnerChild(targetobj)
+	}
+	obj.fOwner = aowner
+	if aowner != nil{
+		aowner.(IInheritedObject).AddOwnerChild(targetobj)
+	}
+}
+
+func (obj *GObject)AddOwnerChild(childobj interface{})  {
+	if obj.fOwnerList == nil{
+		obj.fOwnerList =make([]interface{},1)
+		obj.fOwnerList[0] = childobj
+	}else{
+		obj.fOwnerList = append(obj.fOwnerList,childobj)
+	}
+}
+
+func (obj *GObject)Owner()interface{}  {
+	return obj.fOwner
+}
+
+func (obj *GObject)RemoveOwnerChild(delobj interface{})  {
+	if obj.fOwnerList!= nil{
+		delobj.(*GObject).fOwner =nil
+		for k,v := range obj.fOwnerList{
+			if v == delobj{
+				obj.fOwnerList = append(obj.fOwnerList[:k],obj.fOwnerList[k+1:])
+			}
+		}
+	}
+}
+
+func (obj *GObject) OwnerChild(idx int) interface{} {
+	if obj.fOwnerList == nil {
+		return nil
+	}
+	if idx >= 0 && idx < len(obj.fOwnerList) {
+		return obj.fOwnerList[idx]
+	}
+	return nil
+}
+
+func (obj *GObject)OwnerChildCount()int  {
+	if obj.fOwner != nil{
+		return len(obj.fOwnerList)
+	}
+	return 0
 }
 
 func (obj *GObject)Free()  {
 	//执行Destroy过程
-	if obj.fRealFreeDispatch == nil{
-		for i := obj.SubChildCount() - 1; i >= 0; i-- {
-			subObj := obj.SubChild(i)
-			pType := reflect.TypeOf(subObj)
-			if mnd, ok := pType.MethodByName("Destroy"); ok {
-				pType = mnd.Func.Type()
-				if pType.NumIn() == 1 && pType.NumOut() == 0 {
-					obj.fRealFreeDispatch = new(GDispatchObj)
-					obj.fRealFreeDispatch.DispatchHandler = mnd.Func
-					obj.fRealFreeDispatch.TargetObject = subObj
-					break
-				}
-			}
-		}
-	}
-	if obj.fRealFreeDispatch!=nil{
-		in := make([]reflect.Value, 1)
-		in[0] = reflect.ValueOf(obj.fRealFreeDispatch.TargetObject)
-		obj.fRealFreeDispatch.DispatchHandler.Call(in)
+	if i := obj.SubChildCount() - 1; i >= 0{
+		obj.SubChild(i).(IInheritedObject).Destroy()
+
+	}else{
+		obj.Destroy()
 	}
 }
 
 func (obj *GObject)Destroy()  {
 	//释放的过程，后面继承的重写此方法则可
+	if obj.fOwnerList != nil {
+		for i := 0;i<len(obj.fOwnerList);i++{
+			subObj := obj.fOwnerList[i]
+			subObj.(IInheritedObject).Destroy()
+		}
+	}
+	if obj.fOwner != nil{
+		obj.fOwner.(IInheritedObject).RemoveOwnerChild(obj)
+	}
 }
 
 func (obj *GObject) SubInit(subObj interface{}) {

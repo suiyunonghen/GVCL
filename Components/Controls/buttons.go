@@ -4,12 +4,13 @@ import (
 	"DxSoft/GVCL/Components"
 	"DxSoft/GVCL/WinApi"
 	"reflect"
+	"DxSoft/GVCL/Graphics"
 )
 
 type GButton struct {
 	GWinControl
 	fDefault bool
-	OnClick NotifyEvent
+	OnClick Graphics.NotifyEvent
 }
 
 func (btn *GButton) SetDefault(v bool) {
