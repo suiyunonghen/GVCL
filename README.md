@@ -101,3 +101,20 @@ or rename the `test.manifest` file to `test.exe.manifest` and distribute it with
 	b1.Font.Underline = 1
 	b1.Font.EndUpdate()
 ```
+###  增加弹出菜单组件   
+菜单使用方法
+```go
+//菜单
+	pop := NVisbleControls.NewPopupMenu(m)
+	tmpitem := pop.Items().AddItem("测试1")
+	citem := tmpitem.AddItem("子测试1")
+	citem.OnClick = func(sender interface{}) {
+		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+	}
+	citem = pop.Items().AddItem("测试2")
+	citem.OnClick = func(sender interface{}) {
+		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+	}
+	m.PopupMenu = pop
+```
+目前整体组件框架已经具备雏形，要增加其他组件库按照扩展的Button和Edit以及Label增加则可，下一步做完托盘就暂时放一段落
