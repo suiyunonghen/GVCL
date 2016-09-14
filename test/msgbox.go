@@ -42,8 +42,7 @@ func NewForm1(app *controls.WApplication)*GForm1{
 }
 
 func main() {
-	app := new(controls.WApplication)
-	app.ShowMainForm = true
+	app := controls.NewApplication()
 	m := app.CreateForm()
 	m.SetLeft(200)
 	m.SetTop(50)
@@ -67,8 +66,21 @@ func main() {
 	citem.OnClick = func(sender interface{}) {
 		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
 	}
-	m.PopupMenu = pop
 
+	//托盘图标
+	icon := NVisbleControls.NewTrayIcon(m)
+
+	icon.SetIcon(app.AppIcon())
+	//icon.SetIcon(WinApi.LoadIcon(controls.Hinstance,uintptr(5)))
+	icon.SetVisible(true)
+	icon.PopupMenu = pop
+	icon.OnDblClick = func(sender interface{}) {
+		if !m.Visible(){
+			m.Show()
+		}else{
+			m.SetVisible(false)
+		}
+	}
 
 
 	e := controls.NewEdit(m)
@@ -87,6 +99,7 @@ func main() {
 		if tmpm.ShowModal() == controls.MrOK{
 			WinApi.MessageBox(tmpm.GetWindowHandle(),"程序确定退出","消息",64)
 		}
+
 	}
 
 	b1 := controls.NewButton(m)
@@ -99,8 +112,6 @@ func main() {
 	b1.SetLeft(100)
 	b1.SetTop(40)
 	b1.OnClick = func(sender interface{}) {
-		//b.SetVisible(!b.Visible())
-		//b.SetCaption("测试")
 		cvs := new(controls.GControlCanvas)
 		cvs.SubInit()
 		cvs.SetControl(m)

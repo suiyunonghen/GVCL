@@ -4,8 +4,8 @@ import (
 	"DxSoft/GVCL/Components"
 	"DxSoft/GVCL/WinApi"
 	"DxSoft/GVCL/Graphics"
-	_"fmt"
 	"syscall"
+	"unsafe"
 )
 
 var (
@@ -70,15 +70,40 @@ type WApplication struct {
 	OnMessage    MessageEventHandler
 	fChildObj    interface{}
 	ActiveForm  *GForm
+	fappIcon     WinApi.HICON
+}
+
+func NewApplication()*WApplication  {
+	app := new(WApplication)
+	app.ShowMainForm =true
+	application = app
+	return app
+}
+
+
+func CurrentApplication()*WApplication  {
+	return application
+}
+
+func (app *WApplication) MainForm()*GForm {
+	return app.fMainForm
 }
 
 func (app *WApplication) Run() {
-	application = app
+	if application == nil{
+		application = app
+	}
 	app.fRunning = true
 	if app.fMainForm != nil {
 		if app.ShowMainForm {
 			app.fMainForm.SetVisible(true)
 		}
+		if app.fappIcon==0{
+			if app.fappIcon = WinApi.LoadIcon(Hinstance,uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("MAINICON"))));app.fappIcon == 0{
+				app.fappIcon = WinApi.LoadIcon(Hinstance,uintptr(3))
+			}
+		}
+		WinApi.SendMessage(app.fMainForm.GetWindowHandle(),WinApi.WM_SETICON,uintptr(WinApi.ICON_BIG),uintptr(application.fappIcon))
 		for {
 			app.HandleMessage()
 			if app.fTerminate {
@@ -89,6 +114,14 @@ func (app *WApplication) Run() {
 	app.fRunning = false
 }
 
+func (app *WApplication)AppIcon()WinApi.HICON  {
+	if app.fappIcon == 0{
+		if app.fappIcon = WinApi.LoadIcon(Hinstance,uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("MAINICON"))));app.fappIcon == 0{
+			app.fappIcon = WinApi.LoadIcon(Hinstance,uintptr(3))
+		}
+	}
+	return app.fappIcon
+}
 
 
 func (frm *GForm) CreateParams(params *Components.GCreateParams) {
@@ -112,7 +145,6 @@ func (frm *GForm)PaintWindow(dc WinApi.HDC)int32{
 }
 
 func (frm *GForm)PaintBack(dc WinApi.HDC)int32  {
-	//frm.GWinControl.paintBackGround(dc)
 	return 1
 }
 

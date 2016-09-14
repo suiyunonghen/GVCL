@@ -12,6 +12,7 @@ import (
 	"math"
 )
 
+
 var (
 	InitWndprocCallBack = syscall.NewCallback(initWndProc)
 	controlAtom         WinApi.ATOM
@@ -37,10 +38,16 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 	if msg == WinApi.WM_DESTROY{
 		control.DestoryWnd()
 		if hwnd == application.fMainForm.fHandle {
+			NVisbleControls.TrayIcons.Destroy()
 			application.fTerminate = true
 			WinApi.PostQuitMessage(0)
 		}
 		control.fHandle = 0
+	}else if msg == WinApi.WM_SYSTEM_TRAY_MESSAGE{
+		//托盘消息
+		if NVisbleControls.TrayIcons != nil{
+			return NVisbleControls.TrayIcons.WndProc(uint32(lparam),uint32(wparam))
+		}
 	}else if msg == WinApi.WM_CONTEXTMENU{
 		if control.PopupMenu != nil{
 			pt := new(WinApi.POINT)
@@ -465,6 +472,18 @@ func (ctrl *GWinControl) GetText() string {
 }
 
 func (ctrl *GWinControl) GetWindowHandle() syscall.Handle {
+	if ctrl.fHandle == 0{
+		ctrl.CreateWnd()
+		if ctrl.fHandle != 0{
+			//设置图标
+			if application.fappIcon != 0{
+				WinApi.SendMessage(ctrl.fHandle,WinApi.WM_SETICON,uintptr(WinApi.ICON_BIG),uintptr(application.fappIcon))
+			}
+			for i := 0;i < len(ctrl.fControls);i++{
+				ctrl.fControls[i].AfterParentWndCreate()
+			}
+		}
+	}
 	return ctrl.fHandle
 }
 
@@ -754,11 +773,15 @@ func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool
 			params.Width, params.Height, params.WndParent, 0, params.WindowClass.HInstance,
 			unsafe.Pointer(params.Param))
 	}
-	if ctrl.fHandle == application.fMainForm.fHandle{
+	if ctrl.fHandle != 0 && ctrl.fHandle == application.fMainForm.fHandle{
 		if NVisbleControls.PopList == nil{
 			NVisbleControls.PopList = new(NVisbleControls.GPopList)
 			NVisbleControls.PopList.WindowHandle = ctrl.fHandle
 		}
+		if NVisbleControls.TrayIcons == nil{
+			NVisbleControls.TrayIcons = new(NVisbleControls.GTrayIconList)
+		}
+		NVisbleControls.TrayIcons.SetIconWndProcHandle(ctrl.fHandle)
 	}
 	return ctrl.fHandle !=0
 }
@@ -788,6 +811,10 @@ func (ctrl *GWinControl) UpdateShowing() {
 			if ctrl.fHandle == application.fMainForm.fHandle{
 				WinApi.UpdateWindow(ctrl.fHandle)
 			}
+			//设置图标
+			if application.fappIcon != 0{
+				WinApi.SendMessage(ctrl.fHandle,WinApi.WM_SETICON,uintptr(WinApi.ICON_BIG),uintptr(application.fappIcon))
+			}
 			WinApi.ShowWindow(ctrl.fHandle, WinApi.SW_SHOWNORMAL)
 		}else if !ctrl.fIsForm && ctrl.fParent != nil {
 			if ctrl.fVisible {
@@ -795,6 +822,12 @@ func (ctrl *GWinControl) UpdateShowing() {
 			} else {
 				WinApi.SetWindowPos(ctrl.fHandle, 0, 0, 0, 0, 0,  WinApi.ShowFlagsHide)
 			}
+		}
+	}else{
+		if ctrl.fVisible {
+			WinApi.SetWindowPos(ctrl.fHandle, 0, 0, 0, 0, 0,  WinApi.ShowFlagsVisible)
+		} else {
+			WinApi.SetWindowPos(ctrl.fHandle, 0, 0, 0, 0, 0,  WinApi.ShowFlagsHide)
 		}
 	}
 }

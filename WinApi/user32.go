@@ -1782,3 +1782,19 @@ func InsertMenuItem(hmenu HMENU,nposID uint,ispos bool,iteminfo *GMenuItemInfo)b
 		uintptr(unsafe.Pointer(iteminfo)),0,0)
 	return ret!=0
 }
+
+func LoadIcon(hinstance HINST,iconName uintptr) HICON {
+	ret,_,_:=syscall.Syscall(fnLoadIconW,2,uintptr(hinstance),iconName,0)
+	return HICON(ret)
+}
+
+
+func LoadBitmap(hinstance HINST,lpBitmapName string) HBITMAP {
+	ret,_,_:=syscall.Syscall(fnLoadBitmapW,2,uintptr(hinstance),uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpBitmapName))),0)
+	return HBITMAP(ret)
+}
+
+func GetCursorPos(pt *POINT)bool  {
+	ret,_,_:=syscall.Syscall(fnGetCursorPos,1,uintptr(unsafe.Pointer(pt)),0,0)
+	return ret != 0
+}
