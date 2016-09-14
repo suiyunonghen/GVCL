@@ -146,3 +146,5 @@ or rename the `test.manifest` file to `test.exe.manifest` and distribute it with
 		}
 	}
 ```
+运行效果
+![运行效果](https://github.com/suiyunonghen/GVCL/blob/master/test/GVCL.png)
