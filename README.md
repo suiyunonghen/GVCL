@@ -118,3 +118,31 @@ or rename the `test.manifest` file to `test.exe.manifest` and distribute it with
 	m.PopupMenu = pop
 ```
 目前整体组件框架已经具备雏形，要增加其他组件库按照扩展的Button和Edit以及Label增加则可，下一步做完托盘就暂时放一段落
+
+###  增加托盘组件完成，使用方法
+```go
+//菜单
+	pop := NVisbleControls.NewPopupMenu(m)
+	tmpitem := pop.Items().AddItem("测试1")
+	citem := tmpitem.AddItem("子测试1")
+	citem.OnClick = func(sender interface{}) {
+		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+	}
+	citem = pop.Items().AddItem("测试2")
+	citem.OnClick = func(sender interface{}) {
+		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+	}
+	//托盘图标，结合弹出菜单
+	icon := NVisbleControls.NewTrayIcon(m)
+	icon.SetIcon(app.AppIcon()) //设置托盘图标
+	//icon.SetIcon(WinApi.LoadIcon(controls.Hinstance,uintptr(5))) 
+	icon.SetVisible(true)
+	icon.PopupMenu = pop //设置托盘的右键弹出菜单
+	icon.OnDblClick = func(sender interface{}) {
+		if !m.Visible(){
+			m.Show()
+		}else{
+			m.SetVisible(false)
+		}
+	}
+```
