@@ -327,3 +327,11 @@ func (logpen *GLOGPEN)CreatePen()HPEN  {
 	ret,_,_ := syscall.Syscall(fnCreatePenIndirect,1,uintptr(unsafe.Pointer(logpen)),0,0)
 	return HPEN(ret)
 }
+
+func PChar(str string)*uint16  {
+	return syscall.StringToUTF16Ptr(str)
+}
+
+func PCharUintptr(str string)uintptr  {
+	return uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(str)))
+}

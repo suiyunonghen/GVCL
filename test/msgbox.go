@@ -62,14 +62,21 @@ func main() {
 	citem.OnClick = func(sender interface{}) {
 		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
 	}
-	citem = pop.Items().AddItem("测试2")
+	citem = pop.Items().AddItem("注册表")
 	citem.OnClick = func(sender interface{}) {
-		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+		reg := NVisbleControls.NewRegistry(0)
+		reg.SetRootKey(WinApi.HKEY_LOCAL_MACHINE)
+		if reg.OpenKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",false){
+			if reg.ValueExists("SynTPEnh"){
+				WinApi.MessageBox(m.GetWindowHandle(),"SynTPEnh自动启动: "+reg.ReadString("SynTPEnh"),"消息",64)
+			}
+			WinApi.MessageBox(m.GetWindowHandle(),"打开注册表测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+		}
+		reg.Free()
 	}
 
 	//托盘图标
 	icon := NVisbleControls.NewTrayIcon(m)
-
 	icon.SetIcon(app.AppIcon())
 	//icon.SetIcon(WinApi.LoadIcon(controls.Hinstance,uintptr(5)))
 	icon.SetVisible(true)
