@@ -153,9 +153,9 @@ reg.SetRootKey(WinApi.HKEY_LOCAL_MACHINE)
 if reg.OpenKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",false){
 	if reg.ValueExists("SynTPEnh"){
 		WinApi.MessageBox(m.GetWindowHandle(),"SynTPEnh自动启动: "+reg.ReadString("SynTPEnh"),"消息",64)	
-		}
-		WinApi.MessageBox(m.GetWindowHandle(),"打开注册表测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
 	}
+	WinApi.MessageBox(m.GetWindowHandle(),"打开注册表测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",6)
+}
 reg.Free()
 ```
 运行效果
