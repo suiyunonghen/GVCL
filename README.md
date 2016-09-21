@@ -146,5 +146,17 @@ or rename the `test.manifest` file to `test.exe.manifest` and distribute it with
 		}
 	}
 ```
+###  增加注册表操作类库，使用方法
+```
+reg := NVisbleControls.NewRegistry(0)
+reg.SetRootKey(WinApi.HKEY_LOCAL_MACHINE)
+if reg.OpenKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",false){
+	if reg.ValueExists("SynTPEnh"){
+		WinApi.MessageBox(m.GetWindowHandle(),"SynTPEnh自动启动: "+reg.ReadString("SynTPEnh"),"消息",64)	
+		}
+		WinApi.MessageBox(m.GetWindowHandle(),"打开注册表测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+	}
+reg.Free()
+```
 运行效果
 ![运行效果](https://github.com/suiyunonghen/GVCL/blob/master/test/GVCL.png)
