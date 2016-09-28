@@ -149,13 +149,15 @@ func (frm *GForm)PaintBack(dc WinApi.HDC)int32  {
 }
 
 func (frm *GForm)Close()  {
-	if application.fMainForm == frm{
-		application.fTerminate = true
-		WinApi.PostQuitMessage(0)
-	}else{
-		WinApi.SendMessage(frm.fHandle,WinApi.WM_CLOSE,0,0)
-		frm.fVisible = false
-	}
+	WinApi.SendMessage(frm.fHandle,WinApi.WM_CLOSE,0,0)
+	frm.fVisible = false
+	//if application.fMainForm == frm{
+	//	application.fTerminate = true
+	//	WinApi.PostQuitMessage(0)
+	//}else{
+	//	WinApi.SendMessage(frm.fHandle,WinApi.WM_CLOSE,0,0)
+	//	frm.fVisible = false
+	//}
 }
 
 func (frm *GForm)Show()  {

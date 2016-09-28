@@ -68,6 +68,10 @@ func (iconList *GTrayIconList)SetIconWndProcHandle(wnd syscall.Handle)  {
 		for _,icon := range iconList.trayIcons{
 			if icon != nil{
 				icon.fNotifyData.WND = wnd
+				//重新显示
+				if icon.fvisible{
+					WinApi.Shell_NotifyIcon(WinApi.NIM_ADD,&icon.fNotifyData)
+				}
 			}
 		}
 	}
@@ -119,10 +123,12 @@ func (ticon *GTrayIcon)Destroy()  {
 func (ticon *GTrayIcon)SetVisible(v bool)  {
 	if ticon.fvisible!=v{
 		ticon.fvisible = v
-		if v{
-			WinApi.Shell_NotifyIcon(WinApi.NIM_ADD,&ticon.fNotifyData)
-		}else{
-			WinApi.Shell_NotifyIcon(WinApi.NIM_DELETE,&ticon.fNotifyData)
+		if ticon.fNotifyData.WND != 0{
+			if v{
+				WinApi.Shell_NotifyIcon(WinApi.NIM_ADD,&ticon.fNotifyData)
+			}else{
+				WinApi.Shell_NotifyIcon(WinApi.NIM_DELETE,&ticon.fNotifyData)
+			}
 		}
 	}
 }
