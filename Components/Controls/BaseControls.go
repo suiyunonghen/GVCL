@@ -781,7 +781,7 @@ func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool
 		if NVisbleControls.TrayIcons == nil{
 			NVisbleControls.TrayIcons = new(NVisbleControls.GTrayIconList)
 		}
-		NVisbleControls.TrayIcons.SetIconWndProcHandle(ctrl.fHandle)
+		NVisbleControls.TrayIcons.SetIconWndProcHandle(ctrl.fHandle,application.AppIcon())
 	}
 	return ctrl.fHandle !=0
 }

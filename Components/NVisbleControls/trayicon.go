@@ -59,7 +59,7 @@ func (iconList *GTrayIconList)WndProc(msg uint32,IconId uint32)uintptr  {
 	return 0
 }
 
-func (iconList *GTrayIconList)SetIconWndProcHandle(wnd syscall.Handle)  {
+func (iconList *GTrayIconList)SetIconWndProcHandle(wnd syscall.Handle,aicon WinApi.HICON)  {
 	if iconList.trayiconWnd == wnd{
 		return
 	}
@@ -68,6 +68,10 @@ func (iconList *GTrayIconList)SetIconWndProcHandle(wnd syscall.Handle)  {
 		for _,icon := range iconList.trayIcons{
 			if icon != nil{
 				icon.fNotifyData.WND = wnd
+				//设为应用程序图标
+				if icon.fNotifyData.HIcon == 0{
+					icon.fNotifyData.HIcon = aicon
+				}
 				//重新显示
 				if icon.fvisible{
 					WinApi.Shell_NotifyIcon(WinApi.NIM_ADD,&icon.fNotifyData)
