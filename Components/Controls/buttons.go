@@ -1,10 +1,10 @@
 package controls
 
 import (
-	"DxSoft/GVCL/Components"
-	"DxSoft/GVCL/WinApi"
+	"suiyunonghen/GVCL/Components"
+	"suiyunonghen/GVCL/WinApi"
 	"reflect"
-	"DxSoft/GVCL/Graphics"
+	"suiyunonghen/GVCL/Graphics"
 )
 
 type GButton struct {

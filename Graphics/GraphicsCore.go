@@ -2,7 +2,7 @@ package Graphics
 
 import (
 	"unsafe"
-	"DxSoft/GVCL/WinApi"
+	"suiyunonghen/GVCL/WinApi"
 	"syscall"
 	"fmt"
 )

@@ -1,8 +1,8 @@
 package NVisbleControls
 
 import (
-	"DxSoft/GVCL/WinApi"
-	"DxSoft/GVCL/Graphics"
+	"suiyunonghen/GVCL/WinApi"
+	"suiyunonghen/GVCL/Graphics"
 	"strings"
 	"syscall"
 	"unsafe"

@@ -1,9 +1,9 @@
 package controls
 
 import (
-	"DxSoft/GVCL/Components"
-	"DxSoft/GVCL/WinApi"
-	"DxSoft/GVCL/Graphics"
+	"suiyunonghen/GVCL/Components"
+	"suiyunonghen/GVCL/WinApi"
+	"suiyunonghen/GVCL/Graphics"
 	"syscall"
 	"unsafe"
 )

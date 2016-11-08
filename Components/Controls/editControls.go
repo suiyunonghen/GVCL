@@ -1,10 +1,10 @@
 package controls
 import (
-	"DxSoft/GVCL/Components"
+	"suiyunonghen/GVCL/Components"
 	"reflect"
 	_"fmt"
-	"DxSoft/GVCL/WinApi"
-	"DxSoft/GVCL/Graphics"
+	"suiyunonghen/GVCL/WinApi"
+	"suiyunonghen/GVCL/Graphics"
 )
 
 type GEdit struct {

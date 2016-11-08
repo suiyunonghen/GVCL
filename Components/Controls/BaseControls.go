@@ -1,14 +1,14 @@
 package controls
 
 import (
-	"DxSoft/GVCL/Components"
-	"DxSoft/GVCL/Graphics"
-	"DxSoft/GVCL/WinApi"
+	"suiyunonghen/GVCL/Components"
+	"suiyunonghen/GVCL/Graphics"
+	"suiyunonghen/GVCL/WinApi"
 	"reflect"
 	"syscall"
 	"unsafe"
 	"fmt"
-	"DxSoft/GVCL/Components/NVisbleControls"
+	"suiyunonghen/GVCL/Components/NVisbleControls"
 	"math"
 )
 

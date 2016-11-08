@@ -1,9 +1,9 @@
 package controls
 
 import (
-	"DxSoft/GVCL/WinApi"
-	"DxSoft/GVCL/Graphics"
-	"DxSoft/GVCL/Components"
+	"suiyunonghen/GVCL/WinApi"
+	"suiyunonghen/GVCL/Graphics"
+	"suiyunonghen/GVCL/Components"
 	"reflect"
 )
 

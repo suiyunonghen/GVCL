@@ -1,16 +1,17 @@
 package main
 
 import (
-	_ "DxSoft/GVCL/Components"
-	"DxSoft/GVCL/Components/Controls"
-	_ "DxSoft/GVCL/Graphics"
-	_"DxSoft/GVCL/WinApi"
+	_ "suiyunonghen/GVCL/Components"
+	"suiyunonghen/GVCL/Components/Controls"
+	_ "suiyunonghen/GVCL/Graphics"
+	_"suiyunonghen/GVCL/WinApi"
 	_ "fmt"
 	_ "reflect"
 	_"time"
-	"DxSoft/GVCL/WinApi"
-	"DxSoft/GVCL/Graphics"
-	"DxSoft/GVCL/Components/NVisbleControls"
+	"suiyunonghen/GVCL/WinApi"
+	"suiyunonghen/GVCL/Graphics"
+	"suiyunonghen/GVCL/Components/NVisbleControls"
+	"fmt"
 )
 
 type GForm1 struct {
@@ -46,7 +47,7 @@ func main() {
 	m := app.CreateForm()
 	m.SetLeft(200)
 	m.SetTop(50)
-	m.SetCaption("测试窗体")
+	m.SetCaption("测试窗体")    
 
 	lbl := controls.NewLabel(m)
 	lbl.SetCaption("说明 ")
@@ -60,7 +61,12 @@ func main() {
 	tmpitem := pop.Items().AddItem("测试1")
 	citem := tmpitem.AddItem("子测试1")
 	citem.OnClick = func(sender interface{}) {
-		WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+		if AMajor, AMinor, ABuild,ok :=WinApi.GetProductVersion("D:\\DevTools\\Microsoft VS Code\\Code.exe");ok{
+			st := fmt.Sprintf("%d.%d.%d",AMajor,AMinor,ABuild)
+			WinApi.MessageBox(m.GetWindowHandle(),st+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+		}else{
+			WinApi.MessageBox(m.GetWindowHandle(),"菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(),"消息",64)
+		}
 	}
 	citem = pop.Items().AddItem("注册表")
 	citem.OnClick = func(sender interface{}) {
