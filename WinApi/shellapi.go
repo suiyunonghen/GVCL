@@ -82,6 +82,6 @@ func Shell_NotifyIcon(dwMessage uint32, lpData *GNotifyIconData)bool{
 }
 
 func ShellExecute(hwnd syscall.Handle,Operation, FileName, Parameters,Directory uintptr,ShowCmd int)HINST  {
-	ret,_,_ := syscall.Syscall6(fnShell_NotifyIcon,6,uintptr(hwnd),Operation, FileName, Parameters,Directory,uintptr(ShowCmd))
+	ret,_,_ := syscall.Syscall6(fnShellExecuteW,6,uintptr(hwnd),Operation, FileName, Parameters,Directory,uintptr(ShowCmd))
 	return HINST(ret)
 }
