@@ -120,6 +120,10 @@ func (menu *GPopupMenu)PopUp(x,y int32)  {
 	}
 }
 
+func (menu *GPopupMenu)CloseMenu(){
+	WinApi.EndMenu()
+}
+
 func (menu *GPopupMenu)Items()*GMenuItem  {
 	if menu.fItems == nil{
 		menu.fItems = new(GMenuItem)

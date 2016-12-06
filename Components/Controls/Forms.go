@@ -293,6 +293,15 @@ func (app *WApplication) HandleMessage() {
 	}
 }
 
+func (app *WApplication)ProcessMessages()  {
+	msg := new(WinApi.MSG)
+	for{
+		if !app.ProcessMessage(msg) {
+			break
+		}
+	}
+}
+
 func (app *WApplication) ProcessMessage(msg *WinApi.MSG) bool {
 	result := false
 	defer func() {

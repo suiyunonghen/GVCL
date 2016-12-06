@@ -671,7 +671,6 @@ func init() {
 	fnEnableWindow, _ = syscall.GetProcAddress(libuser32, "EnableWindow")
 	fnEndDeferWindowPos, _ = syscall.GetProcAddress(libuser32, "EndDeferWindowPos")
 	fnEndDialog, _ = syscall.GetProcAddress(libuser32, "EndDialog")
-	fnEndMenu, _ = syscall.GetProcAddress(libuser32, "EndMenu")
 	fnEndPaint, _ = syscall.GetProcAddress(libuser32, "EndPaint")
 	fnEnumChildWindows, _ = syscall.GetProcAddress(libuser32, "EnumChildWindows")
 	fnEnumClipboardFormats, _ = syscall.GetProcAddress(libuser32, "EnumClipboardFormats")
@@ -1021,6 +1020,7 @@ func init() {
 	fnTrackMouseEvent, _ = syscall.GetProcAddress(libuser32, "TrackMouseEvent")
 	fnTrackPopupMenu, _ = syscall.GetProcAddress(libuser32, "TrackPopupMenu")
 	fnTrackPopupMenuEx, _ = syscall.GetProcAddress(libuser32, "TrackPopupMenuEx")
+	fnEndMenu,_= syscall.GetProcAddress(libuser32, "EndMenu")
 	fnTranslateAcceleratorW, _ = syscall.GetProcAddress(libuser32, "TranslateAcceleratorW")
 	fnTranslateAcceleratorA, _ = syscall.GetProcAddress(libuser32, "TranslateAcceleratorA")
 	fnTranslateMDISysAccel, _ = syscall.GetProcAddress(libuser32, "TranslateMDISysAccel")
@@ -1796,5 +1796,15 @@ func LoadBitmap(hinstance HINST,lpBitmapName string) HBITMAP {
 
 func GetCursorPos(pt *POINT)bool  {
 	ret,_,_:=syscall.Syscall(fnGetCursorPos,1,uintptr(unsafe.Pointer(pt)),0,0)
+	return ret != 0
+}
+
+func EndMenu()bool  {
+	ret,_,_:=syscall.Syscall(fnEndMenu,0,0,0,0)
+	return ret != 0
+}
+
+func SetForegroundWindow(hWnd syscall.Handle)bool  {
+	ret,_,_:=syscall.Syscall(fnSetForegroundWindow,1,uintptr(hWnd),0,0)
 	return ret != 0
 }

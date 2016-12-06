@@ -35,7 +35,8 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 	if control == nil {
 		return WinApi.DefWindowProc(hwnd, msg, wparam, lparam)
 	}
-	if msg == WinApi.WM_DESTROY{
+	switch msg{
+	case WinApi.WM_DESTROY:
 		control.DestoryWnd()
 		if hwnd == application.fMainForm.fHandle {
 			NVisbleControls.TrayIcons.Destroy()
@@ -43,12 +44,19 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 			WinApi.PostQuitMessage(0)
 		}
 		control.fHandle = 0
-	}else if msg == WinApi.WM_SYSTEM_TRAY_MESSAGE{
-		//托盘消息
+	case WinApi.WM_SYSTEM_TRAY_MESSAGE:
 		if NVisbleControls.TrayIcons != nil{
+			if uint32(lparam) == WinApi.WM_RBUTTONDOWN{ //激活应用程序
+				WinApi.SetForegroundWindow(application.fMainForm.fHandle)
+				application.ProcessMessages()
+			}
 			return NVisbleControls.TrayIcons.WndProc(uint32(lparam),uint32(wparam))
 		}
-	}else if msg == WinApi.WM_CONTEXTMENU{
+	case WinApi.WM_ACTIVATEAPP:
+		if wparam==0{
+			WinApi.EndMenu()
+		}
+	case WinApi.WM_CONTEXTMENU:
 		if control.PopupMenu != nil{
 			pt := new(WinApi.POINT)
 			pt.Y = int32(WinApi.HiWord(uint32(lparam)))
@@ -60,39 +68,41 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 			}
 			control.PopupMenu.PopUp(pt.X,pt.Y)
 		}
-	} else if control.fIsForm{
-		switch msg {
-		case WinApi.WM_CLOSE:
-			if hwnd == application.fMainForm.fHandle {
-				//先释放资源
-				var closeAction int8
-				closeAction = CAFree
-				if application.fMainForm.OnClose!=nil{
-					application.fMainForm.OnClose(application.fForms,&closeAction)
-				}
-				if closeAction == CAFree{
-					for _,frm := range application.fForms{
-						if frm != application.fMainForm{
-							WinApi.DestroyWindow(frm.fHandle)
-						}
+	default:
+		if control.fIsForm{
+			switch msg {
+			case WinApi.WM_CLOSE:
+				if hwnd == application.fMainForm.fHandle {
+					//先释放资源
+					var closeAction int8
+					closeAction = CAFree
+					if application.fMainForm.OnClose!=nil{
+						application.fMainForm.OnClose(application.fForms,&closeAction)
 					}
-					WinApi.DestroyWindow(application.fMainForm.fHandle)
+					if closeAction == CAFree{
+						for _,frm := range application.fForms{
+							if frm != application.fMainForm{
+								WinApi.DestroyWindow(frm.fHandle)
+							}
+						}
+						WinApi.DestroyWindow(application.fMainForm.fHandle)
+					}
 				}
-			}
-		case WinApi.WM_SIZE:
-		case WinApi.WM_COMMAND:
-			if lparam==0{ //点击的是菜单或者快捷加速
-				ctrlId := WinApi.LoWord(uint32(wparam))
-				if WinApi.HiWord(uint32(wparam))==0{ //菜单ID
-					mitem := NVisbleControls.PopList.MenuItemById(ctrlId)
-					mitem.Click()
-				}else{//快捷键ID
-					fmt.Println("快捷键ID",ctrlId)
-				}
-			}else{ //重新换算控件
-				control = (*GWinControl)(unsafe.Pointer(WinApi.GetProp(syscall.Handle(lparam), uintptr(controlAtom))))
-				if control == nil{
-					return
+			case WinApi.WM_SIZE:
+			case WinApi.WM_COMMAND:
+				if lparam==0{ //点击的是菜单或者快捷加速
+					ctrlId := WinApi.LoWord(uint32(wparam))
+					if WinApi.HiWord(uint32(wparam))==0{ //菜单ID
+						mitem := NVisbleControls.PopList.MenuItemById(ctrlId)
+						mitem.Click()
+					}else{//快捷键ID
+						fmt.Println("快捷键ID",ctrlId)
+					}
+				}else{ //重新换算控件
+					control = (*GWinControl)(unsafe.Pointer(WinApi.GetProp(syscall.Handle(lparam), uintptr(controlAtom))))
+					if control == nil{
+						return
+					}
 				}
 			}
 		}
