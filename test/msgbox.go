@@ -95,6 +95,7 @@ func main() {
 		}
 	}
 
+	m.PopupMenu = pop
 
 	e := controls.NewEdit(m)
 	e.SetName("Edit1")
