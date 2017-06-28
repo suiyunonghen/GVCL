@@ -1,9 +1,9 @@
 ﻿package Components
 
 import (
-	"suiyunonghen/GVCL/Graphics"
+	"github.com/suiyunonghen/GVCL/Graphics"
 	"syscall"
-	"suiyunonghen/GVCL/WinApi"
+	"github.com/suiyunonghen/GVCL/WinApi"
 )
 
 type IComponent interface {

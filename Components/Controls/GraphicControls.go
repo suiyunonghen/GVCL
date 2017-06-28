@@ -1,9 +1,9 @@
 package controls
 
 import (
-	"suiyunonghen/GVCL/WinApi"
-	"suiyunonghen/GVCL/Graphics"
-	"suiyunonghen/GVCL/Components"
+	"github.com/suiyunonghen/GVCL/WinApi"
+	"github.com/suiyunonghen/GVCL/Graphics"
+	"github.com/suiyunonghen/GVCL/Components"
 	"reflect"
 )
 

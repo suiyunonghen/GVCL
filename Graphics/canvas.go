@@ -1,6 +1,6 @@
 package Graphics
 import (
-	"suiyunonghen/GVCL/WinApi"
+	"github.com/suiyunonghen/GVCL/WinApi"
 )
 
 type GCanvas struct {

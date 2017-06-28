@@ -1,11 +1,11 @@
 package NVisbleControls
 
 import (
-	"suiyunonghen/GVCL/WinApi"
-	"suiyunonghen/GVCL/Components"
+	"github.com/suiyunonghen/GVCL/WinApi"
+	"github.com/suiyunonghen/GVCL/Components"
 	"unsafe"
 	"syscall"
-	"suiyunonghen/GVCL/Graphics"
+	"github.com/suiyunonghen/GVCL/Graphics"
 )
 
 type GTrayIcon struct {

@@ -1,14 +1,14 @@
 package controls
 
 import (
-	"suiyunonghen/GVCL/Components"
-	"suiyunonghen/GVCL/Graphics"
-	"suiyunonghen/GVCL/WinApi"
+	"github.com/suiyunonghen/GVCL/Components"
+	"github.com/suiyunonghen/GVCL/Graphics"
+	"github.com/suiyunonghen/GVCL/WinApi"
 	"reflect"
 	"syscall"
 	"unsafe"
 	"fmt"
-	"suiyunonghen/GVCL/Components/NVisbleControls"
+	"github.com/suiyunonghen/GVCL/Components/NVisbleControls"
 	"math"
 )
 
@@ -20,6 +20,7 @@ var (
 	Hinstance           WinApi.HINST
 	MessageHandlerMap map[uint32]string
 )
+
 
 func init() {
 	WindowAtomString := fmt.Sprintf("Go%08X", WinApi.GetCurrentProcessId())
@@ -36,14 +37,6 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 		return WinApi.DefWindowProc(hwnd, msg, wparam, lparam)
 	}
 	switch msg{
-	case WinApi.WM_DESTROY:
-		control.DestoryWnd()
-		if hwnd == application.fMainForm.fHandle {
-			NVisbleControls.TrayIcons.Destroy()
-			application.fTerminate = true
-			WinApi.PostQuitMessage(0)
-		}
-		control.fHandle = 0
 	case WinApi.WM_SYSTEM_TRAY_MESSAGE:
 		if NVisbleControls.TrayIcons != nil{
 			if uint32(lparam) == WinApi.WM_RBUTTONDOWN{ //激活应用程序
@@ -125,7 +118,19 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 	}else{
 		TargetObject = control
 	}
-	if result,dispatchNext := TargetObject.(Components.IWincontrol).WndProc(msg,wparam,lparam);!dispatchNext{
+	//执行子控件的窗口过程
+	result,dispatchNext := TargetObject.(Components.IWincontrol).WndProc(msg,wparam,lparam)
+	if msg == WinApi.WM_DESTROY{
+		control.DestoryWnd()
+		if hwnd == application.fMainForm.fHandle {
+			NVisbleControls.TrayIcons.Destroy()
+			application.fTerminate = true
+			WinApi.PostQuitMessage(0)
+			return
+		}
+		control.fHandle = 0
+	}
+	if !dispatchNext{
 		return result
 	}
 
@@ -636,15 +641,7 @@ func (ctrl *GWinControl) CreateWnd() {
 	ctrl.FDefWndProc = params.WindowClass.FnWndProc
 
 	//if exeOk,retv := ctrl.ExecuteChildMethod("CreateWindowHandle",params);exeOk && retv.Bool(){
-	if TargetObject.(Components.IWincontrol).CreateWindowHandle(params){
-		WinApi.SetProp(ctrl.fHandle, uintptr(controlAtom), uintptr(unsafe.Pointer(ctrl)))
-		WinApi.SetProp(ctrl.fHandle, uintptr(windowAtom), uintptr(unsafe.Pointer(ctrl)))
-		if ctrl.fParent!=nil{
-			WinApi.SetWindowPos(ctrl.fHandle, WinApi.HWND_TOP, 0, 0, 0, 0,
-				WinApi.SWP_NOMOVE + WinApi.SWP_NOSIZE + WinApi.SWP_NOACTIVATE)
-		}
-		ctrl.Perform(WinApi.WM_SETFONT, uintptr(ctrl.Font.FontHandle), 1)
-	}else{
+	if !TargetObject.(Components.IWincontrol).CreateWindowHandle(params){
 		panic("Create Handle Failed")
 	}
 }
@@ -761,6 +758,13 @@ func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool
 				ctrl.FDefWndProc = uintptr(WinApi.SetWindowLong(ctrl.fHandle,WinApi.GWL_WNDPROC,int(InitWndprocCallBack)))
 			}
 		}
+		WinApi.SetProp(ctrl.fHandle, uintptr(controlAtom), uintptr(unsafe.Pointer(ctrl)))
+		WinApi.SetProp(ctrl.fHandle, uintptr(windowAtom), uintptr(unsafe.Pointer(ctrl)))
+		if ctrl.fParent!=nil{
+			WinApi.SetWindowPos(ctrl.fHandle, WinApi.HWND_TOP, 0, 0, 0, 0,
+				WinApi.SWP_NOMOVE + WinApi.SWP_NOSIZE + WinApi.SWP_NOACTIVATE)
+		}
+		ctrl.Perform(WinApi.WM_SETFONT, uintptr(ctrl.Font.FontHandle), 1)
 		return result
 	}
 	tmpWndClass := new(WinApi.GWndClass)
@@ -793,7 +797,17 @@ func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool
 		}
 		NVisbleControls.TrayIcons.SetIconWndProcHandle(ctrl.fHandle,application.AppIcon())
 	}
-	return ctrl.fHandle !=0
+	if ctrl.fHandle!=0{
+		WinApi.SetProp(ctrl.fHandle, uintptr(controlAtom), uintptr(unsafe.Pointer(ctrl)))
+		WinApi.SetProp(ctrl.fHandle, uintptr(windowAtom), uintptr(unsafe.Pointer(ctrl)))
+		if ctrl.fParent!=nil{
+			WinApi.SetWindowPos(ctrl.fHandle, WinApi.HWND_TOP, 0, 0, 0, 0,
+				WinApi.SWP_NOMOVE + WinApi.SWP_NOSIZE + WinApi.SWP_NOACTIVATE)
+		}
+		ctrl.Perform(WinApi.WM_SETFONT, uintptr(ctrl.Font.FontHandle), 1)
+		return true
+	}
+	return false
 }
 
 func (ctrl *GWinControl) UpdateShowing() {
