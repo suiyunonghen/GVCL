@@ -11,8 +11,7 @@ import (
 	"github.com/suiyunonghen/GVCL/Components/Controls"
 	"reflect"
 	"syscall"
-	"runtime"
-	_"github.com/suiyunonghen/GVCL/Graphics"
+	"github.com/suiyunonghen/GVCL/Graphics"
 )
 
 
@@ -21,17 +20,16 @@ type (
 	scintillaLib struct {
 		fHandle			syscall.Handle
 		fDirectFunction uintptr			//导出的窗口函数
-		ref				*struct{}
 	}
 	GCodeLines struct {
-		flines []string 		//保存代码的
-		fowner *GScintilla		//所属的代码编辑器
+		fCodeEditor *GScintilla		//所属的代码编辑器
 	}
 	GScintilla struct {
 		controls.GWinControl
-		fCodeLines	GCodeLines
-		fDirectFunction uintptr
-		fDirectPointer	uintptr
+		fDirectFunction 			uintptr
+		fDirectPointer				uintptr
+		CodeLines					GCodeLines
+		defFont						*GDxLexerFont
 	}
 )
 
@@ -39,18 +37,36 @@ var(
 	scintillaHandle		*scintillaLib
 )
 
+func (lines *GCodeLines)Clear()  {
+	if lines.fCodeEditor != nil{
+		lines.fCodeEditor.SendEditor(SCI_CLEARALL,0,0)
+		/*if lines.fCodeEditor.FLanguageLexer != nil{
+			lines.fCodeEditor.FLanguageLexer.ClearApiItems(False);
+		}*/
+	}
+}
+
 
 func (Scintilla *GScintilla) SubInit() {
 	Scintilla.GWinControl.SubInit()
 	Scintilla.GComponent.SubInit(Scintilla)
 }
 
+func (Scintilla *GScintilla) SetColor(c Graphics.GColorValue) {
+	if Scintilla.GetColor() != c {
+		Scintilla.GBaseControl.SetColor(c)
+		Scintilla.SendEditor(SCI_STYLESETBACK,32,int(c)); //设置编辑区窗口背景色
+	}
+}
 func (Scintilla *GScintilla) CreateParams(params *Components.GCreateParams) {
 	Scintilla.GWinControl.CreateParams(params)
 	Scintilla.InitSubclassParams(params, "SCINTILLA")
 }
 
 func (Scintilla *GScintilla)SendEditor(AMessage,WParam,LParam int)  {
+	if !Scintilla.HandleAllocated(){
+		return
+	}
 	if Scintilla.fDirectFunction != 0{
 		syscall.Syscall6(Scintilla.fDirectFunction,4,Scintilla.fDirectPointer,uintptr(AMessage),uintptr(WParam),uintptr(LParam),0,0)
 	}else{
@@ -64,6 +80,9 @@ func (Scintilla *GScintilla) initScintilla()  {
 	//设定Utf8编码
 	Scintilla.SendEditor(SCI_SETKEYSUNICODE, 1, 0)
 	Scintilla.SendEditor(SCI_SETCODEPAGE, SC_CP_UTF8, 0)
+
+	Scintilla.SendEditor(SCI_STYLESETBACK,32,int(Scintilla.GetColor())); //设置编辑区窗口背景色
+	Scintilla.defFont.InitLexFont()
 }
 
 func (Scintilla *GScintilla) CreateWindowHandle(params *Components.GCreateParams)bool{
@@ -92,6 +111,9 @@ func (Scintilla *GScintilla) WndProc(msg uint32, wparam, lparam uintptr) (result
 
 
 func NewScintillaEditor(aParent Components.IWincontrol) *GScintilla {
+	if scintillaHandle.fHandle == 0{
+		return nil
+	}
 	pType := reflect.TypeOf(aParent)
 	hasWincontrol := false
 	if pType.Kind() == reflect.Ptr {
@@ -104,24 +126,22 @@ func NewScintillaEditor(aParent Components.IWincontrol) *GScintilla {
 		Scintilla.SetWidth(200)
 		Scintilla.SetVisible(true)
 		Scintilla.SetHeight(300)
+		Scintilla.defFont = NewLexerFont(nil,0,0)
+		Scintilla.defFont.fEditor = Scintilla
 		return Scintilla
 	}
 	return nil
 }
 
-func freeScintillaHandle(){
+/*func freeScintillaHandle(){
 	syscall.FreeLibrary(scintillaHandle.fHandle)
-}
+}*/
 
 //初始化这个动态库
 func init()  {
 	scintillaHandle = new(scintillaLib)
-	scintillaHandle.ref = &struct {}{}
-	if WinApi.IsAMD64(){
-		scintillaHandle.fHandle,_ = syscall.LoadLibrary("c:\\SciLexerX64.dll")
-	}else{
-		scintillaHandle.fHandle,_ = syscall.LoadLibrary("c:\\SciLexer.dll")
+	if scintillaHandle.fHandle,_ = syscall.LoadLibrary("SciLexer.dll");scintillaHandle.fHandle!=0{
+		scintillaHandle.fDirectFunction, _ = syscall.GetProcAddress(scintillaHandle.fHandle, "Scintilla_DirectFunction")
+		//runtime.SetFinalizer(scintillaHandle.ref,freeScintillaHandle)
 	}
-	scintillaHandle.fDirectFunction, _ = syscall.GetProcAddress(scintillaHandle.fHandle, "Scintilla_DirectFunction")
-	runtime.SetFinalizer(scintillaHandle.ref,freeScintillaHandle)
 }

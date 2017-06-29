@@ -422,6 +422,10 @@ func (ctrl *GWinControl) SubInit() {
 	ctrl.GComponent.SubInit(ctrl)
 }
 
+func (ctrl *GWinControl) HandleAllocated()bool{
+	return ctrl.fHandle!=0
+}
+
 func (ctrl *GWinControl)Perform(msg uint32,wparam, lparam uintptr)(result WinApi.LRESULT)  {
 	if ctrl.fHandle != 0{
 		return WinApi.LRESULT(initWndProc(ctrl.fHandle,msg,wparam,lparam))

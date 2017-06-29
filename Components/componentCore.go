@@ -78,6 +78,7 @@ type IWincontrol interface {
 	PaintWindow(dc WinApi.HDC)int32
 	CreateWindowHandle(params *GCreateParams)bool
 	PaintBack(dc WinApi.HDC)int32
+	HandleAllocated()bool
 }
 
 
@@ -114,5 +115,4 @@ func (cmp *GComponent) GetTag() int {
 func (cmp *GComponent) SetTag(fdata int) {
 	cmp.ftag = fdata
 }
-
 

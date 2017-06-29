@@ -32,6 +32,7 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 	frm.Button1.SetCaption("确定关闭")
 
 	frm.Edit1 = Scintilla.NewScintillaEditor(frm)
+	frm.Edit1.SetColor(Graphics.RGB(184,220,220))
 	frm.OnClose = func(sender interface{}, closeAction *int8) {
 		*closeAction = controls.CAFree
 	}

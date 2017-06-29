@@ -4,6 +4,7 @@ import (
 	"unsafe"
 	"github.com/suiyunonghen/GVCL/WinApi"
 	"syscall"
+	"github.com/suiyunonghen/Common"
 	"fmt"
 )
 
@@ -140,13 +141,13 @@ func init()  {
 	EmptyPen = WinApi.HPEN(WinApi.GetStockObject(WinApi.NULL_PEN))
 }
 
-func RGB(R, G, B byte) (ret GColorValue) {
-	ret = 0
-	gcolor := Uint32ToGColor(uint32(ret))
+func RGB(R, G, B byte) (GColorValue) {
+	var ret uint32
+	gcolor := Uint32ToGColor(&ret)
 	gcolor.R = R
 	gcolor.G = G
 	gcolor.B = B
-	return
+	return GColorValue(ret)
 }
 
 func (c *GColor) GColor2Uint32() uint32 {
@@ -157,8 +158,8 @@ func (c *GColor) GColor2ColorValue() GColorValue {
 	return GColorValue(*(*uint32)(unsafe.Pointer(c)))
 }
 
-func Uint32ToGColor(ClValue uint32) *GColor {
-	return (*GColor)(unsafe.Pointer(&ClValue))
+func Uint32ToGColor(ClValue *uint32) *GColor {
+	return (*GColor)(unsafe.Pointer(ClValue))
 }
 
 var(
@@ -281,6 +282,86 @@ func (BrushMng *gGDIManager)AllocBrushData(brushData *gBrushData)  {
 			BrushMng.createBrushData(brushData)
 		}
 	}
+}
+
+type GFontStyles byte
+
+func (fstyle GFontStyles)StyleInfo()(bold,italic,underline,strikeout bool)  {
+	bold = fstyle & 1 == 1
+	italic = fstyle & 2 == 2
+	underline = fstyle & 4 == 4
+	strikeout = fstyle & 8 == 8
+	return
+}
+
+func (fstyle GFontStyles)Bold()bool  {
+	return fstyle & 1 == 1
+}
+
+func (fstyle GFontStyles)Italic()bool{
+	return fstyle & 2 == 2
+}
+
+func (fstyle GFontStyles)Underline()bool{
+	return fstyle & 4 == 4
+}
+
+func (fstyle GFontStyles)StrikeOut()bool{
+	return fstyle & 8 == 8
+}
+
+func (fstyle *GFontStyles)SetBold(b bool)  {
+	v := int(*fstyle)
+	if b{
+		*fstyle = GFontStyles(v | 1)
+	}else{
+		*fstyle = GFontStyles(v & 0x0E)
+	}
+}
+
+func (fstyle *GFontStyles)SetItalic(b bool)  {
+	v := int(*fstyle)
+	if b{
+		*fstyle = GFontStyles(v | 2)
+	}else{
+		*fstyle = GFontStyles(v  & 0x0D)
+	}
+
+}
+
+func (fstyle *GFontStyles)SetUnderline(b bool)  {
+	v := int(*fstyle)
+	if b{
+		*fstyle = GFontStyles(v | 4)
+	}else{
+		*fstyle = GFontStyles(v & 0x0B)
+	}
+}
+
+func (fstyle *GFontStyles)SetStrikeOut(b bool)  {
+	v := int(*fstyle)
+	if b{
+		*fstyle = GFontStyles(v | 8)
+	}else{
+		*fstyle = GFontStyles(v & 7)
+	}
+}
+
+func NewFontStyle(bold,italic,underline,StrikeOut bool)(fstyle GFontStyles){
+	fstyle = 0
+	if bold{
+		fstyle = fstyle | 1
+	}
+	if italic{
+		fstyle = fstyle | 2
+	}
+	if underline{
+		fstyle = fstyle | 4
+	}
+	if StrikeOut{
+		fstyle = fstyle | 8
+	}
+	return fstyle
 }
 
 type gFontData struct{
@@ -565,6 +646,37 @@ func (fnt *GFont)Assign(newfnd *GFont)  {
 	fnt.Italic = newfnd.Italic
 	fnt.StrikeOut = newfnd.StrikeOut
 	fnt.Underline = newfnd.Underline
+}
+
+func (fnt *GFont)FontStyle()(fstyle GFontStyles)  {
+	fstyle = 0
+	if fnt.Weight == WinApi.FW_BOLD{
+		fstyle = fstyle | 1
+	}
+	if fnt.Italic > 0{
+		fstyle = fstyle | 2
+	}
+	if fnt.Underline > 0{
+		fstyle = fstyle | 4
+	}
+	if fnt.StrikeOut > 0{
+		fstyle = fstyle | 8
+	}
+	return fstyle
+}
+
+func (fnt *GFont)SetFontStyle(fstyle GFontStyles)  {
+	fnt.BeginUpdate()
+	bold,italic,underline,strikeout := fstyle.StyleInfo()
+	if bold{
+		fnt.Weight = WinApi.FW_BOLD
+	}else{
+		fnt.Weight = WinApi.FW_NORMAL
+	}
+	fnt.Italic = Common.Ord(italic)
+	fnt.Underline = Common.Ord(underline)
+	fnt.StrikeOut = Common.Ord(strikeout)
+	fnt.EndUpdate()
 }
 
 func (pen *GPen)Assign(newpen *GPen)  {
