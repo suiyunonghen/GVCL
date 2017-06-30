@@ -8,7 +8,7 @@ package Scintilla
 import (
 	"github.com/suiyunonghen/GVCL/Graphics"
 	"github.com/suiyunonghen/GVCL/WinApi"
-	"github.com/suiyunonghen/Common"
+	"github.com/suiyunonghen/DxCommonLib"
 	"unsafe"
 )
 
@@ -56,7 +56,7 @@ func (lexerFont *GDxLexerFont)InitLexFont()  {
 		}
 		if lexerFont.fName != ""{
 			//需要先转换为GBK
-			b,_ = Common.GBKString(lexerFont.fName)
+			b,_ = DxCommonLib.GBKString(lexerFont.fName)
 			b = append(b,0)
 			editor.SendEditor(SCI_STYLESETFONT,lexerFont.fStyleNum,int(uintptr(unsafe.Pointer(&b[0]))))
 		}
@@ -69,9 +69,9 @@ func (lexerFont *GDxLexerFont)InitLexFont()  {
 		}else{
 			editor.SendEditor(SCI_STYLESETBACK,lexerFont.fStyleNum,int(lexerFont.fBackColor))
 		}
-		editor.SendEditor(SCI_STYLESETBOLD,lexerFont.fStyleNum,int(Common.Ord(lexerFont.fStyle.Bold())))
-		editor.SendEditor(SCI_STYLESETITALIC,lexerFont.fStyleNum,int(Common.Ord(lexerFont.fStyle.Italic())))
-		editor.SendEditor(SCI_STYLESETUNDERLINE,lexerFont.fStyleNum,int(Common.Ord(lexerFont.fStyle.Underline())))
+		editor.SendEditor(SCI_STYLESETBOLD,lexerFont.fStyleNum,int(DxCommonLib.Ord(lexerFont.fStyle.Bold())))
+		editor.SendEditor(SCI_STYLESETITALIC,lexerFont.fStyleNum,int(DxCommonLib.Ord(lexerFont.fStyle.Italic())))
+		editor.SendEditor(SCI_STYLESETUNDERLINE,lexerFont.fStyleNum,int(DxCommonLib.Ord(lexerFont.fStyle.Underline())))
 		editor.SendEditor(SCI_STYLESETCHARACTERSET,lexerFont.fStyleNum,int(lexerFont.fCharset))
 	}
 }

@@ -13,6 +13,7 @@ import (
 	_ "github.com/suiyunonghen/GVCL/WinApi"
 	_ "reflect"
 	_ "time"
+	"github.com/suiyunonghen/DxCommonLib"
 )
 
 type GForm1 struct {
@@ -37,13 +38,25 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 		*closeAction = controls.CAFree
 	}
 	frm.Button1.OnClick = func(sender interface{}) {
-		WinApi.MessageBox(frm.GetWindowHandle(), "sadf", "Asdf", 64)
-		frm.SetModalResult(controls.MrOK)
+		str := frm.Edit1.CodeLines.Strings(0)
+		WinApi.MessageBox(frm.GetWindowHandle(),"测试",str , 64)
+		frm.Edit1.CodeLines.SetStrings(0,"不得闲测试")
 	}
 	return frm
 }
 
 func main() {
+	lst := DxCommonLib.GStringList{}
+	lst.LineBreak = "\r\n"
+	lst.LoadFromFile("I:\\平面类资料\\test.txt")
+	lst.Add("不得闲测试内容")
+	lst.Add("不得闲测试内容")
+	lst.Add("不得闲测试内容")
+	lst.Add("不得闲测试内容")
+	lst.Add("不得闲测试内容啊手动阀手动阀")
+	lst.Insert(2,"插入的内容")
+	fmt.Println(lst.Strings(0))
+	lst.SaveToFile("I:\\平面类资料\\test.txt")
 	app := controls.NewApplication()
 	m := app.CreateForm()
 	m.SetLeft(200)

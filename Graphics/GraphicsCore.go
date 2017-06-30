@@ -4,7 +4,7 @@ import (
 	"unsafe"
 	"github.com/suiyunonghen/GVCL/WinApi"
 	"syscall"
-	"github.com/suiyunonghen/Common"
+	"github.com/suiyunonghen/DxCommonLib"
 	"fmt"
 )
 
@@ -673,9 +673,9 @@ func (fnt *GFont)SetFontStyle(fstyle GFontStyles)  {
 	}else{
 		fnt.Weight = WinApi.FW_NORMAL
 	}
-	fnt.Italic = Common.Ord(italic)
-	fnt.Underline = Common.Ord(underline)
-	fnt.StrikeOut = Common.Ord(strikeout)
+	fnt.Italic = DxCommonLib.Ord(italic)
+	fnt.Underline = DxCommonLib.Ord(underline)
+	fnt.StrikeOut = DxCommonLib.Ord(strikeout)
 	fnt.EndUpdate()
 }
 

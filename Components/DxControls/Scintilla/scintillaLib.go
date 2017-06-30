@@ -1,5 +1,31 @@
 package Scintilla
 
+type(
+	GSciChar = byte
+	GSciPositionCR = int32
+
+	GSci_CharacterRange struct {
+		cpMin			GSciPositionCR
+		cpMax			GSciPositionCR
+	}
+
+	GSci_TextRange struct {
+		chrg			GSci_CharacterRange
+		lpstrText		*byte
+	}
+
+	GSciStyle byte
+	GSciCell	struct {
+		charByte		GSciChar
+		styleByte		GSciStyle
+	}
+
+	GSci_TextToFind struct {
+		chrg			GSci_CharacterRange		//搜索的区域
+		lpstrText		*byte					//搜索的内容,0结尾
+		chrgText		GSci_CharacterRange		//返回匹配到的字符的区域
+	}
+)
 
 const(
 	INVALID_POSITION = -1
@@ -1210,3 +1236,4 @@ const(
 	SC_MOD_CHANGETABSTOPS = 0x200000
 	SC_MODEVENTMASKALL = 0x3FFFFF
 )
+
