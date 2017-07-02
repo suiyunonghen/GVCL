@@ -29,18 +29,22 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 	frm.Button1 = controls.NewButton(frm)
 	frm.Button1.SetWidth(80)
 	frm.Button1.SetHeight(30)
-	frm.Button1.SetLeft(frm.Width() - 90)
-	frm.Button1.SetTop(frm.Height() - 80)
 	frm.Button1.SetCaption("确定关闭")
 
 	frm.Edit1 = Scintilla.NewScintillaEditor(frm)
 	frm.Edit1.SetColor(Graphics.RGB(184,220,220))
 
 	frm.Edit1.CodeLines.LineBreak = DxCommonLib.LBK_CRLF
-	frm.Edit1.CodeLines.LoadFromFile("I:\\平面类资料\\资料网.txt")
+	frm.Edit1.CodeLines.LoadFromFile("J:\\GoLibrary\\src\\github.com\\suiyunonghen\\GVCL\\Components\\componentCore.go")
 
 	frm.OnClose = func(sender interface{}, closeAction *int8) {
 		*closeAction = controls.CAFree
+	}
+	frm.OnResize = func(sender interface{}) {
+		frm.Button1.SetLeft(frm.Width() - 90)
+		frm.Button1.SetTop(frm.Height() - 80)
+		frm.Edit1.SetWidth(frm.Width())
+		frm.Edit1.SetHeight(frm.Height()-80)
 	}
 	frm.Button1.OnClick = func(sender interface{}) {
 		str := frm.Edit1.CodeLines.Strings(0)

@@ -929,6 +929,9 @@ func (ctrl *GWinControl) WndProc(msg uint32, wparam, lparam uintptr) (result uin
 		ctrl.ftop = rect.Top
 		ctrl.fwidth = rect.Width()
 		ctrl.fheight = rect.Height()
+		if ctrl.OnResize != nil{
+			ctrl.OnResize(ctrl)
+		}
 		msgDispatchNext = false
 	}
 	return
