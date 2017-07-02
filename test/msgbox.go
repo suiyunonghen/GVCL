@@ -13,6 +13,7 @@ import (
 	_ "github.com/suiyunonghen/GVCL/WinApi"
 	_ "reflect"
 	_ "time"
+	_"github.com/suiyunonghen/DxCommonLib"
 	"github.com/suiyunonghen/DxCommonLib"
 )
 
@@ -34,6 +35,10 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 
 	frm.Edit1 = Scintilla.NewScintillaEditor(frm)
 	frm.Edit1.SetColor(Graphics.RGB(184,220,220))
+
+	frm.Edit1.CodeLines.LineBreak = DxCommonLib.LBK_CRLF
+	frm.Edit1.CodeLines.LoadFromFile("I:\\平面类资料\\资料网.txt")
+
 	frm.OnClose = func(sender interface{}, closeAction *int8) {
 		*closeAction = controls.CAFree
 	}
@@ -46,7 +51,7 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 }
 
 func main() {
-	lst := DxCommonLib.GStringList{}
+	/*lst := DxCommonLib.GStringList{}
 	lst.LineBreak = "\r\n"
 	lst.LoadFromFile("I:\\平面类资料\\test.txt")
 	lst.Add("不得闲测试内容")
@@ -56,7 +61,7 @@ func main() {
 	lst.Add("不得闲测试内容啊手动阀手动阀")
 	lst.Insert(2,"插入的内容")
 	fmt.Println(lst.Strings(0))
-	lst.SaveToFile("I:\\平面类资料\\test.txt")
+	lst.SaveToFile("I:\\平面类资料\\test.txt")*/
 	app := controls.NewApplication()
 	m := app.CreateForm()
 	m.SetLeft(200)

@@ -335,3 +335,11 @@ func PChar(str string)*uint16  {
 func PCharUintptr(str string)uintptr  {
 	return uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(str)))
 }
+
+type tagNMHDR struct{
+	HwndFrom		syscall.Handle
+	IdFrom			uintptr
+	NMCode			int
+}
+
+type GNMHDR tagNMHDR

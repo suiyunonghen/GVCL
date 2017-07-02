@@ -1,5 +1,8 @@
 package Scintilla
 
+import(
+	"github.com/suiyunonghen/GVCL/WinApi"
+)
 type(
 	GSciChar = byte
 	GSciPositionCR = int32
@@ -24,6 +27,38 @@ type(
 		chrg			GSci_CharacterRange		//搜索的区域
 		lpstrText		*byte					//搜索的内容,0结尾
 		chrgText		GSci_CharacterRange		//返回匹配到的字符的区域
+	}
+
+	GSCNotification struct {
+		NotifyHeader			WinApi.GNMHDR
+		// SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_MARGINCLICK,
+		// SCN_NEEDSHOWN, SCN_DWELLSTART, SCN_DWELLEND, SCN_CALLTIPCLICK,
+		// SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK,
+		// SCN_INDICATORCLICK, SCN_INDICATORRELEASE,
+		// SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
+		Position				int
+		Char					int						//SCN_CHARADDED, SCN_KEY
+
+		// SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK,
+		// SCN_HOTSPOTRELEASECLICK, SCN_INDICATORCLICK, SCN_INDICATORRELEASE,
+		Modifiers				int
+		ModificationType		int						// SCN_MODIFIED
+		Text				 	*byte					// SCN_MODIFIED
+		Length					int						// SCN_MODIFIED
+		LinesAdded				int						// SCN_MODIFIED
+		Message					int						// SCN_MACRORECORD
+		WParam					uint32					// SCN_MACRORECORD
+		LParam					int32					// SCN_MACRORECORD
+		Line					int						// SCN_MODIFIED
+		FoldLevelNow			int						// SCN_MODIFIED
+		FoldLevelPrev			int						// SCN_MODIFIED
+		Margin					int						// SCN_MARGINCLICK
+		ListType				int						// SCN_USERLISTSELECTION
+		X						int						// SCN_DWELLSTART, SCN_DWELLEND
+		Y						int                     // SCN_DWELLSTART, SCN_DWELLEND
+		Token					int						// SCN_MODIFIED with SC_MOD_CONTAINER
+		AnnotationLinesAdded	int						// SCN_MODIFIED with SC_MOD_CHANGEANNOTATION
+		Updated					int						// SCN_UPDATEUI
 	}
 )
 

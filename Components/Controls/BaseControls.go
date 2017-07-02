@@ -97,6 +97,12 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 						return
 					}
 				}
+			case WinApi.WM_NOTIFY: //需要转换通知
+				NMHdr := (*WinApi.GNMHDR)(unsafe.Pointer(lparam))
+				cpoint := WinApi.GetProp(syscall.Handle(NMHdr.HwndFrom), uintptr(controlAtom))
+				if cpoint != 0{
+					control = (*GWinControl)(unsafe.Pointer(cpoint)) //获取转换的真实控件
+				}
 			}
 		}
 	}
