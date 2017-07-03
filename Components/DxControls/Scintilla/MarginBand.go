@@ -33,6 +33,10 @@ type (
 		OnRightClick				GMarginClick	//右键单击
 		fupcount					int
 		TextMarginWidth				int				//文字边宽度
+		BookMarkBack				Graphics.GColorValue
+		BookMarkFont				Graphics.GFont
+		fBookMarkStyle				int				//书签的文字样式，默认指定254
+		LineNumFont					Graphics.GFont
 	}
 )
 
@@ -46,6 +50,64 @@ func (band *GDxMarginBand)EndUpdate()  {
 		band.fupcount=0
 		band.Update()
 	}
+}
+
+func (band *GDxMarginBand)ClearMarks()  {
+	if band.fcodeEditor == nil || !band.fcodeEditor.HandleAllocated(){
+		return
+	}
+	band.fcodeEditor.SendEditor(SCI_MARKERDELETEALL,-1,0)
+	band.fcodeEditor.SendEditor(SCI_MARGINTEXTCLEARALL,0,0) //清空所有标记
+	for i := 0;i<10;i++{
+		band.fBookmarks[i] = -1
+	}
+}
+
+func (band *GDxMarginBand)GotoBookmark(bkindex int)  {
+	if band.fcodeEditor == nil || !band.fcodeEditor.HandleAllocated(){
+		return
+	}
+	band.fcodeEditor.GoToLine(band.fBookmarks[bkindex])
+}
+
+func (band *GDxMarginBand)UpdateBookMark()  {
+	//指定书签的显示样式
+	if band.ShowBookMark{
+		bold,italic,underline,_ := band.BookMarkFont.FontStyle().StyleInfo()
+		b := ([]byte)(band.BookMarkFont.FontName)
+		b = append(b,0)
+		band.fcodeEditor.SendEditor(SCI_STYLESETFONT,band.fBookMarkStyle,int(uintptr(unsafe.Pointer(&b[0]))))
+		band.fcodeEditor.SendEditor(SCI_STYLESETITALIC,band.fBookMarkStyle,int(DxCommonLib.Ord(italic)))
+		band.fcodeEditor.SendEditor(SCI_STYLESETBOLD,band.fBookMarkStyle,int(DxCommonLib.Ord(bold)))
+		band.fcodeEditor.SendEditor(SCI_STYLESETUNDERLINE,band.fBookMarkStyle,int(DxCommonLib.Ord(underline)))
+		band.fcodeEditor.SendEditor(SCI_STYLESETFORE,band.fBookMarkStyle,int(band.BookMarkFont.Color))
+		band.fcodeEditor.SendEditor(SCI_STYLESETBACK,band.fBookMarkStyle,int(band.BookMarkBack))
+	}
+	if band.ShowLineNum{
+		bold,italic,underline,_ := band.LineNumFont.FontStyle().StyleInfo()
+		b := ([]byte)(band.LineNumFont.FontName)
+		b = append(b,0)
+
+		band.fcodeEditor.SendEditor(SCI_STYLESETFONT,STYLE_LINENUMBER,int(uintptr(unsafe.Pointer(&b[0]))))
+		band.fcodeEditor.SendEditor(SCI_STYLESETITALIC,STYLE_LINENUMBER,int(DxCommonLib.Ord(italic)))
+		band.fcodeEditor.SendEditor(SCI_STYLESETBOLD,STYLE_LINENUMBER,int(DxCommonLib.Ord(bold)))
+		band.fcodeEditor.SendEditor(SCI_STYLESETUNDERLINE,STYLE_LINENUMBER,int(DxCommonLib.Ord(underline)))
+		band.fcodeEditor.SendEditor(SCI_STYLESETFORE,STYLE_LINENUMBER,int(band.LineNumFont.Color))
+		//band.fcodeEditor.SendEditor(SCI_STYLESETBACK,STYLE_LINENUMBER,int(band.BookMarkBack))
+	}
+}
+
+func (band *GDxMarginBand)SetBookmark(bkindex int)  {
+	if band.fcodeEditor == nil || !band.fcodeEditor.HandleAllocated(){
+		return
+	}
+	if band.fBookmarks[bkindex] != -1{
+		band.fcodeEditor.SendEditor(SCI_MARGINSETTEXT,band.fBookmarks[bkindex],0)
+	}
+	bt := DxCommonLib.FastString2Byte(fmt.Sprintf("%d",bkindex))
+	band.fcodeEditor.SendEditor(SCI_MARGINSETTEXT,band.fcodeEditor.CaretPos.Line,int(uintptr(unsafe.Pointer(&bt[0]))))
+	band.fcodeEditor.SendEditor(SCI_MARGINSETSTYLE,band.fcodeEditor.CaretPos.Line,band.fBookMarkStyle) //设置书签样式
+	band.fBookmarks[bkindex] = band.fcodeEditor.CaretPos.Line
 }
 
 func (band *GDxMarginBand)Update()  {
@@ -99,7 +161,9 @@ func (band *GDxMarginBand)Update()  {
 		//这个是0-9位显示，其他的不显示,$03FF设定显示掩码
 		band.fcodeEditor.SendEditor(SCI_SETMARGINMASKN, int(band.fBookmarkIndex), 0x3FF)
 		band.fcodeEditor.SendEditor(SCI_SETMARGINSENSITIVEN,int(band.fBookmarkIndex),1); //接受鼠标点击
-		band.fcodeEditor.SendEditor(SCI_SETMARGINCURSORN,int(band.fBookmarkIndex), SC_CURSORARROW);
+		band.fcodeEditor.SendEditor(SCI_SETMARGINCURSORN,int(band.fBookmarkIndex), SC_CURSORARROW)
+
+		band.UpdateBookMark()
 	}
 
 	if band.TextMargin{
@@ -178,13 +242,18 @@ func (band *GDxMarginBand)BandClick(pos,MarginIndex,modifiers int)  {
 			CurBookmark,ValidBkIndex := band.FindValidBookmark(lineNumber)
 			if CurBookmark == -1{
 				//没有书签，加入书签
+				if ValidBkIndex == -1{
+					//然后将0位置的标签去掉
+					band.fcodeEditor.SendEditor(SCI_MARGINSETTEXT,band.fBookmarks[0],0)
+					ValidBkIndex = 0
+				}
 				bt = DxCommonLib.FastString2Byte(fmt.Sprintf("%d",ValidBkIndex))
 				band.fcodeEditor.SendEditor(SCI_MARGINSETTEXT,lineNumber,int(uintptr(unsafe.Pointer(&bt[0]))))
+				band.fcodeEditor.SendEditor(SCI_MARGINSETSTYLE,lineNumber,band.fBookMarkStyle) //设置书签样式
 				band.fBookmarks[ValidBkIndex] = lineNumber
-				//band.fBookmarks[ValidBkIndex] = band.fcodeEditor.SendEditor(SCI_MARKERADD,lineNumber,ValidBkIndex)
 			}else{
 				//移除书签
-				band.fcodeEditor.SendEditor(SCI_MARGINSETTEXT,lineNumber,int(uintptr(unsafe.Pointer(&cDSciNull))))
+				band.fcodeEditor.SendEditor(SCI_MARGINSETTEXT,lineNumber,0)
 				band.fBookmarks[CurBookmark] = -1
 			}
 		}
@@ -198,5 +267,17 @@ func newMarginBand(codeEditor *GScintilla)*GDxMarginBand  {
 	result.ShowBookMark = true
 	result.Color = Graphics.ClBtnFace
 	result.fcodeEditor = codeEditor
+	result.fBookMarkStyle = STYLE_MAX - 1
+	result.BookMarkFont.Color = Graphics.RGB(43,43,43)
+	result.BookMarkBack = Graphics.RGB(169,183,198)
+	result.BookMarkFont.FontName = "宋体"
+	result.BookMarkFont.SetSize(9)
+	result.BookMarkFont.SetBold(true)
+
+	result.LineNumFont.Color = Graphics.RGB(43,43,43)
+	result.LineNumFont.FontName = "宋体"
+	result.LineNumFont.SetSize(9)
+	result.LineNumFont.Color = Graphics.ClRed
+	result.LineNumFont.SetBold(false)
 	return result
 }

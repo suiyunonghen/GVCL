@@ -360,6 +360,77 @@ func (Scintilla *GScintilla) CreateWindowHandle(params *Components.GCreateParams
    }
 	return false
 }
+
+func (Scintilla *GScintilla)Clear()  {
+	Scintilla.CodeLines.Clear()
+	Scintilla.MarginBand.ClearMarks()
+}
+
+func (Scintilla *GScintilla)ClearSelection()  {
+	Scintilla.SendEditor(SCI_CLEAR,0,0)
+}
+
+func (Scintilla *GScintilla)ClearUndo()  {
+	Scintilla.SendEditor(SCI_EMPTYUNDOBUFFER,0,0)
+}
+
+func (Scintilla *GScintilla)CopyToClipboard()  {
+	Scintilla.SendEditor(SCI_COPY,0,0)
+}
+
+func (Scintilla *GScintilla)CutToClipboard()  {
+	Scintilla.SendEditor(SCI_CUT,0,0)
+}
+
+func (Scintilla *GScintilla)Undo()  {
+	Scintilla.SendEditor(SCI_UNDO,0,0)
+}
+
+func (Scintilla *GScintilla)Redo()  {
+	Scintilla.SendEditor(SCI_REDO,0,0)
+}
+
+func (Scintilla *GScintilla)SelectAll()  {
+	Scintilla.SendEditor(SCI_SELECTALL,0,0)
+}
+
+func (Scintilla *GScintilla)CanUndo()bool  {
+	return Scintilla.SendEditor(SCI_CANUNDO,0,0)==1
+}
+
+
+func (Scintilla *GScintilla)CanRedo()bool  {
+	return Scintilla.SendEditor(SCI_CANREDO,0,0) == 1
+}
+
+func (Scintilla *GScintilla)GoToLine(line int)  {
+	Scintilla.SendEditor(SCI_GOTOLINE,line,0)
+}
+
+func (Scintilla *GScintilla)GoToPos(pos int)  {
+	Scintilla.SendEditor(SCI_GOTOPOS,pos,0)
+}
+
+func (Scintilla *GScintilla)GoToCaretPos(ACaretPos GCaretPos)  {
+	imax := Scintilla.CodeLines.Count() - 1
+	if ACaretPos.Line > imax{
+		ACaretPos.Line = imax
+	}
+	StartPos := Scintilla.SendEditor(SCI_POSITIONFROMLINE,ACaretPos.Line,0)
+	Endpos := Scintilla.SendEditor(SCI_GETLINEENDPOSITION,ACaretPos.Line,0)
+	StartPos += ACaretPos.Column
+	if StartPos > Endpos {
+		StartPos = Endpos
+	}
+	Scintilla.SendEditor(SCI_GOTOPOS,StartPos,0)
+}
+
+func (Scintilla *GScintilla)StyleClearAll()  {
+	//清空样式
+	Scintilla.SendEditor(SCI_STYLECLEARALL, 0, 0)
+	Scintilla.defFont.InitLexFont()
+}
+
 func (Scintilla *GScintilla) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool) {
 	result = 0
 	msgDispatchNext = false

@@ -55,8 +55,7 @@ func (lexerFont *GDxLexerFont)InitLexFont()  {
 			editor.SendEditor(SCI_SETKEYWORDS, int(lexerFont.fKeyWordIndex), int(uintptr(unsafe.Pointer(&b[0]))))
 		}
 		if lexerFont.fName != ""{
-			//需要先转换为GBK
-			b,_ = DxCommonLib.GBKString(lexerFont.fName)
+			b := ([]byte)(lexerFont.fName)
 			b = append(b,0)
 			editor.SendEditor(SCI_STYLESETFONT,lexerFont.fStyleNum,int(uintptr(unsafe.Pointer(&b[0]))))
 		}

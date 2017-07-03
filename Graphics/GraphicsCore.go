@@ -67,6 +67,7 @@ const (
 	cMENUBAR = 30
 
 	ClRed   GColorValue = 0xFF
+	ClGreen	GColorValue = 0x00FF00
 	ClWhite GColorValue = 0xFFFFFF
 	ClBlack GColorValue = 0x000000
 	ClGray GColorValue = 0x808080
@@ -745,7 +746,7 @@ func NewBrush()*GBrush{
 
 func NewFont()*GFont{
 	fnt := new(GFont)
-	fnt.Color = ClWhite
+	fnt.Color = ClBlack
 	fnt.FontName = "宋体"
 	fnt.SetSize(9)
 	return fnt

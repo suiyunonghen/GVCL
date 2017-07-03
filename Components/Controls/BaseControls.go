@@ -60,6 +60,7 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 				WinApi.ClientToScreen(hwnd,pt)
 			}
 			control.PopupMenu.PopUp(pt.X,pt.Y)
+			return
 		}
 	default:
 		if control.fIsForm{

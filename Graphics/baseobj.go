@@ -26,6 +26,7 @@ type GObject struct {
 	fSubChilds []interface{} //子对象
 	fOwner     interface{}
 	fOwnerList []interface{}
+	TagData		interface{}
 }
 
 func (obj *GObject)SetOwner(aowner interface{})  {

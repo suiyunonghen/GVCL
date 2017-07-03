@@ -34,6 +34,28 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 	frm.Edit1 = Scintilla.NewScintillaEditor(frm)
 	frm.Edit1.SetColor(Graphics.RGB(184,220,220))
 
+	pop := NVisbleControls.NewPopupMenu(frm)
+	TargetBookmarkItem := pop.Items().AddItem("设置书签")
+	GotoBookmarkItem := pop.Items().AddItem("跳转书签")
+	for i :=0;i<10;i++{
+		str := fmt.Sprintf("%s%d","书签",i)
+		bookmarkitem := TargetBookmarkItem.AddItem(str)
+		bookmarkitem.TagData = i
+		bookmarkitem.OnClick = func(sender interface{}) {
+			frm.Edit1.MarginBand.SetBookmark(sender.(*NVisbleControls.GMenuItem).TagData.(int))
+		}
+		gotobookitem := GotoBookmarkItem.AddItem(str)
+		gotobookitem.TagData = i
+		gotobookitem.OnClick = func(sender interface{}) {
+			frm.Edit1.MarginBand.GotoBookmark(sender.(*NVisbleControls.GMenuItem).TagData.(int))
+		}
+	}
+	GotoBookmarkItem = pop.Items().AddItem("清空所有书签")
+	GotoBookmarkItem.OnClick = func(sender interface{}) {
+		frm.Edit1.MarginBand.ClearMarks()
+	}
+	frm.Edit1.PopupMenu = pop
+
 	frm.Edit1.CodeLines.LineBreak = DxCommonLib.LBK_CRLF
 	frm.Edit1.CodeLines.LoadFromFile("J:\\GoLibrary\\src\\github.com\\suiyunonghen\\GVCL\\Components\\componentCore.go")
 
