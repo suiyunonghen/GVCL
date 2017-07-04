@@ -68,6 +68,7 @@ const (
 
 	ClRed   GColorValue = 0xFF
 	ClGreen	GColorValue = 0x00FF00
+	ClBlue	GColorValue = 0xFF0000
 	ClWhite GColorValue = 0xFFFFFF
 	ClBlack GColorValue = 0x000000
 	ClGray GColorValue = 0x808080

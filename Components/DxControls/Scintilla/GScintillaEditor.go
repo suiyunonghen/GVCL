@@ -54,6 +54,7 @@ type (
 		CaretPos					GCaretPos
 		fLastCaretPos				GCaretPos
 		OnCaretPosChange			Graphics.NotifyEvent
+		fLexer						ILanguageLexer
 	}
 )
 
@@ -61,6 +62,7 @@ var(
 	scintillaHandle		*scintillaLib
 	cDSciNull  byte = 0
 )
+
 
 func (lines *GCodeLines)Clear()  {
 	lines.GStringList.Clear()
@@ -339,7 +341,11 @@ func (Scintilla *GScintilla) initScintilla()  {
 	Scintilla.SendEditor(SCI_SETTABWIDTH,Scintilla.TabWidth,0)
 	Scintilla.SendEditor(SCI_SETUSETABS,int(DxCommonLib.Ord(!Scintilla.UseTabSpaceChar)),0)
 	Scintilla.SendEditor(SCI_SETTABINDENTS,1,0) //可以使用Tab进行缩进块
-	Scintilla.defFont.InitLexFont()
+	if Scintilla.fLexer != nil{
+		Scintilla.fLexer.Update()
+	}else{
+		Scintilla.defFont.InitLexFont()
+	}
 	Scintilla.MarginBand.Update()
 }
 
@@ -503,13 +509,32 @@ func (Scintilla *GScintilla) WndProc(msg uint32, wparam, lparam uintptr) (result
 
 func (Scintilla *GScintilla) SetProperty(AKey,AValue string){
 	if AKey != ""{
-		btkey := DxCommonLib.FastString2Byte(AKey)
+		btkey := ([]byte)(AKey)
+		btkey = append(btkey,0)
 		if AValue != ""{
-			btv := DxCommonLib.FastString2Byte(AValue)
+			btv := ([]byte)(AValue)
+			btv = append(btv,0)
 			Scintilla.SendEditor(SCI_SETPROPERTY, int(uintptr(unsafe.Pointer(&btkey[0]))), int(uintptr(unsafe.Pointer(&btv[0]))))
 		}else{
 			Scintilla.SendEditor(SCI_SETPROPERTY, int(uintptr(unsafe.Pointer(&btkey[0]))), int(uintptr(unsafe.Pointer(&cDSciNull))))
 		}
+	}
+}
+
+func (Scintilla *GScintilla)SetLexer(lexer ILanguageLexer)  {
+	if Scintilla.fLexer == lexer{
+		return
+	}
+	if Scintilla.fLexer != nil{
+		Scintilla.fLexer.SetEditor(nil)
+	}
+	if lexer == nil{
+		Scintilla.StyleClearAll()
+	}
+	Scintilla.fLexer = lexer
+	if lexer!=nil{
+		lexer.SetEditor(Scintilla)
+		lexer.Update()
 	}
 }
 
