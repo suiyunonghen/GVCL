@@ -36,29 +36,29 @@ type(
 		// SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK,
 		// SCN_INDICATORCLICK, SCN_INDICATORRELEASE,
 		// SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
-		Position				int
-		Char					int						//SCN_CHARADDED, SCN_KEY
+		Position				int32
+		Char					int32						//SCN_CHARADDED, SCN_KEY
 
 		// SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK,
 		// SCN_HOTSPOTRELEASECLICK, SCN_INDICATORCLICK, SCN_INDICATORRELEASE,
-		Modifiers				int
-		ModificationType		int						// SCN_MODIFIED
-		Text				 	*byte					// SCN_MODIFIED
-		Length					int						// SCN_MODIFIED
-		LinesAdded				int						// SCN_MODIFIED
-		Message					int						// SCN_MACRORECORD
-		WParam					uint32					// SCN_MACRORECORD
-		LParam					int32					// SCN_MACRORECORD
-		Line					int						// SCN_MODIFIED
-		FoldLevelNow			int						// SCN_MODIFIED
-		FoldLevelPrev			int						// SCN_MODIFIED
-		Margin					int						// SCN_MARGINCLICK
-		ListType				int						// SCN_USERLISTSELECTION
-		X						int						// SCN_DWELLSTART, SCN_DWELLEND
-		Y						int                     // SCN_DWELLSTART, SCN_DWELLEND
-		Token					int						// SCN_MODIFIED with SC_MOD_CONTAINER
-		AnnotationLinesAdded	int						// SCN_MODIFIED with SC_MOD_CHANGEANNOTATION
-		Updated					int						// SCN_UPDATEUI
+		Modifiers				int32
+		ModificationType		int32						// SCN_MODIFIED
+		Text				 	uintptr					// SCN_MODIFIED
+		Length					int32						// SCN_MODIFIED
+		LinesAdded				int32						// SCN_MODIFIED
+		Message					int32						// SCN_MACRORECORD
+		WParam					uintptr					// SCN_MACRORECORD
+		LParam					uintptr					// SCN_MACRORECORD
+		Line					int32						// SCN_MODIFIED
+		FoldLevelNow			int32						// SCN_MODIFIED
+		FoldLevelPrev			int32						// SCN_MODIFIED
+		Margin					int32						// SCN_MARGINCLICK
+		ListType				int32						// SCN_USERLISTSELECTION
+		X						int32						// SCN_DWELLSTART, SCN_DWELLEND
+		Y						int32                    // SCN_DWELLSTART, SCN_DWELLEND
+		Token					int32						// SCN_MODIFIED with SC_MOD_CONTAINER
+		AnnotationLinesAdded	int32						// SCN_MODIFIED with SC_MOD_CHANGEANNOTATION
+		Updated					int32						// SCN_UPDATEUI
 	}
 )
 

@@ -486,10 +486,10 @@ func (Scintilla *GScintilla) WndProc(msg uint32, wparam, lparam uintptr) (result
 				}
 			}
 		case SCN_MARGINCLICK:
-			Scintilla.MarginBand.BandClick(PSCNotify.Position,PSCNotify.Margin,PSCNotify.Modifiers)
+			Scintilla.MarginBand.BandClick(int(PSCNotify.Position),int(PSCNotify.Margin),int(PSCNotify.Modifiers))
 		case SCN_MARGINRIGHTCLICK:
 			if Scintilla.MarginBand.OnRightClick != nil{
-				Scintilla.MarginBand.OnRightClick(Scintilla.MarginBand,PSCNotify.Position,PSCNotify.Margin,PSCNotify.Modifiers)
+				Scintilla.MarginBand.OnRightClick(Scintilla.MarginBand,int(PSCNotify.Position),int(PSCNotify.Margin),int(PSCNotify.Modifiers))
 			}
 		case SCN_NEEDSHOWN:
 		case SCN_USERLISTSELECTION:

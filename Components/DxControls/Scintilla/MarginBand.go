@@ -177,6 +177,7 @@ func (band *GDxMarginBand)Update()  {
 		band.fcodeEditor.SendEditor(SCI_SETMARGINMASKN, int(band.fFoldIndex), SC_MASK_FOLDERS)
 		band.fcodeEditor.SendEditor(SCI_SETMARGINWIDTHN, int(band.fFoldIndex), 11) //页宽
 		band.fcodeEditor.SendEditor(SCI_SETMARGINSENSITIVEN, int(band.fFoldIndex), 1)
+		band.fcodeEditor.SendEditor(SCI_SETMARGINCURSORN,int(band.fFoldIndex), SC_CURSORARROW)
 		if !band.fCodeFlodInited{
 			band.fCodeFlodInited = true
 			band.fcodeEditor.SendEditor(SCI_MARKERDEFINE, SC_MARKNUM_FOLDER, SC_MARK_CIRCLEPLUS);
@@ -257,6 +258,8 @@ func (band *GDxMarginBand)BandClick(pos,MarginIndex,modifiers int)  {
 				band.fBookmarks[CurBookmark] = -1
 			}
 		}
+	}else if MarginIndex == int(band.fFoldIndex){
+		band.fcodeEditor.SendEditor(SCI_TOGGLEFOLD, lineNumber,0)
 	}
 }
 
