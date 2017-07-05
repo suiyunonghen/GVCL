@@ -57,7 +57,7 @@ type(
 	}
 
 	GGoLexer	struct {
-		GDxLanguageLexer
+		GcppLexer
 	}
 )
 
@@ -84,12 +84,12 @@ func (fnt *GDxLexerFont)Init()  {
 	fnt.fKeyWordIndex = 0
 }
 
-func (lexer *GGoLexer)Language()string  {
+func (lexer *GcppLexer)Language()string  {
 	return "cpp"
 }
 
 
-func (lexer *GGoLexer)LexerId()int  {
+func (lexer *GcppLexer)LexerId()int  {
 	return SCLEX_CPP
 }
 
