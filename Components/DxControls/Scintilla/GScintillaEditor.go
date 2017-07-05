@@ -158,7 +158,7 @@ func (lines *GCodeLines)LoadFromFile(fileName string){
 					databytes = databytes[3:]
 				}
 				file.Close()
-				if !isUtf8{
+				if !isUtf8 && lines.UnknownCodeUseGbk{
 					if tmpbytes,err := DxCommonLib.GBK2Utf8(databytes);err == nil{
 						databytes = tmpbytes
 					}

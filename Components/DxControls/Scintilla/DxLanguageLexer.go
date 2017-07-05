@@ -35,7 +35,7 @@ type(
 	ILanguageLexer interface {
 		Language()string
 		LexerId()int
-		KeyWords()string
+		KeyWords(keywordIndex int)string
 		Update()
 		Editor()*GScintilla
 		SetEditor(scintilla *GScintilla)
@@ -93,14 +93,13 @@ func (lexer *GcppLexer)LexerId()int  {
 	return SCLEX_CPP
 }
 
-func (lexer *GGoLexer)KeyWords()string  {
+func (lexer *GGoLexer)KeyWords(keywordIndex int)string  {
 	return "var const package import func return defer go select interface struct break "+
 			"case continue for fallthrough else if switch goto default chan type map range "+
 			"uintptr int int8 int16 int32 int64 uint uint8 uint16 uint32 uint64 bool float float32 float64"
 }
 
 func (lexer *GGoLexer)Update()  {
-
 	if lexer.fEditor != nil && lexer.fEditor.HandleAllocated(){
 		lexer.fEditor.SendEditor(SCI_SETLEXER,lexer.LexerId(),0)
 		if lexer.fEditor.MarginBand.ShowCodeFlod{
@@ -118,7 +117,7 @@ func (lexer *GGoLexer)Update()  {
 }
 
 
-func (lexer *GcppLexer)KeyWords()string  {
+func (lexer *GcppLexer)KeyWords(keywordIndex int)string  {
 	return "and and_eq asm auto bitand bitor bool break case catch char class compl const const_cast continue default delete do double dynamic_cast else enum "+
 		"explicit export extern false float for friend goto if inline int long mutable namespace new not not_eq operator or or_eq private protected public register "+
 		"reinterpret_cast return short signed sizeof static static_cast struct switch template this throw true try typedef typeid typename union unsigned using "+
@@ -241,7 +240,7 @@ func NewGoLexer()*GGoLexer  {
 	result.KeyWordFont.fOwnerLexer = result
 	result.KeyWordFont.fStyleNum = SCE_C_WORD
 	result.KeyWordFont.fKeyWordStyle = true
-	result.KeyWordFont.fKeyWords = result.KeyWords()
+	result.KeyWordFont.fKeyWords = result.KeyWords(0)
 	ostyleNums[5] = SCE_C_WORD2
 	result.KeyWordFont.OtherStyleNums = ostyleNums[5:6]
 
