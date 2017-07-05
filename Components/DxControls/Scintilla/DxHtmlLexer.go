@@ -1,3 +1,8 @@
+/*
+Scintilla编辑器Html语法高亮分析器
+Autor: 不得闲
+QQ:75492895
+ */
 package Scintilla
 
 import(
