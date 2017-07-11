@@ -58,9 +58,10 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 	frm.Edit1.PopupMenu = pop
 
 	frm.Edit1.CodeLines.LineBreak = DxCommonLib.LBK_CRLF
-	frm.Edit1.CodeLines.LoadFromFile("J:\\GoLibrary\\src\\github.com\\suiyunonghen\\GVCL\\Components\\componentCore.go")
+	frm.Edit1.CodeLines.LoadFromFile("D:\\bookmarks.html")
+	//("J:\\GoLibrary\\src\\github.com\\suiyunonghen\\GVCL\\Components\\componentCore.go")
 
-	lexer := Scintilla.NewGoLexer()
+	lexer := Scintilla.NewHtmlLexer()
 	frm.Edit1.SetLexer(lexer)
 	frm.OnClose = func(sender interface{}, closeAction *int8) {
 		*closeAction = controls.CAFree

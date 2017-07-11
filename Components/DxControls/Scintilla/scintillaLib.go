@@ -4,8 +4,8 @@ import(
 	"github.com/suiyunonghen/GVCL/WinApi"
 )
 type(
-	GSciChar = byte
-	GSciPositionCR = int32
+	GSciChar  byte
+	GSciPositionCR  int32
 
 	GSci_CharacterRange struct {
 		cpMin			GSciPositionCR
