@@ -287,11 +287,14 @@ func (app *WApplication) CreateForm() *GForm {
 
 //消息处理
 func (app *WApplication) HandleMessage() {
-	msg := new(WinApi.MSG)
-	if !app.ProcessMessage(msg) {
-		app.idleMsg(msg)
+	if !app.fTerminate{
+		msg := new(WinApi.MSG)
+		if !app.ProcessMessage(msg) {
+			app.idleMsg(msg)
+		}
 	}
 }
+
 
 func (app *WApplication)ProcessMessages()  {
 	msg := new(WinApi.MSG)
