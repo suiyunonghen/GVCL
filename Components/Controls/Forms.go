@@ -5,6 +5,7 @@ import (
 	"github.com/suiyunonghen/GVCL/WinApi"
 	"github.com/suiyunonghen/GVCL/Graphics"
 	"syscall"
+	"context"
 	"unsafe"
 )
 
@@ -66,15 +67,17 @@ type WApplication struct {
 	fForms       []*GForm
 	fRunning     bool
 	ShowMainForm bool
-	fTerminate   bool
 	OnMessage    MessageEventHandler
 	fChildObj    interface{}
 	ActiveForm  *GForm
 	fappIcon     WinApi.HICON
+	fcancelFunc	 context.CancelFunc
+	fcontext  	 context.Context
 }
 
 func NewApplication()*WApplication  {
 	app := new(WApplication)
+	app.fcontext,app.fcancelFunc = context.WithCancel(context.Background())
 	app.ShowMainForm =true
 	application = app
 	return app
@@ -105,9 +108,12 @@ func (app *WApplication) Run() {
 		}
 		WinApi.SendMessage(app.fMainForm.GetWindowHandle(),WinApi.WM_SETICON,uintptr(WinApi.ICON_BIG),uintptr(application.fappIcon))
 		for {
-			app.HandleMessage()
-			if app.fTerminate {
-				break
+			select {
+			case <- app.fcontext.Done():
+				app.fRunning = false
+				return
+			default:
+				app.HandleMessage()
 			}
 		}
 	}
@@ -285,9 +291,18 @@ func (app *WApplication) CreateForm() *GForm {
 	return frm
 }
 
+func (app *WApplication)Terminated()bool {
+	select {
+	case <-app.fcontext.Done():
+		return true
+	default:
+		return false
+	}
+}
+
 //消息处理
 func (app *WApplication) HandleMessage() {
-	if !app.fTerminate{
+	if app.fRunning{
 		msg := new(WinApi.MSG)
 		if !app.ProcessMessage(msg) {
 			app.idleMsg(msg)
@@ -339,6 +354,7 @@ func (app *WApplication) idleMsg(msg *WinApi.MSG) {
 }
 
 func (app *WApplication) doneApp() {
+	app.fcancelFunc()
 	WinApi.GlobalDeleteAtom(windowAtom)
 	WinApi.GlobalDeleteAtom(controlAtom)
 }

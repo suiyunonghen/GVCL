@@ -131,7 +131,6 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 		control.DestoryWnd()
 		if hwnd == application.fMainForm.fHandle {
 			NVisbleControls.TrayIcons.Destroy()
-			application.fTerminate = true
 			WinApi.PostQuitMessage(0)
 			return
 		}
