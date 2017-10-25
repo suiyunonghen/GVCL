@@ -92,6 +92,13 @@ func (app *WApplication) MainForm()*GForm {
 	return app.fMainForm
 }
 
+func (app *WApplication)Context() context.Context  {
+	if app.fcontext != nil{
+		return app.fcontext
+	}
+	return context.Background()
+}
+
 func (app *WApplication) Run() {
 	if application == nil{
 		application = app
