@@ -105,6 +105,8 @@ func main() {
 	lbl.SetColor(Graphics.ClRed)
 	lbl.SetTop(40)
 
+
+
 	//菜单
 	pop := NVisbleControls.NewPopupMenu(m)
 	tmpitem := pop.Items().AddItem("测试1")
@@ -189,6 +191,17 @@ func main() {
 		r.Bottom = 150
 		cvs.FillRect(r)
 	}
+
+	lstBox	:= controls.NewListBox(m)
+	lstBox.SetTop(80)
+	lstBox.SetLeft(40)
+	lstBox.SetWidth(200)
+	lstBox.SetHeight(200)
+	lstBox.SetColor(Graphics.ClWhite)
+	listitems := lstBox.Items()
+	listitems.Add("asfasf")
+
+	listitems.Add("测试二恶")
 
 	app.Run()
 }

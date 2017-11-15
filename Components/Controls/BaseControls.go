@@ -80,6 +80,8 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 							}
 						}
 						WinApi.DestroyWindow(application.fMainForm.fHandle)
+					}else if closeAction == CANone{
+						return
 					}
 				}
 			case WinApi.WM_SIZE:
