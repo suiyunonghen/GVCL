@@ -243,6 +243,10 @@ func (ctrl *GBaseControl) Top() int32 {
 	return ctrl.ftop
 }
 
+func (ctrl *GBaseControl)ClientRect()WinApi.Rect  {
+	return WinApi.Rect{0,0,ctrl.fwidth,ctrl.fheight}
+}
+
 func (ctrl *GBaseControl) Height() int32 {
 	return ctrl.fheight
 }
@@ -443,6 +447,15 @@ type GWinControl struct {
 func (ctrl *GWinControl) SubInit() {
 	ctrl.GBaseControl.SubInit()
 	ctrl.GComponent.SubInit(ctrl)
+}
+
+
+func (ctrl *GWinControl)ClientRect()WinApi.Rect  {
+	r := ctrl.GBaseControl.ClientRect()
+	if ctrl.fHandle != 0{
+		r.GetClientRect(ctrl.fHandle)
+	}
+	return r
 }
 
 func (ctrl *GWinControl) HandleAllocated()bool{

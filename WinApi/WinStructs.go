@@ -57,6 +57,16 @@ func (rect *Rect)PtInRect(pt *POINT) bool{
 	return ret!=0
 }
 
+func (rect *Rect)GetClientRect(hWnd syscall.Handle)bool  {
+	ret,_,_ := syscall.Syscall(fnGetClientRect,2,uintptr(hWnd),uintptr(unsafe.Pointer(rect)),0)
+	return ret!=0
+}
+
+func (rect *Rect)GetWindowRect(hWnd syscall.Handle)bool  {
+	ret,_,_ := syscall.Syscall(fnGetWindowRect,2,uintptr(hWnd),uintptr(unsafe.Pointer(rect)),0)
+	return ret!=0
+}
+
 func (rect *Rect)AdjustWindowRect(dwStyle uint32,bMenu bool)bool  {
 	ret,_,_ := syscall.Syscall(fnAdjustWindowRect,3,uintptr(unsafe.Pointer(rect)),uintptr(dwStyle),uintptr(BoolToUint(bMenu)))
 	return ret!=0

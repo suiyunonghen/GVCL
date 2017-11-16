@@ -37,6 +37,7 @@ type IControl interface {
 	SetBounds(ALeft, ATop, AWidth, AHeight int32)
 	IsWindowControl()bool
 	AfterParentWndCreate()
+	ClientRect()WinApi.Rect
 }
 
 type IApplication interface {

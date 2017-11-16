@@ -21,6 +21,7 @@ type (
 	}
 	GListBox struct {
 	GWinControl
+	fItemIndex	int
 	fItems		*gListBoxStrings
 	OnItemClick 	Graphics.NotifyEvent
 	OnItemDblClick	Graphics.NotifyEvent
@@ -29,7 +30,7 @@ type (
 )
 
 const(
-	LBStandard=iota
+	LBStandard ListBoxStyle=iota
 	LBOwnerDrawFixed
 	LBOwnerDrawVariable
 	LBVirtual
@@ -282,7 +283,6 @@ func (lstbox *GListBox) SubInit() {
 	if lstbox.fItems == nil{
 		lstbox.fItems = &gListBoxStrings{fListBox:lstbox}
 	}
-	lstbox.fVisible = true
 	lstbox.GWinControl.SubInit()
 	lstbox.GComponent.SubInit(lstbox)
 }
@@ -294,8 +294,12 @@ func (lstbox *GListBox)GetItemIndex()int{
 }
 
 func (lstbox *GListBox)SetItemIndex(idx int){
-	if lstbox.GetItemIndex() != idx{
-		WinApi.SendMessage(lstbox.fHandle, WinApi.LB_SETCURSEL, uintptr(idx), 0)
+	if lstbox.HandleAllocated(){
+		if lstbox.GetItemIndex() != idx{
+			WinApi.SendMessage(lstbox.fHandle, WinApi.LB_SETCURSEL, uintptr(idx), 0)
+		}
+	}else{
+		lstbox.fItemIndex = idx
 	}
 }
 
@@ -337,6 +341,7 @@ func (lstbox *GListBox) CreateWindowHandle(params *Components.GCreateParams)bool
 			WinApi.SendMessage(lstbox.fHandle, WinApi.LB_ADDSTRING, 0, lp)
 		}
 		lstbox.fItems.GStringList.Clear()
+		WinApi.SendMessage(lstbox.fHandle, WinApi.LB_SETCURSEL, uintptr(lstbox.fItemIndex), 0)
 		return true
 	}
 	return false
@@ -368,6 +373,41 @@ func (lstbox *GListBox) WndProc(msg uint32, wparam, lparam uintptr) (result uint
 	return
 }
 
+func (lstbox *GListBox)GetTopIndex()int  {
+	return int(WinApi.SendMessage(lstbox.fHandle, WinApi.LB_GETTOPINDEX, 0, 0))
+}
+
+func (lstbox *GListBox)SetTopIndex(v int)  {
+	WinApi.SendMessage(lstbox.fHandle, WinApi.LB_SETTOPINDEX, uintptr(v), 0)
+}
+
+func (lstbox *GListBox)ItemAtPos(x,y int)int  {
+	r := WinApi.Rect{}
+	p := WinApi.POINT{int32(x),int32(y)}
+	if r.GetClientRect(lstbox.fHandle) && r.PtInRect(&p){
+		for tpidx:=int(WinApi.SendMessage(lstbox.fHandle, WinApi.LB_GETTOPINDEX, 0, 0));
+			tpidx < lstbox.fItems.Count();tpidx++{
+				lstbox.Perform(WinApi.LB_GETITEMRECT,uintptr(tpidx),uintptr(unsafe.Pointer(&r)))
+				if r.PtInRect(&p){
+					return tpidx
+				}
+		}
+	}
+	return  -1
+}
+
+func (lstbox *GListBox)ItemRect(Index int)WinApi.Rect  {
+	r :=WinApi.Rect{}
+	Count := lstbox.fItems.Count()
+	if Index < Count{
+		lstbox.Perform(WinApi.LB_GETITEMRECT,uintptr(Index),uintptr(unsafe.Pointer(&r)))
+	}else if Index == Count{
+		lstbox.Perform(WinApi.LB_GETITEMRECT,uintptr(Index - 1),uintptr(unsafe.Pointer(&r)))
+		r.OffsetRect(0,int(r.Height()))
+	}
+	return r
+}
+
 func NewListBox(aParent Components.IWincontrol) *GListBox {
 	pType := reflect.TypeOf(aParent)
 	hasWincontrol := false
@@ -377,7 +417,10 @@ func NewListBox(aParent Components.IWincontrol) *GListBox {
 	if hasWincontrol {
 		lstbox := new(GListBox)
 		lstbox.SubInit()
-		lstbox.SetColor(Graphics.ClWhite)
+		lstbox.fwidth = 121
+		lstbox.fVisible = true
+		lstbox.fheight = 97
+		lstbox.fColor = Graphics.ClWhite
 		lstbox.SetParent(aParent)
 		return lstbox
 	}
