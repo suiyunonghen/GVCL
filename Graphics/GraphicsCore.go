@@ -534,6 +534,7 @@ type GFont struct {
 	gFontData
 	fsize int32
 	fupcount int32
+	OnChange		NotifyEvent
 }
 
 func (fnt *GFont)Destroy()  {
@@ -560,6 +561,9 @@ func (fnt *GFont)SetName(fontName string)  {
 func (fnt *GFont)Change()  {
 	if fnt.fupcount == 0{
 		gdiManager.AllocFontData(&fnt.gFontData)
+	}
+	if fnt.OnChange != nil{
+		fnt.OnChange(fnt)
 	}
 }
 

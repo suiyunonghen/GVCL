@@ -211,6 +211,21 @@ func (ctrl *GBaseControl) SubInit() {
 	ctrl.Font.FontName = "宋体"
 	ctrl.Font.SetSize(9)
 	ctrl.Font.EndUpdate()
+	ctrl.Font.OnChange = ctrl.FontChange
+}
+
+func (ctrl *GBaseControl)FontChange(sender interface{})  {
+	var TargetObj interface{}
+	if i:=ctrl.SubChildCount()-1;i>=0{
+		TargetObj = ctrl.SubChild(i)
+	}else{
+		TargetObj =ctrl
+	}
+	if TargetObj.(Components.IControl).IsWindowControl() {
+		TargetObj.(Components.IWincontrol).Perform(WinApi.WM_SETFONT, uintptr(ctrl.Font.FontHandle), 1)
+	}else{
+		TargetObj.(Components.IControl).Invalidate()
+	}
 }
 
 func (ctrl *GBaseControl)GetDeviceContext()(dc WinApi.HDC,ctrlHandle syscall.Handle){

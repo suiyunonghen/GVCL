@@ -22,7 +22,8 @@ type (
 	GListBox struct {
 	GWinControl
 	fItems		*gListBoxStrings
-	OnChange 	Graphics.NotifyEvent
+	OnItemClick 	Graphics.NotifyEvent
+	OnItemDblClick	Graphics.NotifyEvent
 	fStyle		ListBoxStyle
 	}
 )
@@ -96,8 +97,8 @@ func (list *gListBoxStrings)Add(str string){
 		return
 	}
 	if list.fListBox.fStyle < LBVirtual{
-		mp := ([]byte)(str)
-		WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_ADDSTRING, 0, uintptr(unsafe.Pointer(&mp[0])))
+		mp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(str)))
+		WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_ADDSTRING, 0, mp)
 	}
 }
 
@@ -143,8 +144,8 @@ func (list *gListBoxStrings)Insert(Index int, str string){
 		return
 	}
 	if list.fListBox.fStyle < LBVirtual{
-		mp := ([]byte)(str)
-		WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_INSERTSTRING, uintptr(Index), uintptr(unsafe.Pointer(&mp[0])))
+		mp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(str)))
+		WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_INSERTSTRING, uintptr(Index), mp)
 	}
 }
 
@@ -171,9 +172,9 @@ func (list *gListBoxStrings)IndexOf(str string) int{
 		return list.GStringList.IndexOf(str)
 	}
 	if list.fListBox.fStyle < LBVirtual{
-		mp := ([]byte)(str)
+		mp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(str)))
 		m := -1
-		return  int(WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_FINDSTRINGEXACT, uintptr(m), uintptr(unsafe.Pointer(&mp[0]))))
+		return  int(WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_FINDSTRINGEXACT, uintptr(m), mp))
 	}
 	return -1
 }
@@ -312,7 +313,7 @@ func (lstbox *GListBox) CreateParams(params *Components.GCreateParams) {
 	}
 	params.Style = params.Style | (WinApi.WS_HSCROLL | WinApi.WS_VSCROLL | WinApi.LBS_HASSTRINGS | WinApi.LBS_NOTIFY) |
 		uint32(lstyle) | WinApi.LBS_USETABSTOPS | WinApi.WS_BORDER | WinApi.WS_TABSTOP
-	params.ExStyle = 0// params.ExStyle | WinApi.WS_EX_CLIENTEDGE
+	params.ExStyle = params.ExStyle | WinApi.WS_EX_CLIENTEDGE
 	lstyle = ^(WinApi.CS_HREDRAW | WinApi.CS_VREDRAW)
 	params.WindowClass.Style = params.WindowClass.Style & uint32(lstyle)
 }
@@ -332,7 +333,6 @@ func (lstbox *GListBox)Items()DxCommonLib.IStrings{
 func (lstbox *GListBox) CreateWindowHandle(params *Components.GCreateParams)bool{
 	if lstbox.GWinControl.CreateWindowHandle(params){
 		for i := 0;i<lstbox.fItems.GStringList.Count();i++{
-			//mp := DxCommonLib.FastString2Byte()
 			lp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lstbox.fItems.GStringList.Strings(i))))
 			WinApi.SendMessage(lstbox.fHandle, WinApi.LB_ADDSTRING, 0, lp)
 		}
@@ -340,6 +340,32 @@ func (lstbox *GListBox) CreateWindowHandle(params *Components.GCreateParams)bool
 		return true
 	}
 	return false
+}
+
+func (lstbox *GListBox) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool) {
+	result = 0
+	msgDispatchNext = false
+	switch msg {
+	case WinApi.WM_COMMAND:
+		notifycode := WinApi.HiWord(uint32(wparam))
+		switch notifycode {
+		case WinApi.LBN_SELCHANGE:
+			if lstbox.OnItemClick != nil{
+				lstbox.OnItemClick(lstbox)
+			}
+		case WinApi.LBN_DBLCLK:
+			if lstbox.OnItemDblClick != nil{
+				lstbox.OnItemDblClick(lstbox)
+			}
+		case WinApi.LBN_SELCANCEL:
+			if lstbox.OnItemClick != nil{
+				lstbox.OnItemClick(lstbox)
+			}
+		}
+	default:
+		result = WinApi.CallWindowProc(lstbox.FDefWndProc, lstbox.GetWindowHandle(), msg, wparam, lparam)
+	}
+	return
 }
 
 func NewListBox(aParent Components.IWincontrol) *GListBox {
@@ -351,6 +377,7 @@ func NewListBox(aParent Components.IWincontrol) *GListBox {
 	if hasWincontrol {
 		lstbox := new(GListBox)
 		lstbox.SubInit()
+		lstbox.SetColor(Graphics.ClWhite)
 		lstbox.SetParent(aParent)
 		return lstbox
 	}

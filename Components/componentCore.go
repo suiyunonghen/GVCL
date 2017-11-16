@@ -79,6 +79,7 @@ type IWincontrol interface {
 	CreateWindowHandle(params *GCreateParams)bool
 	PaintBack(dc WinApi.HDC)int32
 	HandleAllocated()bool
+	Perform(msg uint32,wparam, lparam uintptr)(result WinApi.LRESULT)
 }
 
 
