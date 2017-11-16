@@ -176,8 +176,24 @@ func main() {
 	b1.Font.EndUpdate()
 	b1.SetLeft(100)
 	b1.SetTop(40)
+
+
+	lstBox	:= controls.NewListBox(m)
+	lstBox.SetTop(80)
+	lstBox.SetLeft(40)
+	lstBox.SetWidth(200)
+	lstBox.SetHeight(200)
+	listitems := lstBox.Items()
+	listitems.Add("asfasf")
+	listitems.Add("测试二恶")
+
+	lstBox.OnItemDblClick = func(sender interface{}) {
+		mb := sender.(*controls.GListBox)
+		WinApi.MessageBox(mb.GetWindowHandle(),mb.Items().Strings(mb.GetItemIndex()),"消息",64)
+	}
+
 	b1.OnClick = func(sender interface{}) {
-		cvs := new(controls.GControlCanvas)
+		/*cvs := new(controls.GControlCanvas)
 		cvs.SubInit()
 		cvs.SetControl(m)
 		brsh := cvs.Brush()
@@ -189,19 +205,17 @@ func main() {
 		r.Top = 20
 		r.Right = 150
 		r.Bottom = 150
-		cvs.FillRect(r)
+		cvs.FillRect(r)*/
+		lstBox.Font.BeginUpdate()
+		lstBox.Font.SetName("宋体")
+		lstBox.Font.SetBold(true)
+		lstBox.Font.EndUpdate()
+
+		lbl.Font.BeginUpdate()
+		lbl.Font.Italic = 1
+		lbl.Font.SetBold(true)
+		lbl.Font.EndUpdate()
 	}
-
-	lstBox	:= controls.NewListBox(m)
-	lstBox.SetTop(80)
-	lstBox.SetLeft(40)
-	lstBox.SetWidth(200)
-	lstBox.SetHeight(200)
-	lstBox.SetColor(Graphics.ClWhite)
-	listitems := lstBox.Items()
-	listitems.Add("asfasf")
-
-	listitems.Add("测试二恶")
 
 	app.Run()
 }

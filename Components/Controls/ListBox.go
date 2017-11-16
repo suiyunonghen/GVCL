@@ -312,7 +312,7 @@ func (lstbox *GListBox) CreateParams(params *Components.GCreateParams) {
 		lstyle = WinApi.LBS_OWNERDRAWFIXED
 	}
 	params.Style = params.Style | (WinApi.WS_HSCROLL | WinApi.WS_VSCROLL | WinApi.LBS_HASSTRINGS | WinApi.LBS_NOTIFY) |
-		uint32(lstyle) | WinApi.LBS_USETABSTOPS | WinApi.WS_BORDER | WinApi.WS_TABSTOP
+		uint32(lstyle) | WinApi.LBS_USETABSTOPS | WinApi.WS_TABSTOP
 	params.ExStyle = params.ExStyle | WinApi.WS_EX_CLIENTEDGE
 	lstyle = ^(WinApi.CS_HREDRAW | WinApi.CS_VREDRAW)
 	params.WindowClass.Style = params.WindowClass.Style & uint32(lstyle)
