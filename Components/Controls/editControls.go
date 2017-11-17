@@ -497,7 +497,7 @@ func (cmbox *GCombobox)SetDropDownCount(v int)  {
 }
 
 
-func NewCombobox(aParent Components.IWincontrol) *GCombobox {
+func NewCombobox(aParent Components.IWincontrol,mstyle GComboBoxStyle) *GCombobox {
 	pType := reflect.TypeOf(aParent)
 	hasWincontrol := false
 	if pType.Kind() == reflect.Ptr {
@@ -509,6 +509,7 @@ func NewCombobox(aParent Components.IWincontrol) *GCombobox {
 		cmb.fwidth = 145
 		cmb.fDropDownCount = 8
 		cmb.fVisible = true
+		cmb.fStyle = mstyle
 		cmb.fheight = 25
 		cmb.fColor = Graphics.ClWhite
 		cmb.SetParent(aParent)

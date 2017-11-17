@@ -217,7 +217,7 @@ func main() {
 		lbl.Font.EndUpdate()
 	}
 
-	cmb := controls.NewCombobox(m)
+	cmb := controls.NewCombobox(m,controls.CSDropDownList)
 	cmb.SetTop(80)
 	cmb.SetLeft(180)
 	listitems = cmb.Items()
