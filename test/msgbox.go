@@ -181,8 +181,8 @@ func main() {
 	lstBox	:= controls.NewListBox(m)
 	lstBox.SetTop(80)
 	lstBox.SetLeft(40)
-	lstBox.SetWidth(200)
-	lstBox.SetHeight(200)
+	//lstBox.SetWidth(200)
+	//lstBox.SetHeight(200)
 	listitems := lstBox.Items()
 	listitems.Add("asfasf")
 	listitems.Add("测试二恶")
@@ -216,6 +216,16 @@ func main() {
 		lbl.Font.SetBold(true)
 		lbl.Font.EndUpdate()
 	}
+
+	cmb := controls.NewCombobox(m)
+	cmb.SetTop(80)
+	cmb.SetLeft(180)
+	listitems = cmb.Items()
+	for i := 0;i<10;i++{
+		listitems.Add("asfasf")
+		listitems.Add("测试二恶")
+	}
+	cmb.SetItemIndex(1)
 
 	app.Run()
 }

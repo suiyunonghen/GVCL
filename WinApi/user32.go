@@ -541,7 +541,9 @@ var (
 	fnDispatchMessageA                   uintptr
 	fnDispatchMessageW                   uintptr
 	fnPeekMessageW                       uintptr
-	fnSendMessageW			     uintptr
+	fnSendMessageW			   			 uintptr
+	fnPostMessageA						 uintptr
+	fnPostMessageW						 uintptr
 )
 
 func init() {
@@ -1076,6 +1078,9 @@ func init() {
 	fnSetGestureConfig, _ = syscall.GetProcAddress(libuser32, "SetGestureConfig")
 	fnGetGestureConfig, _ = syscall.GetProcAddress(libuser32, "GetGestureConfig")
 	fnWINNLSEnableIME, _ = syscall.GetProcAddress(libuser32, "WINNLSEnableIME")
+
+	fnPostMessageA, _ = syscall.GetProcAddress(libuser32, "PostMessageA")
+	fnPostMessageW, _ = syscall.GetProcAddress(libuser32, "PostMessageW")
 
 	InitScreenLogPixels()
 }
@@ -1617,6 +1622,13 @@ func SendMessage(hwnd syscall.Handle,msg uint,wparam,lparam uintptr) LRESULT {
 	return LRESULT(ret)
 }
 
+
+func PostMessage(hwnd syscall.Handle,msg uint,wparam,lparam uintptr) bool {
+	ret,_,_:=syscall.Syscall6(fnSendMessageW,1,uintptr(hwnd),uintptr(msg),wparam,lparam,0,0)
+	return ret != 0
+}
+
+
 func InvalidateRect(hwnd syscall.Handle,r *Rect,bErase bool)bool  {
 	ret,_,_:=syscall.Syscall(fnInvalidateRect,3,uintptr(hwnd),uintptr(unsafe.Pointer(r)),uintptr(BoolToUint(bErase)))
 	return ret!=0
@@ -1807,4 +1819,9 @@ func EndMenu()bool  {
 func SetForegroundWindow(hWnd syscall.Handle)bool  {
 	ret,_,_:=syscall.Syscall(fnSetForegroundWindow,1,uintptr(hWnd),0,0)
 	return ret != 0
+}
+
+func GetWindow(hWnd syscall.Handle,uCmd uint)syscall.Handle  {
+	ret,_,_:=syscall.Syscall(fnGetWindow,2,uintptr(hWnd),uintptr(uCmd),0)
+	return syscall.Handle(ret)
 }

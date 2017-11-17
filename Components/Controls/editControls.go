@@ -70,9 +70,17 @@ type (
 	}
 	GCombobox struct {
 		GWinControl
-		fItemIndex	int
-		fItems		*gComboBoxStrings
-		fStyle 		GComboBoxStyle
+		fItemIndex		int
+		fItems			*gComboBoxStrings
+		fStyle 			GComboBoxStyle
+		fListHandle		syscall.Handle
+		fEditHandle 	syscall.Handle
+		fDefListProc 	uintptr
+		fDefEditProc 	uintptr
+		fDropDownCount  int32
+		OnChange 		Graphics.NotifyEvent
+		OnSelect		Graphics.NotifyEvent
+		OnCloseUp		Graphics.NotifyEvent
 	}
 )
 
@@ -324,6 +332,171 @@ func (cmbox *GCombobox)SetItemIndex(idx int){
 	}
 }
 
+func (cmbox *GCombobox) CreateParams(params *Components.GCreateParams) {
+	cmbox.GWinControl.CreateParams(params)
+	cmbox.InitSubclassParams(params, "COMBOBOX")
+	params.Style = params.Style | (WinApi.WS_VSCROLL | WinApi.CBS_HASSTRINGS | WinApi.CBS_AUTOHSCROLL)
+	switch cmbox.fStyle {
+	case CSDropDown: params.Style = params.Style | WinApi.CBS_DROPDOWN
+	case CSSimple: params.Style = params.Style | WinApi.CBS_SIMPLE
+	case CSDropDownList: params.Style = params.Style | WinApi.CBS_DROPDOWNLIST
+	case CSOwnerDrawFixed: params.Style = params.Style | WinApi.CBS_DROPDOWNLIST | WinApi.CBS_OWNERDRAWFIXED
+	case CSOwnerDrawVariable: params.Style = params.Style | WinApi.CBS_DROPDOWNLIST | WinApi.CBS_OWNERDRAWVARIABLE
+	}
+}
+
+var(
+	cmbListWndprocCallBack = syscall.NewCallback(cmbListWndProc)
+	cmbEdtWndprocCallBack = syscall.NewCallback(cmbEdtWndProc)
+)
+
+func cmbListWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (result uintptr) {
+	cmbox := (*GCombobox)(unsafe.Pointer(WinApi.GetProp(hwnd, uintptr(controlAtom))))
+	if cmbox == nil {
+		return WinApi.DefWindowProc(hwnd, msg, wparam, lparam)
+	}
+	result = cmbox.comboWndProc(msg,wparam,lparam,hwnd,cmbox.fDefEditProc)
+	return
+}
+
+func cmbEdtWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (result uintptr) {
+	cmbox := (*GCombobox)(unsafe.Pointer(WinApi.GetProp(hwnd, uintptr(controlAtom))))
+	if cmbox == nil {
+		return WinApi.DefWindowProc(hwnd, msg, wparam, lparam)
+	}
+	if msg == WinApi.WM_SYSCOMMAND{
+		result,_ := cmbox.WndProc(msg,wparam,lparam)
+		return result
+	}
+	result = cmbox.comboWndProc(msg,wparam,lparam,hwnd,cmbox.fDefEditProc)
+	return
+}
+
+func (cmbox *GCombobox)comboWndProc(msg uint32, wparam, lparam uintptr,msghwnd syscall.Handle,defwndproc uintptr)  (result uintptr) {
+	return WinApi.CallWindowProc(defwndproc,msghwnd,msg,wparam,lparam)
+}
+
+func (cmbox *GCombobox) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool) {
+	result = 0
+	msgDispatchNext = false
+	switch msg {
+	case WinApi.WM_COMMAND:
+		notifycode := WinApi.HiWord(uint32(wparam))
+		switch notifycode {
+		case WinApi.CBN_DBLCLK:
+			fmt.Println("Asdf")
+		case WinApi.CBN_EDITCHANGE:
+			if cmbox.OnChange != nil{
+				cmbox.OnChange(cmbox)
+			}
+		case WinApi.CBN_SELCHANGE:
+			index := cmbox.GetItemIndex()
+			strptr,_ := syscall.UTF16PtrFromString(cmbox.fItems.Strings(index))
+			cmbox.Perform(WinApi.WM_SETTEXT,0,uintptr(unsafe.Pointer(strptr)))
+			WinApi.SendMessage(cmbox.fHandle, WinApi.CB_SHOWDROPDOWN, 0, 0)
+			if cmbox.OnSelect!=nil{
+				cmbox.OnSelect(cmbox)
+			}else if cmbox.OnChange != nil{
+				cmbox.OnChange(cmbox)
+			}
+		case WinApi.CBN_CLOSEUP:
+			if cmbox.OnCloseUp!=nil{
+				cmbox.OnCloseUp(cmbox)
+			}
+		default:
+			result = WinApi.CallWindowProc(cmbox.FDefWndProc, cmbox.fHandle, msg, wparam, lparam)
+		}
+	case WinApi.WM_SETFONT:
+		result = WinApi.CallWindowProc(cmbox.FDefWndProc, cmbox.fHandle, msg, wparam, lparam)
+		//设置实际高度
+		ItemHeight := int32(WinApi.SendMessage(cmbox.fHandle,WinApi.CB_GETITEMHEIGHT,0,0))
+		WinApi.SetWindowPos(cmbox.fHandle,0, 0, 0, cmbox.fwidth, ItemHeight * cmbox.fDropDownCount +
+			cmbox.fheight + 2, WinApi.SWP_NOMOVE | WinApi.SWP_NOZORDER | WinApi.SWP_NOACTIVATE | WinApi.SWP_NOREDRAW |
+			WinApi.SWP_HIDEWINDOW)
+	default:
+		result = WinApi.CallWindowProc(cmbox.FDefWndProc, cmbox.fHandle, msg, wparam, lparam)
+	}
+	return
+}
+
+func (cmbox *GCombobox)DroppedDown()bool{
+	if cmbox.fHandle !=0{
+		return WinApi.SendMessage(cmbox.fHandle, WinApi.CB_GETDROPPEDSTATE, 0, 0)!=0
+	}
+	return false
+}
+
+func (cmbox *GCombobox)SetDroppedDown(v bool){
+	if cmbox.fHandle!=0{
+		WinApi.SendMessage(cmbox.fHandle, WinApi.CB_SHOWDROPDOWN, uintptr(DxCommonLib.Ord(v)), 0)
+		r := cmbox.ClientRect()
+		WinApi.InvalidateRect(cmbox.fHandle,&r,true)
+	}
+}
+
+func (cmbox *GCombobox) CreateWindowHandle(params *Components.GCreateParams)bool{
+	if cmbox.GWinControl.CreateWindowHandle(params){
+		for i := 0;i<cmbox.fItems.GStringList.Count();i++{
+			lp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(cmbox.fItems.GStringList.Strings(i))))
+			WinApi.SendMessage(cmbox.fHandle, WinApi.CB_ADDSTRING, 0, lp)
+		}
+		if cmbox.fItemIndex < cmbox.fItems.GStringList.Count(){
+			WinApi.SendMessage(cmbox.fHandle, WinApi.CB_SETCURSEL, uintptr(cmbox.fItemIndex), 0)
+		}
+		cmbox.fItems.GStringList.Clear()
+		if cmbox.fStyle == CSDropDown || cmbox.fStyle == CSSimple{
+			if ChildHandle := WinApi.GetWindow(cmbox.fHandle, WinApi.GW_CHILD);ChildHandle != 0{
+				if cmbox.fStyle == CSSimple{
+					cmbox.fListHandle = ChildHandle
+					WinApi.SetProp(ChildHandle, uintptr(controlAtom), uintptr(unsafe.Pointer(cmbox)))
+					if WinApi.IsAMD64(){
+						//指定窗口过程
+						cmbox.fDefListProc = uintptr(WinApi.SetWindowLongPtr(ChildHandle,WinApi.GWL_WNDPROC,int64(cmbListWndprocCallBack)))
+					}else{
+						cmbox.fDefListProc = uintptr(WinApi.SetWindowLong(ChildHandle,WinApi.GWL_WNDPROC,int(cmbListWndprocCallBack)))
+					}
+					ChildHandle = WinApi.GetWindow(ChildHandle, WinApi.GW_HWNDNEXT)
+				}
+				cmbox.fEditHandle = ChildHandle
+				WinApi.SetProp(ChildHandle, uintptr(controlAtom), uintptr(unsafe.Pointer(cmbox)))
+				if WinApi.IsAMD64(){
+					//指定窗口过程
+					cmbox.fDefEditProc = uintptr(WinApi.SetWindowLongPtr(ChildHandle,WinApi.GWL_WNDPROC,int64(cmbEdtWndprocCallBack)))
+				}else{
+					cmbox.fDefEditProc = uintptr(WinApi.SetWindowLong(ChildHandle,WinApi.GWL_WNDPROC,int(cmbEdtWndprocCallBack)))
+				}
+			}
+		}
+		return true
+	}
+	return false
+}
+
+func (cmbox *GCombobox)Items()DxCommonLib.IStrings  {
+	return cmbox.fItems
+}
+
+func (cmbox *GCombobox) SubInit() {
+	if cmbox.fItems == nil{
+		cmbox.fItems = &gComboBoxStrings{fCombobox:cmbox}
+	}
+	cmbox.GWinControl.SubInit()
+	cmbox.GComponent.SubInit(cmbox)
+}
+
+func (cmbox *GCombobox)SetDropDownCount(v int)  {
+	if cmbox.fDropDownCount != int32(v){
+		cmbox.fDropDownCount = int32(v)
+		if cmbox.fHandle != 0{
+			ItemHeight := int32(WinApi.SendMessage(cmbox.fHandle,WinApi.CB_GETITEMHEIGHT,0,0))
+			WinApi.SetWindowPos(cmbox.fHandle,0, 0, 0, cmbox.fwidth, ItemHeight * cmbox.fDropDownCount +
+				cmbox.fheight + 2, WinApi.SWP_NOMOVE | WinApi.SWP_NOZORDER | WinApi.SWP_NOACTIVATE | WinApi.SWP_NOREDRAW |
+				WinApi.SWP_SHOWWINDOW)
+		}
+	}
+}
+
+
 func NewCombobox(aParent Components.IWincontrol) *GCombobox {
 	pType := reflect.TypeOf(aParent)
 	hasWincontrol := false
@@ -334,6 +507,7 @@ func NewCombobox(aParent Components.IWincontrol) *GCombobox {
 		cmb := new(GCombobox)
 		cmb.SubInit()
 		cmb.fwidth = 145
+		cmb.fDropDownCount = 8
 		cmb.fVisible = true
 		cmb.fheight = 25
 		cmb.fColor = Graphics.ClWhite
