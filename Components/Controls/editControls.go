@@ -412,7 +412,7 @@ func (cmbox *GCombobox) WndProc(msg uint32, wparam, lparam uintptr) (result uint
 		ItemHeight := int32(WinApi.SendMessage(cmbox.fHandle,WinApi.CB_GETITEMHEIGHT,0,0))
 		WinApi.SetWindowPos(cmbox.fHandle,0, 0, 0, cmbox.fwidth, ItemHeight * cmbox.fDropDownCount +
 			cmbox.fheight + 2, WinApi.SWP_NOMOVE | WinApi.SWP_NOZORDER | WinApi.SWP_NOACTIVATE | WinApi.SWP_NOREDRAW |
-			WinApi.SWP_HIDEWINDOW)
+			WinApi.SWP_SHOWWINDOW)
 	default:
 		result = WinApi.CallWindowProc(cmbox.FDefWndProc, cmbox.fHandle, msg, wparam, lparam)
 	}

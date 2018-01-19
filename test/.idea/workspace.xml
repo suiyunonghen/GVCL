@@ -18,95 +18,38 @@
     <option name="SHOW_EMPTY_GROUPS" value="false" />
     <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
     <favorites_list name="test" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="scintillaLib.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/scintillaLib.go">
+      <file leaf-file-name="editControls.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/../Components/Controls/editControls.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1276">
-              <caret line="60" column="37" lean-forward="false" selection-start-line="60" selection-start-column="37" selection-end-line="60" selection-end-column="37" />
+            <state relative-caret-position="126">
+              <caret line="465" column="57" lean-forward="false" selection-start-line="465" selection-start-column="57" selection-end-line="465" selection-end-column="57" />
               <folding>
-                <element signature="e#19#67#0" expanded="true" />
+                <element signature="e#17#248#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GScintillaEditor.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/GScintillaEditor.go">
+      <file leaf-file-name="combobox.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../../lxn/walk/combobox.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="10538">
-              <caret line="491" column="141" lean-forward="false" selection-start-line="491" selection-start-column="141" selection-end-line="491" selection-end-column="141" />
-              <folding>
-                <element signature="e#67#347#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CommonFunc.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../../DxCommonLib/CommonFunc.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
-              <caret line="16" column="16" lean-forward="false" selection-start-line="16" selection-start-column="16" selection-end-line="16" selection-end-column="16" />
+            <state relative-caret-position="918">
+              <caret line="64" column="22" lean-forward="false" selection-start-line="64" selection-start-column="22" selection-end-line="64" selection-end-column="22" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MarginBand.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/MarginBand.go">
+      <file leaf-file-name="message.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../WinApi/message.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="792">
-              <caret line="36" column="50" lean-forward="true" selection-start-line="36" selection-start-column="50" selection-end-line="36" selection-end-column="50" />
-              <folding>
-                <element signature="e#73#179#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DxLanguageLexer.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/DxLanguageLexer.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="528">
-              <caret line="41" column="5" lean-forward="true" selection-start-line="41" selection-start-column="5" selection-end-line="41" selection-end-column="5" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GraphicsCore.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../Graphics/GraphicsCore.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16654">
-              <caret line="763" column="1" lean-forward="true" selection-start-line="763" selection-start-column="1" selection-end-line="763" selection-end-column="1" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="msgbox.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/msgbox.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="484">
-              <caret line="37" column="44" lean-forward="true" selection-start-line="37" selection-start-column="44" selection-end-line="37" selection-end-column="44" />
-              <folding>
-                <element signature="e#14#526#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CommonLib.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../../DxCommonLib/CommonLib.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2596">
-              <caret line="122" column="51" lean-forward="false" selection-start-line="122" selection-start-column="51" selection-end-line="122" selection-end-column="51" />
+            <state relative-caret-position="5576">
+              <caret line="328" column="4" lean-forward="false" selection-start-line="328" selection-start-column="4" selection-end-line="328" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -115,9 +58,53 @@
       <file leaf-file-name="BaseControls.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../Components/Controls/BaseControls.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="9284">
-              <caret line="432" column="0" lean-forward="false" selection-start-line="432" selection-start-column="0" selection-end-line="432" selection-end-column="0" />
+            <state relative-caret-position="8670">
+              <caret line="520" column="25" lean-forward="false" selection-start-line="520" selection-start-column="25" selection-end-line="520" selection-end-column="25" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="componentCore.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../Components/componentCore.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="25" column="19" lean-forward="false" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="user32.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../WinApi/user32.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="27523">
+              <caret line="1624" column="0" lean-forward="false" selection-start-line="1624" selection-start-column="0" selection-end-line="1624" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="msgbox.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/msgbox.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3536">
+              <caret line="223" column="24" lean-forward="false" selection-start-line="223" selection-start-column="24" selection-end-line="223" selection-end-column="24" />
+              <folding>
+                <element signature="e#14#526#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GraphicsCore.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../Graphics/GraphicsCore.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="6154">
+              <caret line="368" column="5" lean-forward="false" selection-start-line="368" selection-start-column="5" selection-end-line="368" selection-end-column="5" />
+              <folding>
+                <element signature="e#18#134#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -133,47 +120,51 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>CreateWindowHandle</find>
-      <find>clred</find>
-      <find>fontstyle</find>
+      <find>GetWindowText</find>
+      <find>Items</find>
+      <find>WM_SETFONT</find>
+      <find>GBase</find>
+      <find>Perform</find>
+      <find>wm_setfont</find>
+      <find>FontChange</find>
       <find>GFont</find>
-      <find>FW_BOLD</find>
-      <find>clbtnface</find>
-      <find>Ord</find>
-      <find>Uint32ToGColor</find>
-      <find>line</find>
-      <find>lines.fCodeEditor.</find>
-      <find>split</find>
-      <find>ClHighlightText</find>
-      <find>btnface</find>
-      <find>SCMOD_NORM</find>
-      <find>beginpaint</find>
-      <find>NMHdr</find>
-      <find>: Integer;</find>
-      <find>NMHDR</find>
-      <find>WM_Notify</find>
-      <find>indexof</find>
-      <find>OnResize</find>
-      <find>WM_Size</find>
-      <find>Notify</find>
-      <find>字体</find>
-      <find>STYLE_MAX</find>
-      <find>Pascal</find>
-      <find>#define</find>
-      <find>Show</find>
-      <find>initScintilla</find>
-      <find>fInitLexer</find>
+      <find>Invalidate</find>
+      <find>gListBoxStrings</find>
+      <find>fListBox</find>
+      <find>LB_</find>
+      <find>ptinrect</find>
+      <find>ClientRect</find>
+      <find>GetClientRect</find>
+      <find>GetClient</find>
+      <find>fnGetClientRect</find>
+      <find>GWin</find>
+      <find>MouseDown</find>
+      <find>setparent</find>
+      <find>ControlCount</find>
+      <find>initWndProc</find>
+      <find>GWL_WNDPROC</find>
+      <find>Prop</find>
+      <find>comboBoxEditWndProcPtr</find>
+      <find>SendMessage</find>
+      <find>GetProp</find>
+      <find>newComboBoxWithStyle</find>
+      <find>WM_SetFont</find>
+      <find>CSDropDown</find>
     </findStrings>
     <replaceStrings>
       <replace>Scintilla.</replace>
       <replace>int</replace>
+      <replace>fItems</replace>
+      <replace>gComboBoxStrings</replace>
+      <replace>fCombobox</replace>
+      <replace>CB_</replace>
     </replaceStrings>
   </component>
+  <component name="GOROOT" path="D:/DevTools/go" />
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/../Components/Controls/buttons.go" />
-        <option value="$PROJECT_DIR$/../Components/Controls/editControls.go" />
         <option value="$PROJECT_DIR$/../Components/Controls/Forms.go" />
         <option value="$PROJECT_DIR$/../Components/Controls/GraphicControls.go" />
         <option value="$PROJECT_DIR$/../Components/NVisbleControls/menus.go" />
@@ -184,20 +175,25 @@
         <option value="$PROJECT_DIR$/../Components/DxControls/GScintillaEditor.go" />
         <option value="$PROJECT_DIR$/../WinApi/message.go" />
         <option value="$PROJECT_DIR$/../Common.go" />
-        <option value="$PROJECT_DIR$/../Components/componentCore.go" />
         <option value="$PROJECT_DIR$/../../Common/CommonFunc.go" />
         <option value="$PROJECT_DIR$/../../Common/CommonLib.go" />
         <option value="$PROJECT_DIR$/../../DxCommonLib/CommonLib.go" />
-        <option value="$PROJECT_DIR$/../WinApi/WinStructs.go" />
-        <option value="$PROJECT_DIR$/../Components/Controls/BaseControls.go" />
         <option value="$PROJECT_DIR$/../Graphics/baseobj.go" />
         <option value="$PROJECT_DIR$/../../DxCommonLib/CommonFunc.go" />
-        <option value="$PROJECT_DIR$/../Graphics/GraphicsCore.go" />
         <option value="$PROJECT_DIR$/../Components/DxControls/Scintilla/scintillaLib.go" />
         <option value="$PROJECT_DIR$/../Components/DxControls/Scintilla/GScintillaEditor.go" />
-        <option value="$PROJECT_DIR$/msgbox.go" />
         <option value="$PROJECT_DIR$/../Components/DxControls/Scintilla/MarginBand.go" />
         <option value="$PROJECT_DIR$/../Components/DxControls/Scintilla/DxLanguageLexer.go" />
+        <option value="$PROJECT_DIR$/../../DxCommonLib/StringList.go" />
+        <option value="$PROJECT_DIR$/../Graphics/GraphicsCore.go" />
+        <option value="$PROJECT_DIR$/../Components/Controls/DxListBox.go" />
+        <option value="$PROJECT_DIR$/../Components/componentCore.go" />
+        <option value="$PROJECT_DIR$/../WinApi/WinStructs.go" />
+        <option value="$PROJECT_DIR$/../Components/Controls/BaseControls.go" />
+        <option value="$PROJECT_DIR$/../WinApi/user32.go" />
+        <option value="$PROJECT_DIR$/../Components/Controls/ListBox.go" />
+        <option value="$PROJECT_DIR$/msgbox.go" />
+        <option value="$PROJECT_DIR$/../Components/Controls/editControls.go" />
       </list>
     </option>
   </component>
@@ -207,7 +203,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
@@ -232,208 +228,116 @@
       <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;test&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;test&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;test&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="suiyunonghen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GVCL" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;test&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="suiyunonghen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GVCL" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Components" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;test&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="suiyunonghen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GVCL" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Components" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="DxControls" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Scintilla" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;test&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="suiyunonghen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GVCL" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Components" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Controls" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GOPATH &lt;test&gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="github.com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="suiyunonghen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
+          <expand>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+              <item name="suiyunonghen" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+              <item name="suiyunonghen" type="462c0819:PsiDirectoryNode" />
+              <item name="GVCL" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+              <item name="suiyunonghen" type="462c0819:PsiDirectoryNode" />
+              <item name="GVCL" type="462c0819:PsiDirectoryNode" />
+              <item name="Components" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+              <item name="suiyunonghen" type="462c0819:PsiDirectoryNode" />
+              <item name="GVCL" type="462c0819:PsiDirectoryNode" />
+              <item name="Components" type="462c0819:PsiDirectoryNode" />
+              <item name="Controls" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+              <item name="suiyunonghen" type="462c0819:PsiDirectoryNode" />
+              <item name="GVCL" type="462c0819:PsiDirectoryNode" />
+              <item name="Components" type="462c0819:PsiDirectoryNode" />
+              <item name="DxControls" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+              <item name="suiyunonghen" type="462c0819:PsiDirectoryNode" />
+              <item name="GVCL" type="462c0819:PsiDirectoryNode" />
+              <item name="Components" type="462c0819:PsiDirectoryNode" />
+              <item name="DxControls" type="462c0819:PsiDirectoryNode" />
+              <item name="Scintilla" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+              <item name="suiyunonghen" type="462c0819:PsiDirectoryNode" />
+              <item name="GVCL" type="462c0819:PsiDirectoryNode" />
+              <item name="Graphics" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="test" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="GOPATH &lt;test&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="github.com" type="462c0819:PsiDirectoryNode" />
+              <item name="suiyunonghen" type="462c0819:PsiDirectoryNode" />
+              <item name="GVCL" type="462c0819:PsiDirectoryNode" />
+              <item name="WinApi" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
         </subPane>
       </pane>
     </panes>
@@ -456,7 +360,37 @@
     </option>
   </component>
   <component name="RunManager" selected="Go Application.test">
-    <configuration default="false" name="test" type="GoTestRunConfiguration" factoryName="Go Test" singleton="true" temporary="true">
+    <configuration name="Build github.com/suiyunonghen/GVCL/test and run" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
+      <module name="test" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i -ldflags=&quot;-linkmode internal -H windowsgui&quot;" />
+      <kind value="PACKAGE" />
+      <filePath value="$PROJECT_DIR$/msgbox.go" />
+      <package value="github.com/suiyunonghen/GVCL/test" />
+    </configuration>
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="test" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i -ldflags=&quot;-linkmode internal -H windowsgui&quot;" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/msgbox.go" />
+      <package value="github.com/suiyunonghen/GVCL/test" />
+    </configuration>
+    <configuration name="go run msgbox.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
+      <module name="test" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/msgbox.go" />
+    </configuration>
+    <configuration name="test" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
+      <module name="test" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i -ldflags=&quot;-linkmode internal -H windowsgui&quot;" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/msgbox.go" />
+      <package value="github.com/suiyunonghen/GVCL/test" />
+    </configuration>
+    <configuration name="test" type="GoTestRunConfiguration" factoryName="Go Test" singleton="true" temporary="true">
       <module name="test" />
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i -ldflags=&quot;-linkmode internal&quot;" />
@@ -465,40 +399,6 @@
       <package value="github.com/suiyunonghen/GVCL/test" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/msgbox.go" />
-      <method />
-    </configuration>
-    <configuration default="false" name="go run msgbox.go" type="GoRunFileConfiguration" factoryName="Go Single File" temporary="true">
-      <module name="test" />
-      <working_directory value="$PROJECT_DIR$/" />
-      <filePath value="$PROJECT_DIR$/msgbox.go" />
-      <method />
-    </configuration>
-    <configuration default="false" name="test" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
-      <module name="test" />
-      <working_directory value="$PROJECT_DIR$/" />
-      <go_parameters value="-i -ldflags=&quot;-linkmode internal -H windowsgui&quot;" />
-      <filePath value="$PROJECT_DIR$/msgbox.go" />
-      <kind value="FILE" />
-      <package value="github.com/suiyunonghen/GVCL/test" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Build github.com/suiyunonghen/GVCL/test and run" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
-      <module name="test" />
-      <working_directory value="$PROJECT_DIR$/" />
-      <go_parameters value="-i -ldflags=&quot;-linkmode internal -H windowsgui&quot;" />
-      <filePath value="$PROJECT_DIR$/msgbox.go" />
-      <kind value="PACKAGE" />
-      <package value="github.com/suiyunonghen/GVCL/test" />
-      <method />
-    </configuration>
-    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="test" />
-      <working_directory value="$PROJECT_DIR$/" />
-      <go_parameters value="-i -ldflags=&quot;-linkmode internal -H windowsgui&quot;" />
-      <filePath value="$PROJECT_DIR$/msgbox.go" />
-      <kind value="FILE" />
-      <package value="github.com/suiyunonghen/GVCL/test" />
-      <method />
     </configuration>
     <configuration default="true" type="GoRunFileConfiguration" factoryName="Go Single File">
       <module name="test" />
@@ -531,15 +431,6 @@
     <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
       <method />
     </configuration>
-    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
-      <node-interpreter>project</node-interpreter>
-      <node-options />
-      <gulpfile />
-      <tasks />
-      <arguments />
-      <envs />
-      <method />
-    </configuration>
     <configuration default="true" type="js.build_tools.npm" factoryName="npm">
       <command value="run" />
       <scripts />
@@ -547,18 +438,25 @@
       <envs />
       <method />
     </configuration>
+    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
+    </configuration>
     <list size="4">
-      <item index="0" class="java.lang.String" itemvalue="Go Test.test" />
-      <item index="1" class="java.lang.String" itemvalue="Go Single File.go run msgbox.go" />
+      <item index="0" class="java.lang.String" itemvalue="Go Application.go run msgbox.go" />
+      <item index="1" class="java.lang.String" itemvalue="Go Test.test" />
       <item index="2" class="java.lang.String" itemvalue="Go Application.test" />
       <item index="3" class="java.lang.String" itemvalue="Go Application.Build github.com/suiyunonghen/GVCL/test and run" />
     </list>
     <recent_temporary>
-      <list size="4">
+      <list size="3">
         <item index="0" class="java.lang.String" itemvalue="Go Application.test" />
         <item index="1" class="java.lang.String" itemvalue="Go Application.Build github.com/suiyunonghen/GVCL/test and run" />
-        <item index="2" class="java.lang.String" itemvalue="Go Single File.go run msgbox.go" />
-        <item index="3" class="java.lang.String" itemvalue="Go Test.test" />
+        <item index="2" class="java.lang.String" itemvalue="Go Test.test" />
       </list>
     </recent_temporary>
   </component>
@@ -598,19 +496,19 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18020834" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22767204" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18393235" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35126582" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39957717" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39873418" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -621,114 +519,25 @@
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="processedProjectFiles" value="true" />
+    <option name="version" value="1" />
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="137" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/../Components/Controls/editControls.go</url>
+          <line>337</line>
+          <option name="timeStamp" value="165" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="166" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../WinApi/comctl32.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/NVisbleControls/registry.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="4" column="16" lean-forward="false" selection-start-line="4" selection-start-column="16" selection-end-line="4" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/Controls/editControls.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="43" column="26" lean-forward="true" selection-start-line="43" selection-start-column="26" selection-end-line="43" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/NVisbleControls/trayicon.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="7" column="16" lean-forward="false" selection-start-line="7" selection-start-column="16" selection-end-line="7" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../CommonLib.go" />
-    <entry file="file://E:/DevTools/go/src/syscall/syscall_windows.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="16" column="5" lean-forward="false" selection-start-line="16" selection-start-column="5" selection-end-line="16" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/syscall/zsyscall_windows.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="422">
-          <caret line="212" column="23" lean-forward="true" selection-start-line="212" selection-start-column="23" selection-end-line="212" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/runtime/mfinal.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6688">
-          <caret line="308" column="9" lean-forward="false" selection-start-line="308" selection-start-column="9" selection-end-line="308" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/DxControls/GScintillaEditor.go" />
-    <entry file="file://E:/DevTools/go/src/runtime/asm_amd64.s">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="518" column="25" lean-forward="true" selection-start-line="518" selection-start-column="25" selection-end-line="518" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/Controls/GraphicControls.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="66">
-          <caret line="3" column="41" lean-forward="false" selection-start-line="3" selection-start-column="41" selection-end-line="3" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/runtime/syscall_windows.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="173" column="7" lean-forward="false" selection-start-line="173" selection-start-column="7" selection-end-line="173" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/Controls/Forms.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4466">
-          <caret line="209" column="35" lean-forward="false" selection-start-line="209" selection-start-column="35" selection-end-line="209" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/builtin/builtin.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="87" column="5" lean-forward="false" selection-start-line="87" selection-start-column="5" selection-end-line="87" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Common.go" />
-    <entry file="file://$PROJECT_DIR$/../../../../golang/text/encoding/simplifiedchinese/gbk.go" />
-    <entry file="file://$PROJECT_DIR$/../../../../golang/x/text/encoding/simplifiedchinese/gbk.go" />
-    <entry file="file://$PROJECT_DIR$/../../../../golang.org/x/text/transform/transform.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="133" column="5" lean-forward="false" selection-start-line="133" selection-start-column="5" selection-end-line="133" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../../../golang.org/x/text/encoding/encoding.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="248">
@@ -736,75 +545,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/componentCore.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-354">
-          <caret line="74" column="19" lean-forward="false" selection-start-line="74" selection-start-column="19" selection-end-line="74" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/strings/strings.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="293" column="5" lean-forward="false" selection-start-line="293" selection-start-column="5" selection-end-line="293" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/reflect/value.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="1774" column="5" lean-forward="false" selection-start-line="1774" selection-start-column="5" selection-end-line="1774" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/strings/strings_decl.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
-          <caret line="7" column="5" lean-forward="false" selection-start-line="7" selection-start-column="5" selection-end-line="7" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/os/stat_windows.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="63" column="13" lean-forward="true" selection-start-line="63" selection-start-column="13" selection-end-line="63" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/os/file.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="268">
-          <caret line="82" column="6" lean-forward="false" selection-start-line="82" selection-start-column="6" selection-end-line="82" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../WinApi/user32.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="1615" column="13" lean-forward="false" selection-start-line="1615" selection-start-column="4" selection-end-line="1615" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/syscall/dll_windows.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="24" column="5" lean-forward="false" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://E:/DevTools/go/src/strings/strings.go" />
+    <entry file="file://E:/DevTools/go/src/reflect/value.go" />
+    <entry file="file://E:/DevTools/go/src/strings/strings_decl.go" />
+    <entry file="file://E:/DevTools/go/src/os/stat_windows.go" />
+    <entry file="file://E:/DevTools/go/src/os/file.go" />
+    <entry file="file://E:/DevTools/go/src/syscall/dll_windows.go" />
     <entry file="file://$PROJECT_DIR$/../../Common/CommonLib.go" />
     <entry file="file://$PROJECT_DIR$/../../Common/CommonFunc.go" />
     <entry file="file://$PROJECT_DIR$/../../DxNetPay/Common/DxNetPayCommon.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="66">
           <caret line="3" column="4" lean-forward="false" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Graphics/canvas.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="876">
-          <caret line="203" column="30" lean-forward="false" selection-start-line="203" selection-start-column="30" selection-end-line="203" selection-end-column="30" />
         </state>
       </provider>
     </entry>
@@ -829,13 +581,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../WinApi/WindowsConsts.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-30">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../WinApi/shellapi.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1320">
@@ -843,125 +588,264 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/Controls/buttons.go">
+    <entry file="file://E:/DevTools/go/src/runtime/cgocall.go" />
+    <entry file="file://$PROJECT_DIR$/../../DxCommonLib/CommonLib.go" />
+    <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/scintillaLib.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="55" column="5" lean-forward="false" selection-start-line="55" selection-start-column="5" selection-end-line="55" selection-end-column="5" />
+        <state relative-caret-position="0">
+          <caret line="60" column="37" lean-forward="false" selection-start-line="60" selection-start-column="37" selection-end-line="60" selection-end-column="37" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../WinApi/message.go">
+    <entry file="file://$PROJECT_DIR$/../../../../golang.org/x/image/bmp/writer.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="214">
-          <caret line="58" column="47" lean-forward="true" selection-start-line="58" selection-start-column="47" selection-end-line="58" selection-end-column="47" />
+        <state relative-caret-position="-2373">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../golang.org/x/image/bmp/reader.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2509">
+          <caret line="30" column="40" lean-forward="false" selection-start-line="30" selection-start-column="40" selection-end-line="30" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/DevTools/go/src/image/png/paeth.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/DevTools/go/src/image/png/reader.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3670">
+          <caret line="103" column="5" lean-forward="false" selection-start-line="103" selection-start-column="5" selection-end-line="103" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/DevTools/go/src/image/png/writer.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2922">
+          <caret line="232" column="33" lean-forward="false" selection-start-line="232" selection-start-column="33" selection-end-line="232" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/DevTools/go/src/image/draw/draw.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="98" column="7" lean-forward="false" selection-start-line="98" selection-start-column="3" selection-end-line="98" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/DevTools/go/src/image/image.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="196">
+          <caret line="159" column="48" lean-forward="true" selection-start-line="159" selection-start-column="48" selection-end-line="159" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/DxLanguageLexer.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="22" column="40" lean-forward="true" selection-start-line="22" selection-start-column="40" selection-end-line="22" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/MarginBand.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="548">
+          <caret line="36" column="50" lean-forward="false" selection-start-line="36" selection-start-column="50" selection-end-line="36" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Graphics/canvas.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2500">
+          <caret line="191" column="25" lean-forward="false" selection-start-line="191" selection-start-column="25" selection-end-line="191" selection-end-column="25" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../Components/NVisbleControls/menus.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="-102">
           <caret line="0" column="23" lean-forward="false" selection-start-line="0" selection-start-column="8" selection-end-line="0" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/NVisbleControls/registry.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="31" column="4" lean-forward="false" selection-start-line="31" selection-start-column="4" selection-end-line="31" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/Controls/Forms.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2984">
+          <caret line="108" column="0" lean-forward="false" selection-start-line="108" selection-start-column="0" selection-end-line="108" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/Controls/buttons.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="986">
+          <caret line="63" column="21" lean-forward="false" selection-start-line="63" selection-start-column="21" selection-end-line="63" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../DxCommonLib/StringList.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="23" column="8" lean-forward="false" selection-start-line="23" selection-start-column="8" selection-end-line="23" selection-end-column="8" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../Graphics/baseobj.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="28" column="27" lean-forward="true" selection-start-line="28" selection-start-column="27" selection-end-line="28" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/DevTools/go/src/runtime/cgocall.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="322" column="0" lean-forward="false" selection-start-line="322" selection-start-column="0" selection-end-line="322" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../DxCommonLib/CommonLib.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2596">
-          <caret line="122" column="51" lean-forward="false" selection-start-line="122" selection-start-column="51" selection-end-line="122" selection-end-column="51" />
-          <folding />
+        <state relative-caret-position="68">
+          <caret line="6" column="16" lean-forward="false" selection-start-line="6" selection-start-column="5" selection-end-line="6" selection-end-column="16" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../Graphics/GraphicsCore.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16654">
-          <caret line="763" column="1" lean-forward="true" selection-start-line="763" selection-start-column="1" selection-end-line="763" selection-end-column="1" />
-          <folding />
+        <state relative-caret-position="6154">
+          <caret line="368" column="5" lean-forward="false" selection-start-line="368" selection-start-column="5" selection-end-line="368" selection-end-column="5" />
+          <folding>
+            <element signature="e#18#134#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/Controls/GraphicControls.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1258">
+          <caret line="79" column="24" lean-forward="true" selection-start-line="79" selection-start-column="24" selection-end-line="79" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../lxn/walk/listbox.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-748">
+          <caret line="89" column="64" lean-forward="true" selection-start-line="89" selection-start-column="10" selection-end-line="89" selection-end-column="64" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/GScintillaEditor.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7021">
+          <caret line="515" column="31" lean-forward="true" selection-start-line="515" selection-start-column="31" selection-end-line="515" selection-end-column="31" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../../DxCommonLib/CommonFunc.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="16" column="16" lean-forward="false" selection-start-line="16" selection-start-column="16" selection-end-line="16" selection-end-column="16" />
-          <folding />
+        <state relative-caret-position="1105">
+          <caret line="72" column="5" lean-forward="true" selection-start-line="72" selection-start-column="5" selection-end-line="72" selection-end-column="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../WinApi/WinStructs.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="344">
-          <caret line="341" column="23" lean-forward="true" selection-start-line="341" selection-start-column="23" selection-end-line="341" selection-end-column="23" />
+        <state relative-caret-position="155">
+          <caret line="50" column="17" lean-forward="false" selection-start-line="50" selection-start-column="17" selection-end-line="50" selection-end-column="17" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/scintillaLib.go">
+    <entry file="file://$PROJECT_DIR$/../../../lxn/walk/property.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1276">
-          <caret line="60" column="37" lean-forward="false" selection-start-line="60" selection-start-column="37" selection-end-line="60" selection-end-column="37" />
-          <folding>
-            <element signature="e#19#67#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="-92">
+          <caret line="15" column="5" lean-forward="false" selection-start-line="15" selection-start-column="5" selection-end-line="15" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../lxn/walk/window.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2183">
+          <caret line="471" column="67" lean-forward="true" selection-start-line="471" selection-start-column="67" selection-end-line="471" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../WinApi/user32.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="27523">
+          <caret line="1624" column="0" lean-forward="false" selection-start-line="1624" selection-start-column="0" selection-end-line="1624" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/Controls/ListBox.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-6198">
+          <caret line="27" column="28" lean-forward="false" selection-start-line="27" selection-start-column="28" selection-end-line="27" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../WinApi/WindowsConsts.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="4458" column="4" lean-forward="false" selection-start-line="4458" selection-start-column="4" selection-end-line="4458" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../WinApi/message.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5576">
+          <caret line="328" column="4" lean-forward="false" selection-start-line="328" selection-start-column="4" selection-end-line="328" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/DevTools/go/src/syscall/syscall_windows.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="62" column="37" lean-forward="false" selection-start-line="62" selection-start-column="19" selection-end-line="62" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/Controls/BaseControls.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8670">
+          <caret line="520" column="25" lean-forward="false" selection-start-line="520" selection-start-column="25" selection-end-line="520" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../lxn/walk/combobox.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="918">
+          <caret line="64" column="22" lean-forward="false" selection-start-line="64" selection-start-column="22" selection-end-line="64" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Components/componentCore.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="25" column="19" lean-forward="false" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/msgbox.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="484">
-          <caret line="37" column="44" lean-forward="true" selection-start-line="37" selection-start-column="44" selection-end-line="37" selection-end-column="44" />
+        <state relative-caret-position="3536">
+          <caret line="223" column="24" lean-forward="false" selection-start-line="223" selection-start-column="24" selection-end-line="223" selection-end-column="24" />
           <folding>
             <element signature="e#14#526#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/Controls/BaseControls.go">
+    <entry file="file://$PROJECT_DIR$/../Components/Controls/editControls.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9284">
-          <caret line="432" column="0" lean-forward="false" selection-start-line="432" selection-start-column="0" selection-end-line="432" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/GScintillaEditor.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10538">
-          <caret line="491" column="141" lean-forward="false" selection-start-line="491" selection-start-column="141" selection-end-line="491" selection-end-column="141" />
+        <state relative-caret-position="126">
+          <caret line="465" column="57" lean-forward="false" selection-start-line="465" selection-start-column="57" selection-end-line="465" selection-end-column="57" />
           <folding>
-            <element signature="e#67#347#0" expanded="true" />
+            <element signature="e#17#248#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/MarginBand.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="792">
-          <caret line="36" column="50" lean-forward="true" selection-start-line="36" selection-start-column="50" selection-end-line="36" selection-end-column="50" />
-          <folding>
-            <element signature="e#73#179#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Components/DxControls/Scintilla/DxLanguageLexer.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="41" column="5" lean-forward="true" selection-start-line="41" selection-start-column="5" selection-end-line="41" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>

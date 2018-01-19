@@ -665,6 +665,7 @@ var (
 	fnGetNamedPipeClientSessionId       uintptr
 	fnGetNamedPipeClientComputerNameW   uintptr
 	fnGetNamedPipeClientComputerNameA   uintptr
+	fnMoveMemory						uintptr
 )
 
 func init() {
@@ -1334,6 +1335,14 @@ func initKernel32() {
 	fnGetNamedPipeClientSessionId, _ = syscall.GetProcAddress(libkernel32, "GetNamedPipeClientSessionId")
 	fnGetNamedPipeClientComputerNameW, _ = syscall.GetProcAddress(libkernel32, "GetNamedPipeClientComputerNameW")
 	fnGetNamedPipeClientComputerNameA, _ = syscall.GetProcAddress(libkernel32, "GetNamedPipeClientComputerNameA")
+	fnMoveMemory, _ = syscall.GetProcAddress(libkernel32, "RtlMoveMemory")
+}
+
+func MoveMemory(destination, source unsafe.Pointer, length uintptr) {
+	syscall.Syscall(fnMoveMemory, 3,
+		uintptr(unsafe.Pointer(destination)),
+		uintptr(source),
+		uintptr(length))
 }
 
 func GetModuleHandle(lpModuleName string) syscall.Handle {
