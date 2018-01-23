@@ -3,7 +3,6 @@ package WinApi
 import (
 	"syscall"
 	"unsafe"
-	"runtime"
 	"unicode/utf16"
 )
 
@@ -1669,9 +1668,6 @@ func IsWindowEnabled(hwnd syscall.Handle)bool  {
 	return ret!=0
 }
 
-func IsAMD64()bool  {
-	return runtime.GOARCH == "amd64"
-}
 
 func SetWindowLong(hWnd syscall.Handle,nIndex int,dwNewLong int)int  {
 	ret,_,_:=syscall.Syscall(fnSetWindowLongW,3,uintptr(hWnd),uintptr(nIndex),uintptr(dwNewLong))

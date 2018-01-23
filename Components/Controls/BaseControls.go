@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"unsafe"
 	"fmt"
+	"github.com/suiyunonghen/DxCommonLib"
 	"github.com/suiyunonghen/GVCL/Components/NVisbleControls"
 	"math"
 )
@@ -791,7 +792,7 @@ func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool
 			unsafe.Pointer(params.Param))
 		result := ctrl.fHandle !=0
 		if result{
-			if WinApi.IsAMD64(){
+			if DxCommonLib.IsAmd64{
 				//指定窗口过程
 				ctrl.FDefWndProc = uintptr(WinApi.SetWindowLongPtr(ctrl.fHandle,WinApi.GWL_WNDPROC,int64(InitWndprocCallBack)))
 			}else{

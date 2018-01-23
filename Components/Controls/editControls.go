@@ -449,7 +449,7 @@ func (cmbox *GCombobox) CreateWindowHandle(params *Components.GCreateParams)bool
 				if cmbox.fStyle == CSSimple{
 					cmbox.fListHandle = ChildHandle
 					WinApi.SetProp(ChildHandle, uintptr(controlAtom), uintptr(unsafe.Pointer(cmbox)))
-					if WinApi.IsAMD64(){
+					if DxCommonLib.IsAmd64{
 						//指定窗口过程
 						cmbox.fDefListProc = uintptr(WinApi.SetWindowLongPtr(ChildHandle,WinApi.GWL_WNDPROC,int64(cmbListWndprocCallBack)))
 					}else{
@@ -459,7 +459,7 @@ func (cmbox *GCombobox) CreateWindowHandle(params *Components.GCreateParams)bool
 				}
 				cmbox.fEditHandle = ChildHandle
 				WinApi.SetProp(ChildHandle, uintptr(controlAtom), uintptr(unsafe.Pointer(cmbox)))
-				if WinApi.IsAMD64(){
+				if DxCommonLib.IsAmd64{
 					//指定窗口过程
 					cmbox.fDefEditProc = uintptr(WinApi.SetWindowLongPtr(ChildHandle,WinApi.GWL_WNDPROC,int64(cmbEdtWndprocCallBack)))
 				}else{
