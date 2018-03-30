@@ -1623,7 +1623,7 @@ func SendMessage(hwnd syscall.Handle,msg uint,wparam,lparam uintptr) LRESULT {
 
 
 func PostMessage(hwnd syscall.Handle,msg uint,wparam,lparam uintptr) bool {
-	ret,_,_:=syscall.Syscall6(fnSendMessageW,1,uintptr(hwnd),uintptr(msg),wparam,lparam,0,0)
+	ret,_,_:=syscall.Syscall6(fnPostMessageW,1,uintptr(hwnd),uintptr(msg),wparam,lparam,0,0)
 	return ret != 0
 }
 
