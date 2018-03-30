@@ -346,7 +346,7 @@ func (app *WApplication)Synchronize(syncMnd SyncMethod,params ...interface{})  {
 		select{
 		case <-notifychan:
 			//完成之后退出咯
-			return 
+			return
 		case <- app.fcontext.Done(): //退出
 			return
 		}
@@ -362,6 +362,12 @@ func (app *WApplication)Terminated()bool {
 		return true
 	default:
 		return false
+	}
+}
+
+func Synchronize(syncMnd SyncMethod,params ...interface{})  {
+	if application != nil{
+		application.Synchronize(syncMnd)
 	}
 }
 

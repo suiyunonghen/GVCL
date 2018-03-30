@@ -38,6 +38,8 @@ type IControl interface {
 	IsWindowControl()bool
 	AfterParentWndCreate()
 	ClientRect()WinApi.Rect
+	Enabled()bool
+	SetEnabled(v bool)
 }
 
 type IApplication interface {

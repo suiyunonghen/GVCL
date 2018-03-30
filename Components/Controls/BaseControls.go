@@ -164,10 +164,24 @@ type GBaseControl struct {
 	fwidth             int32
 	fheight            int32
 	fVisible           bool
+	fEnabled			bool
 	fMessageHandlerMap map[uint32]*Graphics.GDispatchObj
 	Font               Graphics.GFont
 	OnResize Graphics.NotifyEvent
 	PopupMenu      	   *NVisbleControls.GPopupMenu
+}
+
+func (ctrl *GBaseControl)Enabled()bool  {
+	return ctrl.fEnabled
+}
+
+func (ctrl *GBaseControl)SetEnabled(v bool)  {
+	if ctrl.fEnabled != v{
+		ctrl.fEnabled = v
+		if ctrl.fParent != nil && ctrl.fParent.HandleAllocated(){
+			ctrl.Invalidate()
+		}
+	}
 }
 
 func (ctrl *GBaseControl)BindMessageMpas()  {
@@ -209,6 +223,7 @@ func (ctrl *GBaseControl) Left() int32 {
 func (ctrl *GBaseControl) SubInit() {
 	ctrl.GObject.SubInit(ctrl)
 	ctrl.Font.BeginUpdate()
+	ctrl.fEnabled = true
 	ctrl.Font.FontName = "宋体"
 	ctrl.Font.SetSize(9)
 	ctrl.Font.EndUpdate()
@@ -425,6 +440,9 @@ func (ctrl *GBaseControl)Paint(cvs Graphics.ICanvas)  {
 
 func (ctrl *GBaseControl) SetVisible(v bool) {
 	ctrl.fVisible = v
+	if ctrl.fParent != nil && ctrl.fParent.HandleAllocated(){
+		ctrl.Invalidate()
+	}
 }
 
 func (ctrl *GBaseControl)AfterParentWndCreate()  {
@@ -783,6 +801,22 @@ func (ctrl *GWinControl) SetVisible(v bool) {
 	}
 }
 
+func (ctrl *GWinControl)Enabled()bool  {
+	if ctrl.HandleAllocated(){
+		ctrl.fEnabled = WinApi.IsWindowEnabled(ctrl.fHandle)
+	}
+	return ctrl.fEnabled
+}
+
+func (ctrl *GWinControl)SetEnabled(v bool)  {
+	if ctrl.fEnabled != v{
+		ctrl.fEnabled = v
+		if ctrl.HandleAllocated(){
+			WinApi.EnableWindow(ctrl.fHandle,v)
+		}
+	}
+}
+
 func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool  {
 	if params.WindowClass.LpszClassName!=nil && params.WinClassName == WinApi.UTF16Ptr2String(params.WindowClass.LpszClassName,256){
 		//两者类名一致，一般WinSDK绑定
@@ -888,6 +922,7 @@ func (ctrl *GWinControl) UpdateShowing() {
 				WinApi.SetWindowPos(ctrl.fHandle, 0, 0, 0, 0, 0,  WinApi.ShowFlagsHide)
 			}
 		}
+		WinApi.EnableWindow(ctrl.fHandle,ctrl.fEnabled)
 	}else{
 		if ctrl.fVisible {
 			WinApi.SetWindowPos(ctrl.fHandle, 0, 0, 0, 0, 0,  WinApi.ShowFlagsVisible)
