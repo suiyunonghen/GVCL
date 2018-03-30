@@ -61,7 +61,16 @@ type unActiveFormNode struct {
 	formwnd syscall.Handle
 	prev *unActiveFormNode
 }
-type WApplication struct {
+
+type  (
+	SyncMethod		func(params ...interface{}) //同步方法
+	syncObject		struct{
+		method		SyncMethod
+		params		[]interface{}		//参数
+		syncChan	chan struct{}
+	}
+
+    WApplication struct {
 	Components.GComponent
 	fMainForm    *GForm
 	fForms       []*GForm
@@ -73,12 +82,24 @@ type WApplication struct {
 	fappIcon     WinApi.HICON
 	fcancelFunc	 context.CancelFunc
 	fcontext  	 context.Context
+	synchronizeSignal		chan syncObject  //用来做goroutine同步的通道信号,一般发送的是要同步的函数和一个等待关闭的chan信号
+	}
+)
+
+func (obj *syncObject)runSyncMethod()  {
+	if obj.method!=nil{
+		obj.method(obj.params...)
+		if obj.syncChan!=nil{
+			close(obj.syncChan) //关闭通道，通知完成了
+		}
+	}
 }
 
 func NewApplication()*WApplication  {
 	app := new(WApplication)
 	app.fcontext,app.fcancelFunc = context.WithCancel(context.Background())
 	app.ShowMainForm =true
+	app.synchronizeSignal = make(chan syncObject,1)
 	application = app
 	return app
 }
@@ -97,6 +118,17 @@ func (app *WApplication)Context() context.Context  {
 		return app.fcontext
 	}
 	return context.Background()
+}
+
+func (app *WApplication)checkSyncMethod()  {
+	select{
+	case syncObj,ok := <- app.synchronizeSignal:
+		if ok{
+			syncObj.runSyncMethod() //执行同步
+		}
+	default:
+
+	}
 }
 
 func (app *WApplication) Run() {
@@ -275,6 +307,8 @@ func (frm *GForm) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, m
 		}else{
 			frm.fModalResult = MrClose
 		}
+	case WinApi.WM_NULL:
+		application.checkSyncMethod()
 	case WinApi.WM_SETFOCUS:
 		application.ActiveForm = frm
 	default:
@@ -296,6 +330,25 @@ func (app *WApplication) CreateForm() *GForm {
 	}
 	app.fForms = append(app.fForms, frm)
 	return frm
+}
+
+//执行同步
+func (app *WApplication)Synchronize(syncMnd SyncMethod,params ...interface{})  {
+	//通信发送
+	if app.fMainForm == nil || app.fMainForm.HandleAllocated(){
+		notifychan := make(chan struct{})
+		app.synchronizeSignal <- syncObject{syncMnd,params,notifychan}
+		WinApi.SendMessage(app.fMainForm.fHandle,WinApi.WM_NULL,0,0)
+		select{
+		case <-notifychan:
+			//执行通知完成
+		case <- app.fcontext.Done(): //退出
+			return
+		}
+	}else{
+		//直接执行函数
+		syncMnd(params)
+	}
 }
 
 func (app *WApplication)Terminated()bool {
@@ -338,15 +391,26 @@ func (app *WApplication) ProcessMessage(msg *WinApi.MSG) bool {
 	if msg.PeekMessage(0, 0, 0, WinApi.PM_REMOVE) {
 		result = true
 		if msg.Message != WinApi.WM_QUIT {
-			handled := false
-			if app.OnMessage != nil {
-				app.OnMessage(app, msg, &handled)
-			}
-			if !handled {
-				msg.TranslateMessage()
-				msg.DispatchMessage()
-			} else {
-				app.idleMsg(msg)
+			if msg.Message == WinApi.WM_NULL{//检查是否可以同步
+				application.checkSyncMethod()
+			}else{
+				handled := false
+				if app.OnMessage != nil {
+					app.OnMessage(app, msg, &handled)
+				}
+				if !handled {
+					msg.TranslateMessage()
+					msg.DispatchMessage()
+				} else {
+					select{
+					case syncObj,ok := <- app.synchronizeSignal:
+						if ok{
+							syncObj.runSyncMethod() //执行同步
+						}
+					default:
+						app.idleMsg(msg)
+					}
+				}
 			}
 		} else {
 			//执行完成
