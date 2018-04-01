@@ -131,6 +131,14 @@ func (obj *GObject) SubChild(idx int) interface{} {
 	return nil
 }
 
+func (obj *GObject)RealObject()interface{}  {
+	if i := obj.SubChildCount() -1;i>=0{
+		return obj.SubChild(i)
+	}else{
+		return obj
+	}
+}
+
 func (obj *GObject) SubChildCount() int {
 	if obj.fSubChilds == nil {
 		return 0

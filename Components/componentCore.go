@@ -40,6 +40,9 @@ type IControl interface {
 	ClientRect()WinApi.Rect
 	Enabled()bool
 	SetEnabled(v bool)
+	MouseEnter()
+	MouseLeave()
+	MouseMove(x,y int,state KeyState)
 }
 
 type IApplication interface {
@@ -62,6 +65,7 @@ type GCreateParams struct {
 }
 
 type IWincontrol interface {
+	IControl
 	GetWindowHandle() syscall.Handle
 	CreateWnd()
 	DestoryWnd()
@@ -70,7 +74,6 @@ type IWincontrol interface {
 	WControlCount() int
 	InsertChildWinCtrl(ctrl IWincontrol)
 	InsertControl(ctrl IControl)
-	GetParent() IWincontrol
 	RemoveChildWinCtrl(ctrl IWincontrol)
 	RemoveControl(ctrl IControl)
 	ControlExists(ctrl IControl) bool
@@ -118,5 +121,49 @@ func (cmp *GComponent) GetTag() int {
 
 func (cmp *GComponent) SetTag(fdata int) {
 	cmp.ftag = fdata
+}
+
+const(
+	MK_XBUTTON1 = 0x0020
+	MK_XBUTTON2 = 0x0040
+)
+//键盘状态
+type KeyState uint32
+
+func (state KeyState)CtrlKeyDown()bool  {
+	return state & WinApi.MK_CONTROL != 0
+}
+
+func (state KeyState)LButtonDown()bool  {
+	return state & WinApi.MK_LBUTTON != 0
+}
+
+func (state KeyState)MButtonDown()bool  {
+	return state & WinApi.MK_MBUTTON != 0
+}
+
+func (state KeyState)RButtonDown()bool  {
+
+	return state & WinApi.MK_RBUTTON != 0
+}
+
+func (state KeyState)ShiftKeyDown()bool  {
+	return state & WinApi.MK_SHIFT != 0
+}
+
+func (state KeyState)AltKeyDown()bool  {
+	return WinApi.GetKeyState(WinApi.VK_MENU) < 0
+}
+
+func (state KeyState)XBUTTON1Down()bool  {
+	return MK_XBUTTON1 & state != 0
+}
+
+func (state KeyState)XBUTTON2Down()bool  {
+	return MK_XBUTTON2 & state != 0
+}
+
+func (state *KeyState)SetCtrlKeyDown(v bool)  {
+	*state = KeyState(uint32(*state) | WinApi.MK_CONTROL)
 }
 

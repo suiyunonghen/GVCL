@@ -11,6 +11,8 @@ import (
 	"github.com/suiyunonghen/DxCommonLib"
 	"github.com/suiyunonghen/GVCL/Components/NVisbleControls"
 	"math"
+	"time"
+	"sync/atomic"
 )
 
 
@@ -20,6 +22,9 @@ var (
 	windowAtom          WinApi.ATOM
 	Hinstance           WinApi.HINST
 	MessageHandlerMap map[uint32]string
+	captureControl		*GBaseControl
+	RM_GetObjectInstance	uint
+	lastMouseIn			*GBaseControl		//上次鼠标所在的控件
 )
 
 
@@ -27,9 +32,42 @@ func init() {
 	WindowAtomString := fmt.Sprintf("Go%08X", WinApi.GetCurrentProcessId())
 	windowAtom = WinApi.GlobalAddAtom(WindowAtomString)
 	ControlAtomString := fmt.Sprintf("Go%08X%08X", WinApi.GetModuleHandle(""), WinApi.GetCurrentProcessId())
+	RM_GetObjectInstance = WinApi.RegisterWindowMessage("GO_RM_GetObjectInstance")
 	controlAtom = WinApi.GlobalAddAtom(ControlAtomString)
 	MessageHandlerMap = make(map[uint32]string)
 	MessageHandlerMap[WinApi.WM_PAINT] = "WMPaint"
+}
+
+func mouseLeaveSync(data ...interface{})  {
+	data[0].(Components.IControl).MouseLeave()
+}
+
+func checkMouseLeave(data ...interface{})  {
+	ctrl := data[0].(*GWinControl)
+	rbounds := ctrl.BoundsRect()
+	appExit := application.fcontext.Done()
+	leaveDone := ctrl.leaveDone
+	for{
+		select{
+		case <-DxCommonLib.After(time.Millisecond*100):
+			p := WinApi.POINT{}
+			WinApi.GetCursorPos(&p)
+			if !p.PtInRect(rbounds){ //已经离开
+				if atomic.CompareAndSwapInt32(&ctrl.fisCheckLeaveing,1,0){
+					//执行MouseLeave
+					lastMouseIn = nil
+					application.Synchronize(mouseLeaveSync,ctrl.RealObject())
+				}
+				return
+			}
+		case <-leaveDone:
+			atomic.CompareAndSwapInt32(&ctrl.fisCheckLeaveing,1,0)
+			fmt.Println("leaveDOne")
+			return
+		case <-appExit:
+			return
+		}
+	}
 }
 
 func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (result uintptr) {
@@ -37,6 +75,7 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 	if control == nil {
 		return WinApi.DefWindowProc(hwnd, msg, wparam, lparam)
 	}
+
 	switch msg{
 	case WinApi.WM_SYSTEM_TRAY_MESSAGE:
 		if NVisbleControls.TrayIcons != nil{
@@ -49,6 +88,69 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 	case WinApi.WM_ACTIVATEAPP:
 		if wparam==0{
 			WinApi.EndMenu()
+		}
+	case uint32(RM_GetObjectInstance):
+		if uint32(wparam) == WinApi.GetCurrentProcessId(){
+			if i := control.SubChildCount() - 1;i>=0{
+				return uintptr(unsafe.Pointer(control.SubChild(i).(*GWinControl)))
+			}else{
+				return uintptr(unsafe.Pointer(control))
+			}
+		}else{
+			return WinApi.CallWindowProc(control.FDefWndProc,hwnd,msg,wparam,lparam)
+		}
+	case WinApi.WM_MOUSEMOVE:
+		//鼠标移动消息
+		//判断是否在子控件上，有Enter进入
+		for i := 0;i < len(control.fControls);i++{
+			rbounds := control.fControls[i].ClientRect()
+			rbounds.OffsetRect(int(control.fControls[i].Left()),int(control.fControls[i].Top()))
+			pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
+			if rbounds.PtInRect(&pt) {
+				gcontrol := control.fControls[i].(*GBaseControl)
+				if lastMouseIn != gcontrol{
+					if lastMouseIn != nil{
+						realobj := lastMouseIn.RealObject()
+						if _,ok := realobj.(Components.IWincontrol);ok{
+							wcontrol := (*GWinControl)(unsafe.Pointer(lastMouseIn))
+							if wcontrol.leaveDone != nil{
+								close(wcontrol.leaveDone)
+								wcontrol.leaveDone = nil
+							}
+						}
+						realobj.(Components.IControl).MouseLeave()
+					}
+					lastMouseIn = gcontrol
+					lastMouseIn.RealObject().(Components.IControl).MouseEnter()
+					return 1
+				}else{
+					gcontrol.RealObject().(Components.IControl).MouseMove(int(pt.X - gcontrol.Left()),int(pt.Y - gcontrol.Top()),Components.KeyState(wparam))
+					return
+				}
+			}
+		}
+		if lastMouseIn != &control.GBaseControl{
+			if lastMouseIn != nil{
+				realctrl := lastMouseIn.RealObject()
+				if _,ok := realctrl.(Components.IWincontrol);ok{
+					wcontrol := (*GWinControl)(unsafe.Pointer(lastMouseIn))
+					if wcontrol.leaveDone != nil{
+						close(wcontrol.leaveDone)
+						wcontrol.leaveDone = nil
+					}
+				}
+				lastMouseIn.RealObject().(Components.IControl).MouseLeave()
+			}
+			lastMouseIn = &control.GBaseControl
+			lastMouseIn.RealObject().(Components.IWincontrol).MouseEnter()
+			//开启一个检查是否离开了的消息
+			if control.IsPopup(){
+				if atomic.CompareAndSwapInt32(&control.fisCheckLeaveing,0,1){
+					control.leaveDone = make(chan struct{})
+					DxCommonLib.PostFunc(checkMouseLeave,control)
+				}
+			}
+			return 1
 		}
 	case WinApi.WM_CONTEXTMENU:
 		if control.PopupMenu != nil{
@@ -122,12 +224,7 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 			}
 		}
 	}
-	var TargetObject interface{}
-	if i := control.SubChildCount() - 1;i>=0{
-		TargetObject = control.SubChild(i)
-	}else{
-		TargetObject = control
-	}
+	TargetObject := control.RealObject()
 	//执行子控件的窗口过程
 	result,dispatchNext := TargetObject.(Components.IWincontrol).WndProc(msg,wparam,lparam)
 	if msg == WinApi.WM_DESTROY{
@@ -151,6 +248,60 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 	return
 }
 
+func WinControlFromHwnd(handle syscall.Handle) *GWinControl  {
+	ProcessId := WinApi.GetCurrentProcessId()
+	OwningProcess := uint32(0)
+	if WinApi.GetWindowThreadProcessId(handle,&OwningProcess) != 0 && OwningProcess == ProcessId{
+		ret := WinApi.SendMessage(handle, RM_GetObjectInstance, uintptr(ProcessId), 0)
+		if ret != 0{
+			return (*GWinControl)(unsafe.Pointer(uintptr(ret)))
+		}
+	}
+	return nil
+}
+
+func FindControl(Handle syscall.Handle) *GWinControl{
+	OwningProcess := uint32(0)
+	if Handle != 0 && WinApi.GetWindowThreadProcessId(Handle,&OwningProcess) != 0 && OwningProcess == WinApi.GetCurrentProcessId(){
+		control := (*GWinControl)(unsafe.Pointer(WinApi.GetProp(Handle, uintptr(controlAtom))))
+		if i := control.SubChildCount() - 1;i>=0{
+			return control.SubChild(i).(*GWinControl)
+		}else{
+			return control
+		}
+	}
+	return nil
+}
+
+func GetCaptureControl() *GBaseControl  {
+	Result := FindControl(WinApi.GetCapture())
+	if Result != nil && captureControl != nil && captureControl.GetParent() == Result{
+		return captureControl
+	}
+	if Result != nil{
+		return &Result.GBaseControl
+	}
+	return nil
+}
+
+func SetCaptureControl(Control *GBaseControl)  {
+	WinApi.ReleaseCapture()
+	captureControl = nil
+	if Control != nil{
+		var wcontrol *GWinControl
+		if !Control.IsWindowControl(){
+			if Control.fParent == nil{
+				return
+			}
+			captureControl = Control
+			wcontrol = Control.fParent.(*GWinControl)
+		}else{
+			wcontrol = (*GWinControl)(unsafe.Pointer(Control))
+		}
+		WinApi.SetCapture(wcontrol.GetWindowHandle())
+	}
+}
+
 type MessageEventHandler func(sender interface{}, msg *WinApi.MSG, handled *bool)
 type MessageDispatch func(sender interface{}, msg uint32, wparam, lparam uintptr) uintptr
 
@@ -169,6 +320,8 @@ type GBaseControl struct {
 	Font               Graphics.GFont
 	OnResize Graphics.NotifyEvent
 	PopupMenu      	   *NVisbleControls.GPopupMenu
+	OnMouseEnter		Graphics.NotifyEvent
+	OnMouseLeave		Graphics.NotifyEvent
 }
 
 func (ctrl *GBaseControl)Enabled()bool  {
@@ -182,6 +335,22 @@ func (ctrl *GBaseControl)SetEnabled(v bool)  {
 			ctrl.Invalidate()
 		}
 	}
+}
+
+func (ctrl *GBaseControl)MouseEnter()  {
+	if ctrl.OnMouseEnter != nil{
+		ctrl.OnMouseEnter(ctrl)
+	}
+}
+
+func (ctrl *GBaseControl)MouseLeave()  {
+	if ctrl.OnMouseLeave != nil{
+		ctrl.OnMouseLeave(ctrl)
+	}
+}
+
+func (ctrl *GBaseControl)MouseMove(x,y int,state Components.KeyState){
+
 }
 
 func (ctrl *GBaseControl)BindMessageMpas()  {
@@ -222,6 +391,8 @@ func (ctrl *GBaseControl) Left() int32 {
 
 func (ctrl *GBaseControl) SubInit() {
 	ctrl.GObject.SubInit(ctrl)
+	ctrl.fVisible = true
+	ctrl.fColor = Graphics.ClBtnFace
 	ctrl.Font.BeginUpdate()
 	ctrl.fEnabled = true
 	ctrl.Font.FontName = "宋体"
@@ -370,7 +541,7 @@ func (ctrl *GBaseControl)BoundsRect()*WinApi.Rect  {
 }
 
 func (ctrl *GBaseControl) Invalidate() {
-	if ctrl.fParent!=nil {
+	if ctrl.fParent!=nil && ctrl.fParent.HandleAllocated(){
 		handle := ctrl.fParent.GetWindowHandle()
 		if handle!=0{
 			r := ctrl.BoundsRect()
@@ -461,6 +632,8 @@ type GWinControl struct {
 	fIsForm             bool
 	fCaption            string
 	FDefWndProc         uintptr
+	fisCheckLeaveing	int32
+	leaveDone			chan struct{}
 }
 
 func (ctrl *GWinControl) SubInit() {
@@ -496,6 +669,18 @@ func (ctrl *GWinControl)Perform(msg uint32,wparam, lparam uintptr)(result WinApi
 	return WinApi.LRESULT(ret)
 }
 
+//是否是弹出
+func (ctrl *GWinControl)IsPopup()bool  {
+	if ctrl.fIsForm{
+		return true
+	}
+	wstyle := WinApi.GetWindowLong(ctrl.GetWindowHandle(),WinApi.GWL_STYLE)
+	if WinApi.WS_CHILD & wstyle != WinApi.WS_CHILD || WinApi.WS_CHILDWINDOW & wstyle != WinApi.WS_CHILDWINDOW{
+		return WinApi.WS_POPUP & wstyle == WinApi.WS_POPUP || WinApi.WS_POPUPWINDOW & wstyle == WinApi.WS_POPUPWINDOW ||
+			WinApi.WS_OVERLAPPEDWINDOW & wstyle == WinApi.WS_OVERLAPPEDWINDOW
+	}
+	return false
+}
 
 func (ctrl *GWinControl) SetParent(AParent Components.IWincontrol) {
 	if ctrl.fParent != AParent {
@@ -958,12 +1143,7 @@ func (ctrl *GWinControl) WndProc(msg uint32, wparam, lparam uintptr) (result uin
 	case WinApi.WM_ERASEBKGND:
 		//背景绘制
 	        //result = ctrl.paintBackGround(WinApi.HDC(wparam))
-		var targetobj interface{}
-		if i := ctrl.SubChildCount() -1;i>=0{
-			targetobj = ctrl.SubChild(i)
-		}else{
-			targetobj = ctrl
-		}
+		targetobj := ctrl.RealObject()
 		result = uintptr(targetobj.(Components.IWincontrol).PaintBack(WinApi.HDC(wparam)))
 		msgDispatchNext = result == 0
 	case WinApi.WM_SIZE:

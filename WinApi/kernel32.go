@@ -1364,6 +1364,7 @@ func GetCurrentProcessId() uint32 {
 	return uint32(r1)
 }
 
+
 func GetCurrentProcess() syscall.Handle {
 	initKernel32()
 	r1, _, _ := syscall.Syscall(fnGetCurrentProcess, 0, 0, 0, 0)

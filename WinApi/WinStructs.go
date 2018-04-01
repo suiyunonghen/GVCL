@@ -31,8 +31,9 @@ type POINT struct {
 }
 
 func (pt *POINT)PtInRect(r *Rect)bool{
-	ret,_,_ := syscall.Syscall(fnPtInRect,2,uintptr(unsafe.Pointer(pt)),uintptr(unsafe.Pointer(r)),0)
-	return ret!=0
+	/*ret,_,_ := syscall.Syscall(fnPtInRect,2,uintptr(unsafe.Pointer(r)),uintptr(unsafe.Pointer(pt)),0)
+	return ret!=0*/
+	return pt.X >= r.Left && pt.X <= r.Right && pt.Y>=r.Top && pt.Y <= r.Bottom
 }
 
 type Rect struct {
@@ -53,8 +54,9 @@ func (rect *Rect)Height()  int32{
 }
 
 func (rect *Rect)PtInRect(pt *POINT) bool{
-	ret,_,_ := syscall.Syscall(fnPtInRect,2,uintptr(unsafe.Pointer(pt)),uintptr(unsafe.Pointer(rect)),0)
-	return ret!=0
+	/*ret,_,_ := syscall.Syscall(fnPtInRect,3,uintptr(unsafe.Pointer(rect)),uintptr(pt.X),uintptr(pt.Y))
+	return ret!=0*/
+	return pt.X >= rect.Left && pt.X <= rect.Right && pt.Y>=rect.Top && pt.Y <= rect.Bottom
 }
 
 func (rect *Rect)GetClientRect(hWnd syscall.Handle)bool  {

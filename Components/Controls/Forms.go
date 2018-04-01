@@ -48,6 +48,7 @@ func (frm *GForm) SubInit() {
 	frm.GWinControl.SubInit()
 	frm.GComponent.SubInit(frm)
 	frm.BindMessageMpas()
+	frm.fVisible = false
 	frm.fIsForm = true
 	frm.fColor = Graphics.ClBtnFace
 	frm.fwidth = 400

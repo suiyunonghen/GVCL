@@ -15,6 +15,7 @@ import (
 	_ "time"
 	_"github.com/suiyunonghen/DxCommonLib"
 	"github.com/suiyunonghen/DxCommonLib"
+	_ "github.com/suiyunonghen/GVCL/Components/DxControls/WindowLessControls"
 )
 
 type GForm1 struct {
@@ -101,7 +102,8 @@ func main() {
 	lbl := controls.NewLabel(m)
 	lbl.SetCaption("说明 ")
 
-	lbl.SetAutoSize(true)
+
+	//lbl.SetAutoSize(true)
 	lbl.SetColor(Graphics.ClRed)
 	lbl.SetTop(40)
 

@@ -62,7 +62,9 @@ func (lbl *GLabel)SetAutoSize(v bool)  {
 	if lbl.fAutoSize != v{
 		lbl.fAutoSize = v
 		if lbl.fAutoSize{
-			lbl.calcSize()
+			if pc := lbl.GetParent();pc!=nil && pc.HandleAllocated(){
+				lbl.calcSize()
+			}
 		}
 	}
 }

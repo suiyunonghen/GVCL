@@ -168,6 +168,7 @@ var (
 	fnGetClassInfoW                      uintptr
 	fnGetClassInfoA                      uintptr
 	fnGetClassInfoExW                    uintptr
+	fnGetWindowThreadProcessId			uintptr
 	fnGetClassInfoExA                    uintptr
 	fnGetClassNameW                      uintptr
 	fnGetClassNameA                      uintptr
@@ -898,6 +899,7 @@ func init() {
 	fnOemToCharA, _ = syscall.GetProcAddress(libuser32, "OemToCharA")
 	fnOemToCharBuffA, _ = syscall.GetProcAddress(libuser32, "OemToCharBuffA")
 	fnOemToCharW, _ = syscall.GetProcAddress(libuser32, "OemToCharW")
+	fnGetWindowThreadProcessId, _ = syscall.GetProcAddress(libkernel32, "GetWindowThreadProcessId")
 	fnOemToCharBuffW, _ = syscall.GetProcAddress(libuser32, "OemToCharBuffW")
 	fnOffsetRect, _ = syscall.GetProcAddress(libuser32, "OffsetRect")
 	fnOpenClipboard, _ = syscall.GetProcAddress(libuser32, "OpenClipboard")
@@ -1092,12 +1094,32 @@ func BoolToUint(value bool) uint8 {
 	return 0
 }
 
+func GetCapture() syscall.Handle  {
+	r, _, _ := syscall.Syscall(fnGetCapture,0,0,0,0)
+	return syscall.Handle(r)
+}
+
+func ReleaseCapture()bool  {
+	r, _, _ := syscall.Syscall(fnReleaseCapture,0,0,0,0)
+	return r != 0
+}
+
+func SetCapture(hwnd syscall.Handle)syscall.Handle  {
+	r, _, _ := syscall.Syscall(fnSetCapture,1,uintptr(hwnd),0,0)
+	return syscall.Handle(r)
+}
+
 func MessageBox(hwnd syscall.Handle, lpText string, lpCaption string, uType uint) int {
 	r, _, _ := syscall.Syscall6(fnMessageBoxW, 4, uintptr(hwnd),
 		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpText))),
 		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpCaption))),
 		uintptr(uType), 0, 0)
 	return int(r)
+}
+
+func RegisterWindowMessage(msgInfo string) uint  {
+	ret, _, _ := syscall.Syscall(fnRegisterWindowMessageW,1,uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(msgInfo))),0,0)
+	return uint(ret)
 }
 
 func CreateWindow(ClassName, WindowName string, dwStyle uint32, x, y, width, height int, hWndParent syscall.Handle, hMenu HMENU, hInstance syscall.Handle, lpParam uintptr) (result syscall.Handle) {
@@ -1198,6 +1220,11 @@ func DefWindowProc(hWnd syscall.Handle, Msg uint32, wParam, lParam uintptr) uint
 	return ret
 }
 
+func GetKeyState(nVirtKey int)int16  {
+	ret,_,_ := syscall.Syscall(fnGetKeyState,1,uintptr(nVirtKey),0,0)
+	return int16(ret)
+}
+
 func SetWindowPos(hWnd, hWndInsertAfter syscall.Handle, x, y, cx, cy int32, uFlags uint32) bool {
 	ret, _, _ := syscall.Syscall9(fnSetWindowPos, 7,
 		uintptr(hWnd),
@@ -1229,6 +1256,11 @@ func GetClassInfoEx(hInstance HINST, lpClassName string, lpWndClass *GWndClassEx
 		uintptr(hInstance), uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lpClassName))),
 		uintptr(unsafe.Pointer(lpWndClass)))
 	return ret != 0
+}
+
+func GetWindowThreadProcessId(hWnd syscall.Handle,dwProcessId *uint32) uint32 {
+	r1, _, _ := syscall.Syscall(fnGetWindowThreadProcessId, 2, uintptr(hWnd), uintptr(unsafe.Pointer(dwProcessId)), 0)
+	return uint32(r1)
 }
 
 func UnregisterClass(lpClassName string, hinst HINST) bool {
