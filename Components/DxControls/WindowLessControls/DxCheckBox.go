@@ -10,14 +10,19 @@ import (
 
 type GDxCheckBox struct {
 	controls.GBaseControl
-	fTrasparent bool
 	fCaption string
 	fAutoSize bool
+	fChecked	bool
+	fIsMouseIn	bool
+	fisMouseDown bool
+	fWordWrap	bool
+	OnChange	Graphics.NotifyEvent
 }
 
 func (checkbox *GDxCheckBox) SubInit() {
 	checkbox.GBaseControl.SubInit()
 	checkbox.GComponent.SubInit(checkbox)
+	checkbox.SetTrasparent(true)
 	checkbox.SetWidth(100)
 	checkbox.SetHeight(20)
 }
@@ -86,16 +91,162 @@ func (checkbox *GDxCheckBox)SetCaption(cap string)  {
 	}
 }
 
+func (checkBox *GDxCheckBox)SetChecked(v bool)  {
+	if checkBox.fChecked != v{
+		checkBox.fChecked = v
+		checkBox.Invalidate()
+		if checkBox.OnChange!=nil{
+			checkBox.OnChange(checkBox)
+		}
+	}
+}
+
+func (checkbox *GDxCheckBox)Checked()bool  {
+	return checkbox.fChecked
+}
+
 func (checkbox *GDxCheckBox)Paint(cvs Graphics.ICanvas)  {
 	//先绘制checkBox
 	//居中绘制，大小14*14
+	if !checkbox.Trasparent(){
+		r := WinApi.Rect{0,0,checkbox.Width(),checkbox.Height()}
+		cvs.FillRect(&r)
+	}
+	brush := cvs.Brush()
 	checkRect := WinApi.Rect{0,0,14,14}
 	checkRect.Top = (checkbox.Height() - checkRect.Bottom) / 2
 	checkRect.Bottom = checkRect.Top + 14
+	if checkbox.fChecked{
+		brush.BeginUpdate()
+		if checkbox.fIsMouseIn{
+			if checkbox.fisMouseDown{
+				brush.Color = Graphics.RGB(56,140,245)
+			}else{
+				brush.Color = Graphics.RGB(69,165,255)
+			}
+		}else{
+			brush.Color = Graphics.RGB(66,149,252)
+		}
+		brush.EndUpdate()
+		cvs.FillRect(&checkRect)
+		//绘制勾选的
+		pen := cvs.Pen()
+		pen.Color = Graphics.ClWhite
+		pen.Change()
+		cvs.MoveTo(checkRect.Left + 3,checkRect.Top+7)
+		cvs.LineTo(int(checkRect.Left) + 5,int(checkRect.Top)+9)
+		cvs.LineTo(int(checkRect.Left) + 11,int(checkRect.Top)+3)
+		if checkbox.fIsMouseIn{
+			if checkbox.fisMouseDown{
+				pen.Color = Graphics.RGB(118,176,248) //阴影
+			}else{
+				pen.Color = Graphics.RGB(127,193,255) //阴影
+			}
+		}else{
+			pen.Color = Graphics.RGB(125,182,253) //阴影
+		}
+		pen.Change()
+		cvs.MoveTo(checkRect.Left + 3,checkRect.Top+8)
+		cvs.LineTo(int(checkRect.Left) + 5,int(checkRect.Top)+10)
+		cvs.LineTo(int(checkRect.Left) + 11,int(checkRect.Top)+4)
+
+		if checkbox.fIsMouseIn {
+			if checkbox.fisMouseDown{
+				pen.Color = Graphics.RGB(102,166,247) //阴影
+			}else {
+				pen.Color = Graphics.RGB(112, 185, 255)
+			}
+		}else{
+			pen.Color = Graphics.RGB(109, 173, 252)
+		}
+		pen.Change()
+
+		cvs.MoveTo(checkRect.Left,checkRect.Top)
+		cvs.LineTo(int(checkRect.Left),int(checkRect.Top+1))
+
+		cvs.MoveTo(checkRect.Left,checkRect.Bottom-1)
+		cvs.LineTo(int(checkRect.Left+1),int(checkRect.Bottom-1))
+
+		cvs.MoveTo(checkRect.Right - 1,checkRect.Top)
+		cvs.LineTo(int(checkRect.Right),int(checkRect.Top))
+
+		cvs.MoveTo(checkRect.Right - 1,checkRect.Bottom-1)
+		cvs.LineTo(int(checkRect.Right),int(checkRect.Bottom-1))
+
+	}else if checkbox.fIsMouseIn{
+		brush.BeginUpdate()
+		brush.Color = Graphics.RGB(66,149,252)
+		brush.EndUpdate()
+		cvs.FrameRect(&checkRect)
+	}else{
+		brush.BeginUpdate()
+		brush.Color = Graphics.RGB(200,206,210)
+		brush.EndUpdate()
+		cvs.FrameRect(&checkRect)
+	}
+	//绘制Caption
+	if checkbox.fCaption != ""{
+		checkRect.Left = checkRect.Left + 17
+		checkRect.Top = 0
+		checkRect.Bottom = checkbox.Height()
+		checkRect.Right = checkbox.Width()
+		brush := cvs.Brush()
+		brush.BrushStyle = Graphics.BSClear
+		brush.Change()
+		var drawflags uint = WinApi.DT_LEFT | WinApi.DT_TOP | WinApi.DT_CALCRECT
+		if checkbox.fWordWrap{
+			drawflags = WinApi.DT_LEFT | WinApi.DT_VCENTER | WinApi.DT_WORDBREAK
+		}else{
+			drawflags = WinApi.DT_LEFT | WinApi.DT_VCENTER | WinApi.DT_SINGLELINE
+		}
+		WinApi.DrawText(cvs.GetHandle(),checkbox.fCaption,-1,&checkRect,drawflags)
+	}
 
 }
 
-func NewLabel(aParent Components.IWincontrol) *GDxCheckBox {
+/*func (checkbox *GDxCheckBox)MouseMove(x,y int,state Components.KeyState)  {
+
+}*/
+
+
+func (checkbox *GDxCheckBox)MouseDown(button Components.MouseButton,x,y int,state Components.KeyState)  {
+	checkbox.fisMouseDown = button == Components.MbLeft
+	if checkbox.fisMouseDown{
+		checkbox.Invalidate()
+	}
+}
+
+func (checkbox *GDxCheckBox)MouseUp(button Components.MouseButton,x,y int,state Components.KeyState)  {
+	if checkbox.fisMouseDown{
+		checkbox.fisMouseDown = false
+		checkbox.fChecked = !checkbox.fChecked
+		checkbox.Invalidate()
+		if checkbox.OnChange!=nil{
+			checkbox.OnChange(checkbox)
+		}
+	}
+}
+
+
+
+
+func (checkbox *GDxCheckBox)MouseEnter(){
+	checkbox.fIsMouseIn = true
+	if checkbox.Enabled(){
+		checkbox.Invalidate()
+	}
+	checkbox.GBaseControl.MouseEnter()
+}
+
+func (checkbox *GDxCheckBox)MouseLeave(){
+	checkbox.fIsMouseIn = false
+	if checkbox.Enabled(){
+		checkbox.Invalidate()
+	}
+	checkbox.GBaseControl.MouseLeave()
+}
+
+func NewCheckBox(aParent Components.IWincontrol) *GDxCheckBox {
 	pType := reflect.TypeOf(aParent)
 	hasWincontrol := false
 	if pType.Kind() == reflect.Ptr {

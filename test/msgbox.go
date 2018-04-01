@@ -15,7 +15,7 @@ import (
 	_ "time"
 	_"github.com/suiyunonghen/DxCommonLib"
 	"github.com/suiyunonghen/DxCommonLib"
-	_ "github.com/suiyunonghen/GVCL/Components/DxControls/WindowLessControls"
+	"github.com/suiyunonghen/GVCL/Components/DxControls/WindowLessControls"
 )
 
 type GForm1 struct {
@@ -101,11 +101,14 @@ func main() {
 
 	lbl := controls.NewLabel(m)
 	lbl.SetCaption("说明 ")
+	lbl.SetTrasparent(true)
 
 
 	//lbl.SetAutoSize(true)
 	lbl.SetColor(Graphics.ClRed)
 	lbl.SetTop(40)
+
+
 
 
 
@@ -193,6 +196,12 @@ func main() {
 		mb := sender.(*controls.GListBox)
 		WinApi.MessageBox(mb.GetWindowHandle(),mb.Items().Strings(mb.GetItemIndex()),"消息",64)
 	}
+
+	checkbox := WindowLessControls.NewCheckBox(m)
+	checkbox.SetLeft(lbl.Left()+10)
+	checkbox.SetTop(lstBox.Top()+lstBox.Height()+10)
+	checkbox.SetCaption("测试选择框")
+	checkbox.SetChecked(true)
 
 	b1.OnClick = func(sender interface{}) {
 		/*cvs := new(controls.GControlCanvas)

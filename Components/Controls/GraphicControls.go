@@ -9,7 +9,6 @@ import (
 
 type GLabel struct {
 	GBaseControl
-	fTrasparent bool
 	fWordWrap  bool
 	fCaption string
 	fAutoSize bool
@@ -87,16 +86,14 @@ func (lbl *GLabel)Paint(cvs Graphics.ICanvas)  {
 		drawflags = WinApi.DT_CENTER | WinApi.DT_VCENTER | WinApi.DT_SINGLELINE
 	}
 	if lbl.fCaption != ""{
+		brush := cvs.Brush()
+		brush.BrushStyle = Graphics.BSClear
+		brush.Change()
 		WinApi.DrawText(cvs.GetHandle(),lbl.fCaption,-1,&r,drawflags)
 	}
 }
 
-func (lbl *GLabel)SetTrasparent(v bool)  {
-	if lbl.fTrasparent != v{
-		lbl.fTrasparent = v
-		lbl.Invalidate()
-	}
-}
+
 
 func (lbl *GLabel)SetCaption(cap string)  {
 	if lbl.fCaption != cap{

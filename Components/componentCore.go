@@ -43,7 +43,17 @@ type IControl interface {
 	MouseEnter()
 	MouseLeave()
 	MouseMove(x,y int,state KeyState)
+	MouseDown(button MouseButton,x,y int,state KeyState)
+	MouseUp(button MouseButton,x,y int,state KeyState)
 }
+
+type MouseButton uint8
+
+const (
+	MbLeft MouseButton = iota
+	MbRight
+	MbMiddle
+)
 
 type IApplication interface {
 	Run()

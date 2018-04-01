@@ -35,6 +35,7 @@ type GColor struct {
 
 const (
 	SystemColor GColorValue = 0xFF000000
+	SysNone = 0x1FFFFFFF
 	SCROLLBAR int32 = 0
 	BACKGROUND int32 = 1
 	ACTIVECAPTION int32 = 2
@@ -66,6 +67,7 @@ const (
 	cMENUHILIGHT = 29
 	cMENUBAR = 30
 
+	ClNone	GColorValue = SysNone
 	ClRed   GColorValue = 0xFF
 	ClGreen	GColorValue = 0x00FF00
 	ClBlue	GColorValue = 0xFF0000
@@ -193,12 +195,13 @@ func (fntMng *gGDIManager)AllocPenData(pdata *gPenData)  {
 		if pdata.fHashCode != ""{//先移除以前的
 			if v,ok := fntMng.fPens[pdata.fHashCode];ok{
 				v.frefCount--
+				oldHash := pdata.fHashCode
 				pdata.fHashCode = ""
 				if v.frefCount == 0{
 					if v.Handle != BlackPen && v.Handle != EmptyPen && v.Handle != WhitePen{
 						WinApi.DeleteObject(uintptr(v.Handle))
 					}
-					delete(fntMng.fPens,hash)
+					delete(fntMng.fPens,oldHash)
 				}
 			}
 		}
@@ -237,10 +240,11 @@ func (fntMng *gGDIManager)AllocFontData(fntData *gFontData)  {
 		if fntData.fHashCode != ""{//先移除以前的
 			if v,ok := fntMng.fFonts[fntData.fHashCode];ok{
 				v.frefCount--
+				oldHash := fntData.fHashCode
 				fntData.fHashCode = ""
 				if v.frefCount == 0{
 					WinApi.DeleteObject(uintptr(v.FontHandle))
-					delete(fntMng.fFonts,hash)
+					delete(fntMng.fFonts,oldHash)
 				}
 			}
 		}
@@ -265,6 +269,7 @@ func (BrushMng *gGDIManager)AllocBrushData(brushData *gBrushData)  {
 		if brushData.fHashCode != ""{//先移除以前的
 			if v,ok := BrushMng.fBrushs[brushData.fHashCode];ok{
 				v.frefCount--
+				oldhash := brushData.fHashCode
 				brushData.fHashCode = ""
 				if v.frefCount == 0{
 					if v.Handle != EmptyBrush && v.Handle != WhiteBrush &&
@@ -272,7 +277,7 @@ func (BrushMng *gGDIManager)AllocBrushData(brushData *gBrushData)  {
 						v.Handle != BlackBrush && v.Handle != LtGrayBrush{
 						WinApi.DeleteObject(uintptr(v.Handle))
 					}
-					delete(BrushMng.fBrushs,hash)
+					delete(BrushMng.fBrushs,oldhash)
 				}
 			}
 		}
@@ -743,7 +748,7 @@ func (pen *GPen)Destroy()  {
 
 func NewBrush()*GBrush{
 	brush := new(GBrush)
-	brush.Color = ClWhite
+	brush.Color = ClNone
 	brush.BrushStyle = BSSolid
 	brush.Change()
 	return brush

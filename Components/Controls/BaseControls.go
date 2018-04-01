@@ -62,7 +62,6 @@ func checkMouseLeave(data ...interface{})  {
 			}
 		case <-leaveDone:
 			atomic.CompareAndSwapInt32(&ctrl.fisCheckLeaveing,1,0)
-			fmt.Println("leaveDOne")
 			return
 		case <-appExit:
 			return
@@ -103,6 +102,9 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 		//鼠标移动消息
 		//判断是否在子控件上，有Enter进入
 		for i := 0;i < len(control.fControls);i++{
+			if !control.fControls[i].Visible(){
+				continue
+			}
 			rbounds := control.fControls[i].ClientRect()
 			rbounds.OffsetRect(int(control.fControls[i].Left()),int(control.fControls[i].Top()))
 			pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
@@ -151,6 +153,52 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 				}
 			}
 			return 1
+		}
+	case WinApi.WM_LBUTTONDOWN:
+		pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
+		if lastMouseIn!=nil{
+			ictrl := lastMouseIn.RealObject().(Components.IControl)
+			if !ictrl.IsWindowControl(){
+				ictrl.MouseDown(Components.MbLeft,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
+			}else{
+				ictrl.MouseDown(Components.MbLeft,int(pt.X),int(pt.Y),Components.KeyState(wparam))
+			}
+			return
+		}else{
+			fmt.Println("ASdfasdf")
+		}
+	case WinApi.WM_RBUTTONDOWN:
+		pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
+		if lastMouseIn!=nil{
+			ictrl := lastMouseIn.RealObject().(Components.IControl)
+			if !ictrl.IsWindowControl(){
+				ictrl.MouseDown(Components.MbRight,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
+			}else{
+				ictrl.MouseDown(Components.MbRight,int(pt.X),int(pt.Y),Components.KeyState(wparam))
+			}
+			return
+		}
+	case WinApi.WM_MBUTTONDOWN:
+		pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
+		if lastMouseIn!=nil{
+			ictrl := lastMouseIn.RealObject().(Components.IControl)
+			if !ictrl.IsWindowControl(){
+				ictrl.MouseDown(Components.MbMiddle,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
+			}else{
+				ictrl.MouseDown(Components.MbMiddle,int(pt.X),int(pt.Y),Components.KeyState(wparam))
+			}
+			return
+		}
+	case WinApi.WM_LBUTTONUP:
+		pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
+		if lastMouseIn!=nil{
+			ictrl := lastMouseIn.RealObject().(Components.IControl)
+			if !ictrl.IsWindowControl(){
+				ictrl.MouseUp(Components.MbLeft,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
+			}else{
+				ictrl.MouseUp(Components.MbLeft,int(pt.X),int(pt.Y),Components.KeyState(wparam))
+			}
+			return
 		}
 	case WinApi.WM_CONTEXTMENU:
 		if control.PopupMenu != nil{
@@ -316,6 +364,7 @@ type GBaseControl struct {
 	fheight            int32
 	fVisible           bool
 	fEnabled			bool
+	fTrasparent 		bool
 	fMessageHandlerMap map[uint32]*Graphics.GDispatchObj
 	Font               Graphics.GFont
 	OnResize Graphics.NotifyEvent
@@ -326,6 +375,19 @@ type GBaseControl struct {
 
 func (ctrl *GBaseControl)Enabled()bool  {
 	return ctrl.fEnabled
+}
+
+
+
+func (ctrl *GBaseControl)SetTrasparent(v bool)  {
+	if ctrl.fTrasparent != v{
+		ctrl.fTrasparent = v
+		ctrl.Invalidate()
+	}
+}
+
+func (ctrl *GBaseControl)Trasparent()bool  {
+	return ctrl.fTrasparent
 }
 
 func (ctrl *GBaseControl)SetEnabled(v bool)  {
@@ -350,6 +412,14 @@ func (ctrl *GBaseControl)MouseLeave()  {
 }
 
 func (ctrl *GBaseControl)MouseMove(x,y int,state Components.KeyState){
+
+}
+
+func (ctrl *GBaseControl)MouseDown(button Components.MouseButton,x,y int,state Components.KeyState)  {
+
+}
+
+func (ctrl *GBaseControl)MouseUp(button Components.MouseButton,x,y int,state Components.KeyState)  {
 
 }
 
@@ -587,8 +657,10 @@ func (ctrl *GBaseControl)PaintControl(dc WinApi.HDC)  {
 	//执行绘制
 	var cvs Graphics.ICanvas
 	cvs = Graphics.NewCanvas()
-	defer cvs.(*Graphics.GCanvas).Destroy()
-	defer cvs.SetHandle(0)
+	defer func() {
+		cvs.SetHandle(0)
+		cvs.(*Graphics.GCanvas).Destroy()
+	}()
 	cvs.SetHandle(dc)
 	brsh := cvs.Brush()
 	brsh.Color = ctrl.fColor
@@ -1249,13 +1321,14 @@ func (ctrl *GWinControl)PaintHandler(dc WinApi.HDC)(result uintptr)  {
 		//裁剪掉GraphcControls的区域不绘制，然后
 		SaveIndex := WinApi.SaveDC(dc)
 		Clip := WinApi.SIMPLEREGION
-		//defer WinApi.RestoreDC(dc,SaveIndex)
 		for i := 0;i<graphicControlCount;i++{
 			ictrl := ctrl.Controls(i)
-			Clip =WinApi.ExcludeClipRect(dc,int(ictrl.Left()),int(ictrl.Top()),
-				int(ictrl.Left()+ictrl.Width()),int(ictrl.Top()+ictrl.Height()))
-			if Clip == WinApi.NULLREGION {
-				break
+			if !ictrl.(*GBaseControl).fTrasparent && ictrl.Visible(){ //不透明并且可视的裁剪点
+				Clip =WinApi.ExcludeClipRect(dc,int(ictrl.Left()),int(ictrl.Top()),
+					int(ictrl.Left()+ictrl.Width()),int(ictrl.Top()+ictrl.Height()))
+				if Clip == WinApi.NULLREGION {
+					break
+				}
 			}
 		}
 		if Clip!=WinApi.NULLREGION{
