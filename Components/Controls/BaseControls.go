@@ -158,47 +158,57 @@ func initWndProc(hwnd syscall.Handle, msg uint32, wparam, lparam uintptr) (resul
 		pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
 		if lastMouseIn!=nil{
 			ictrl := lastMouseIn.RealObject().(Components.IControl)
+			ret := false
 			if !ictrl.IsWindowControl(){
-				ictrl.MouseDown(Components.MbLeft,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
+				ret = ictrl.MouseDown(Components.MbLeft,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
 			}else{
-				ictrl.MouseDown(Components.MbLeft,int(pt.X),int(pt.Y),Components.KeyState(wparam))
+				ret = ictrl.MouseDown(Components.MbLeft,int(pt.X),int(pt.Y),Components.KeyState(wparam))
 			}
-			return
-		}else{
-			fmt.Println("ASdfasdf")
+			if ret{
+				return
+			}
 		}
 	case WinApi.WM_RBUTTONDOWN:
 		pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
 		if lastMouseIn!=nil{
 			ictrl := lastMouseIn.RealObject().(Components.IControl)
+			ret := false
 			if !ictrl.IsWindowControl(){
-				ictrl.MouseDown(Components.MbRight,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
+				ret = ictrl.MouseDown(Components.MbRight,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
 			}else{
-				ictrl.MouseDown(Components.MbRight,int(pt.X),int(pt.Y),Components.KeyState(wparam))
+				ret = ictrl.MouseDown(Components.MbRight,int(pt.X),int(pt.Y),Components.KeyState(wparam))
 			}
-			return
+			if ret{
+				return
+			}
 		}
 	case WinApi.WM_MBUTTONDOWN:
 		pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
 		if lastMouseIn!=nil{
 			ictrl := lastMouseIn.RealObject().(Components.IControl)
+			ret := false
 			if !ictrl.IsWindowControl(){
-				ictrl.MouseDown(Components.MbMiddle,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
+				ret = ictrl.MouseDown(Components.MbMiddle,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
 			}else{
-				ictrl.MouseDown(Components.MbMiddle,int(pt.X),int(pt.Y),Components.KeyState(wparam))
+				ret = ictrl.MouseDown(Components.MbMiddle,int(pt.X),int(pt.Y),Components.KeyState(wparam))
 			}
-			return
+			if ret{
+				return
+			}
 		}
 	case WinApi.WM_LBUTTONUP:
 		pt := WinApi.POINT{int32(WinApi.LoWord(uint32(lparam))),int32(WinApi.HiWord(uint32(lparam)))}
 		if lastMouseIn!=nil{
 			ictrl := lastMouseIn.RealObject().(Components.IControl)
+			ret := false
 			if !ictrl.IsWindowControl(){
-				ictrl.MouseUp(Components.MbLeft,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
+				ret = ictrl.MouseUp(Components.MbLeft,int(pt.X - ictrl.Left()),int(pt.Y - ictrl.Top()),Components.KeyState(wparam))
 			}else{
-				ictrl.MouseUp(Components.MbLeft,int(pt.X),int(pt.Y),Components.KeyState(wparam))
+				ret = ictrl.MouseUp(Components.MbLeft,int(pt.X),int(pt.Y),Components.KeyState(wparam))
 			}
-			return
+			if ret{
+				return
+			}
 		}
 	case WinApi.WM_CONTEXTMENU:
 		if control.PopupMenu != nil{
@@ -411,16 +421,16 @@ func (ctrl *GBaseControl)MouseLeave()  {
 	}
 }
 
-func (ctrl *GBaseControl)MouseMove(x,y int,state Components.KeyState){
-
+func (ctrl *GBaseControl)MouseMove(x,y int,state Components.KeyState)bool{
+	return false
 }
 
-func (ctrl *GBaseControl)MouseDown(button Components.MouseButton,x,y int,state Components.KeyState)  {
-
+func (ctrl *GBaseControl)MouseDown(button Components.MouseButton,x,y int,state Components.KeyState)bool  {
+	return false
 }
 
-func (ctrl *GBaseControl)MouseUp(button Components.MouseButton,x,y int,state Components.KeyState)  {
-
+func (ctrl *GBaseControl)MouseUp(button Components.MouseButton,x,y int,state Components.KeyState)bool  {
+	return false
 }
 
 func (ctrl *GBaseControl)BindMessageMpas()  {

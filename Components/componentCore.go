@@ -42,9 +42,9 @@ type IControl interface {
 	SetEnabled(v bool)
 	MouseEnter()
 	MouseLeave()
-	MouseMove(x,y int,state KeyState)
-	MouseDown(button MouseButton,x,y int,state KeyState)
-	MouseUp(button MouseButton,x,y int,state KeyState)
+	MouseMove(x,y int,state KeyState)bool
+	MouseDown(button MouseButton,x,y int,state KeyState)bool
+	MouseUp(button MouseButton,x,y int,state KeyState)bool
 }
 
 type MouseButton uint8
