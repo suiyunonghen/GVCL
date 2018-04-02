@@ -310,7 +310,8 @@ func (frm *GForm) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, m
 		case CAHide:
 			frm.SetVisible(false)
 		case CAFree:
-			msgDispatchNext = true
+			WinApi.DestroyWindow(frm.fHandle)
+			return
 		case CAMinimize:
 			if frm.fisModalform {
 				frm.SetVisible(false)

@@ -736,6 +736,12 @@ func (ctrl *GWinControl) HandleAllocated()bool{
 	return ctrl.fHandle!=0
 }
 
+func (ctrl *GWinControl)Destroy()  {
+	if ctrl.fHandle!=0{
+		WinApi.DestroyWindow(ctrl.fHandle)
+	}
+}
+
 func (ctrl *GWinControl)Perform(msg uint32,wparam, lparam uintptr)(result WinApi.LRESULT)  {
 	if ctrl.fHandle != 0{
 		return WinApi.LRESULT(initWndProc(ctrl.fHandle,msg,wparam,lparam))
@@ -985,7 +991,7 @@ func (ctrl *GWinControl) DestoryWnd() {
 		}
 		ctrl.fWincontrols = nil
 	}
-	ctrl.Free()//释放资源
+	ctrl.GBaseControl.Free()//释放资源
 	WinApi.RemoveProp(ctrl.fHandle, uintptr(controlAtom))
 	WinApi.RemoveProp(ctrl.fHandle, uintptr(windowAtom))
 }
