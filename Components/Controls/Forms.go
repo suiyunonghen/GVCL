@@ -28,6 +28,7 @@ type GForm struct {
 	fModalResult int8
 	fisModalform bool
 	OnClose OnFormCloseEvent
+	fisDialog	bool
 	OnCreate Graphics.NotifyEvent
 }
 
@@ -178,7 +179,12 @@ func (frm *GForm) CreateParams(params *Components.GCreateParams) {
 		params.WndParent = application.fMainForm.fHandle
 	}
 	params.WinClassName = "GForm"
-	params.Style = params.Style | WinApi.WS_OVERLAPPEDWINDOW | WinApi.WS_CAPTION | WinApi.WS_THICKFRAME | WinApi.WS_MINIMIZEBOX | WinApi.WS_MAXIMIZEBOX | WinApi.WS_SYSMENU
+	if frm.fisDialog{
+		params.ExStyle = params.ExStyle | WinApi.WS_EX_DLGMODALFRAME | WinApi.WS_EX_WINDOWEDGE | WinApi.WS_EX_APPWINDOW
+		params.Style = params.Style | WinApi.WS_CAPTION | WinApi.WS_POPUP | WinApi.WS_SYSMENU
+	}else{
+		params.Style = params.Style | WinApi.WS_OVERLAPPEDWINDOW | WinApi.WS_CAPTION | WinApi.WS_THICKFRAME | WinApi.WS_MINIMIZEBOX | WinApi.WS_MAXIMIZEBOX | WinApi.WS_SYSMENU
+	}
 	nstyle = ^(WinApi.CS_HREDRAW | WinApi.CS_VREDRAW)
 	params.WindowClass.Style = uint32(int32(params.WindowClass.Style) & nstyle)
 	if frm == application.fMainForm{
@@ -274,6 +280,15 @@ func (frm *GForm)SetModalResult(v int8)  {
 
 func (frm *GForm)ModalResult()int8  {
 	return frm.fModalResult
+}
+
+func (frm *GForm)Set2DialogForm(v bool)  {
+	if frm.fisDialog != v{
+		frm.fisDialog = v
+		if frm.HandleAllocated(){
+
+		}
+	}
 }
 
 func (frm *GForm) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, msgDispatchNext bool) {

@@ -127,6 +127,7 @@ var (
 	fnEmptyClipboard                     uintptr
 	fnEnableMenuItem                     uintptr
 	fnEnableScrollBar                    uintptr
+	fnSystemParametersInfo				 uintptr
 	fnEnableWindow                       uintptr
 	fnEndDeferWindowPos                  uintptr
 	fnEndDialog                          uintptr
@@ -548,6 +549,7 @@ var (
 
 func init() {
 	libuser32, _ = syscall.LoadLibrary("user32.dll")
+	fnSystemParametersInfo, _ = syscall.GetProcAddress(libuser32, "SystemParametersInfoW")
 	fnLoadCursor, _ = syscall.GetProcAddress(libuser32, "LoadCursorW")
 	fnPostQuitMessage, _ = syscall.GetProcAddress(libuser32, "PostQuitMessage")
 	fnTranslateMessage, _ = syscall.GetProcAddress(libuser32, "TranslateMessage")
@@ -1154,6 +1156,20 @@ func GetFocus() syscall.Handle {
 		0,
 		0)
 	return syscall.Handle(ret)
+}
+
+func SystemParametersInfo(uiAction, uiParam uint,pvParam uintptr,fWinIni uint)bool  {
+	ret, _, _ := syscall.Syscall6(fnSystemParametersInfo, 4,
+		uintptr(uiAction), uintptr(uiParam), pvParam,uintptr(fWinIni),0,0)
+	return ret!=0
+}
+
+func GetScreenWorkArea()*Rect  {
+	var Result Rect
+	if SystemParametersInfo(SPI_GETWORKAREA, 0, uintptr(unsafe.Pointer(&Result)), 0){
+		return &Result
+	}
+	return nil
 }
 
 func TranslateMessage(msg *MSG) bool {
