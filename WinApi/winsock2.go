@@ -131,6 +131,13 @@ const(
 
 
 	FIONBIO = syscall.IOC_IN | ((4 & 0x7f) << 16) | (102 << 8) | 126 // set/clear non-blocking i/o
+
+	IP_OPTIONS = 1
+	IP_HDRINCL = 2
+	IP_TOS = 3
+	IP_TTL = 4
+	IP_MULTICAST_IF = 9
+
 )
 
 func init()  {

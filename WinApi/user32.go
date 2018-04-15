@@ -1151,8 +1151,16 @@ func RegisterClassEx(wndClass *GWndClassEx) ATOM {
 }
 
 func GetFocus() syscall.Handle {
-	ret, _, _ := syscall.Syscall(fnRegisterClassExW, 0,
+	ret, _, _ := syscall.Syscall(fnGetFocus, 0,
 		0,
+		0,
+		0)
+	return syscall.Handle(ret)
+}
+
+func SetFocus(focusControl syscall.Handle) syscall.Handle {
+	ret, _, _ := syscall.Syscall(fnSetFocus, 1,
+		uintptr(focusControl),
 		0,
 		0)
 	return syscall.Handle(ret)
