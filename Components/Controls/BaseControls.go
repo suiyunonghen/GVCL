@@ -25,6 +25,7 @@ var (
 	captureControl		*GBaseControl
 	RM_GetObjectInstance	uint
 	lastMouseIn			*GBaseControl		//上次鼠标所在的控件
+	activeControl		*GWinControl
 )
 
 
@@ -818,6 +819,13 @@ func (ctrl *GWinControl) GetText() string {
 	}
 }
 
+func (ctr *GWinControl)SetFocus()  {
+	activeControl = ctr
+	if ctr.fHandle != 0{
+		WinApi.SetFocus(ctr.fHandle)
+	}
+}
+
 func (ctrl *GWinControl) GetWindowHandle() syscall.Handle {
 	if ctrl.fHandle == 0{
 		ctrl.CreateWnd()
@@ -979,6 +987,9 @@ func (ctrl *GWinControl) CreateWnd() {
 }
 
 func (ctrl *GWinControl) DestoryWnd() {
+	if ctrl == activeControl{
+		activeControl = nil
+	}
 	if ctrl.fControls!=nil{
 		for _,v := range ctrl.fControls{
 			v.Free() //释放对应的资源
@@ -1049,6 +1060,10 @@ func (ctrl *GWinControl) WControls(idx int) Components.IWincontrol {
 func (ctrl *GWinControl) SetVisible(v bool) {
 	if ctrl.fVisible != v {
 		ctrl.fVisible = v
+		if !ctrl.fVisible && ctrl == activeControl{
+			activeControl = nil
+		}
+		//WinApi.GetFocus() //重新设定焦点
 		if ctrl.fParent != nil {
 			if ctrl.fHandle != 0 {
 				var showflags uint32
@@ -1086,6 +1101,9 @@ func (ctrl *GWinControl)SetEnabled(v bool)  {
 		ctrl.fEnabled = v
 		if ctrl.HandleAllocated(){
 			WinApi.EnableWindow(ctrl.fHandle,v)
+		}
+		if !ctrl.fEnabled && ctrl == activeControl{
+			activeControl = nil
 		}
 	}
 }
@@ -1153,6 +1171,10 @@ func (ctrl *GWinControl)CreateWindowHandle(params *Components.GCreateParams)bool
 				WinApi.SWP_NOMOVE + WinApi.SWP_NOSIZE + WinApi.SWP_NOACTIVATE)
 		}
 		ctrl.Perform(WinApi.WM_SETFONT, uintptr(ctrl.Font.FontHandle), 1)
+
+		if ctrl == activeControl{
+			WinApi.SetFocus(ctrl.fHandle)
+		}
 		return true
 	}
 	return false

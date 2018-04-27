@@ -140,7 +140,7 @@ func (lines *GCodeLines)SetText(text string){
 		if text == ""{
 			lines.fCodeEditor.SendEditor(SCI_SETTEXT, 0, int(uintptr(unsafe.Pointer(&cDSciNull))))
 		}else{
-			bt := DxCommonLib.FastString2Byte(text)
+			bt := []byte(text)
 			lines.fCodeEditor.SendEditor(SCI_SETTEXT, 0, int(uintptr(unsafe.Pointer(&bt[0]))))
 		}
 	}else{
