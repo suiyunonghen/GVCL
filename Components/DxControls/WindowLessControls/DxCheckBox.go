@@ -204,19 +204,16 @@ func (checkbox *GDxCheckBox)Paint(cvs Graphics.ICanvas)  {
 
 }
 
-/*func (checkbox *GDxCheckBox)MouseMove(x,y int,state Components.KeyState)  {
 
-}*/
-
-
-func (checkbox *GDxCheckBox)MouseDown(button Components.MouseButton,x,y int,state Components.KeyState)  {
+func (checkbox *GDxCheckBox)MouseDown(button Components.MouseButton,x,y int,state Components.KeyState)bool  {
 	checkbox.fisMouseDown = button == Components.MbLeft
 	if checkbox.fisMouseDown{
 		checkbox.Invalidate()
 	}
+	return true
 }
 
-func (checkbox *GDxCheckBox)MouseUp(button Components.MouseButton,x,y int,state Components.KeyState)  {
+func (checkbox *GDxCheckBox)MouseUp(button Components.MouseButton,x,y int,state Components.KeyState)bool  {
 	if checkbox.fisMouseDown{
 		checkbox.fisMouseDown = false
 		checkbox.fChecked = !checkbox.fChecked
@@ -225,6 +222,7 @@ func (checkbox *GDxCheckBox)MouseUp(button Components.MouseButton,x,y int,state 
 			checkbox.OnChange(checkbox)
 		}
 	}
+	return true
 }
 
 

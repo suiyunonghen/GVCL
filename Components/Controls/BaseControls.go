@@ -1236,7 +1236,7 @@ func (ctrl *GWinControl)PaintBack(dc WinApi.HDC)int32  {
 	r.Right = ctrl.Width()
 	r.Bottom =ctrl.Height()
 	WinApi.FillRect(dc,r,Brush)
-	WinApi.DeleteObject(uintptr(Brush))
+	WinApi.DeleteObject(WinApi.HGDIOBJ(Brush))
 	return  1
 }
 
@@ -1329,7 +1329,7 @@ func (ctrl *GWinControl)PaintWindow(dc WinApi.HDC)int32{
 	r.Right = ctrl.Width()
 	r.Bottom =ctrl.Height()
 	WinApi.FillRect(dc,r,Brush)
-	WinApi.DeleteObject(uintptr(Brush))
+	WinApi.DeleteObject(WinApi.HGDIOBJ(Brush))
 	return 0
 }
 

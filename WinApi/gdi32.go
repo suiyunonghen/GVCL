@@ -744,3 +744,52 @@ func RectVisible(dc HDC,rect *Rect)bool  {
 	ret,_,_ := syscall.Syscall(fnRectVisible,2,uintptr(dc),uintptr(unsafe.Pointer(rect)),0)
 	return ret !=0
 }
+
+func BitBlt(DestDC HDC,X, Y, Width, Height int,SrcDC HDC,XSrc, YSrc int,Rop uint32)bool {
+	ret,_,_ := syscall.Syscall9(fnBitBlt,9,uintptr(DestDC),uintptr(X),uintptr(Y),uintptr(Width),
+		uintptr(Height),uintptr(SrcDC),uintptr(XSrc),uintptr(YSrc),uintptr(Rop))
+	return ret !=0
+}
+
+
+func CreateCompatibleDC(dc HDC)HDC  {
+	ret,_,_ := syscall.Syscall(fnCreateCompatibleDC,1,uintptr(dc),0,0)
+	return HDC(ret)
+}
+
+func DeleteDC(dc HDC)bool  {
+	ret,_,_ := syscall.Syscall(fnDeleteDC,1,uintptr(dc),0,0)
+	return ret !=0
+}
+
+func DeleteObject(p HGDIOBJ)bool  {
+	ret,_,_ := syscall.Syscall(fnDeleteObject,1,uintptr(p),0,0)
+	return ret !=0
+}
+
+/*function SetDIBitsToDevice(DC: HDC; DestX, DestY: Integer; Width, Height: DWORD;
+SrcX, SrcY: Integer; nStartScan, NumScans: UINT; Bits: Pointer;
+var BitsInfo: TBitmapInfo; Usage: UINT): Integer; stdcall;*/
+
+func SetDIBitsToDevice(dc HDC,DestX, DestY int,Width, Height uint32,SrcX, SrcY int,nStartScan, NumScans uint,bits uintptr,BitsInfo *BITMAPINFO,usage uint)int  {
+	ret,_,_ := syscall.Syscall12(fnSetDIBitsToDevice,12,uintptr(dc),
+		uintptr(DestX),uintptr(DestY),uintptr(Width),uintptr(Height),
+		uintptr(SrcX),uintptr(SrcY),uintptr(nStartScan),uintptr(NumScans),bits,
+			uintptr(unsafe.Pointer(BitsInfo)),uintptr(usage))
+	return int(ret)
+}
+
+func SetMapMode(dc HDC,p2 int)int  {
+	ret,_,_ := syscall.Syscall(fnSetMapMode,2,uintptr(dc),uintptr(p2),0)
+	return int(ret)
+}
+
+func SetGraphicsMode(dc HDC,imode int)int  {
+	ret,_,_ := syscall.Syscall(fnSetGraphicsMode,2,uintptr(dc),uintptr(imode),0)
+	return int(ret)
+}
+
+func CreateDIBSection(dc HDC,p2 *BITMAPINFO,p3 uint,p4 *uintptr,p5 syscall.Handle,p6 uint32) HBITMAP  {
+	ret,_,_ := syscall.Syscall6(fnCreateDIBSection,6,uintptr(dc),uintptr(unsafe.Pointer(p2)),uintptr(p3),uintptr(unsafe.Pointer(p4)),uintptr(p5),uintptr(p6))
+	return HBITMAP(ret)
+}

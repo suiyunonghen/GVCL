@@ -17,6 +17,7 @@ type HDC uintptr
 type HOOK uintptr
 type LRESULT int
 type HBITMAP uintptr
+type HGDIOBJ uintptr
 
 func HiWord(L uint32) uint16 {
 	return uint16(L >> 16)
@@ -355,3 +356,77 @@ type tagNMHDR struct{
 }
 
 type GNMHDR tagNMHDR
+
+
+type CIEXYZ struct {
+	CiexyzX, CiexyzY, CiexyzZ int32 // FXPT2DOT30
+}
+
+type CIEXYZTRIPLE struct {
+	CiexyzRed, CiexyzGreen, CiexyzBlue CIEXYZ
+}
+
+type BITMAPINFOHEADER struct {
+	BiSize		uint32
+	BiWidth		int32
+	BiHeight        int32
+	BiPlanes        uint16
+	BiBitCount      uint16
+	BiCompression   uint32
+	BiSizeImage     uint32
+	BiXPelsPerMeter int32
+	BiYPelsPerMeter int32
+	BiClrUsed       uint32
+	BiClrImportant  uint32
+}
+
+type BITMAPV4HEADER struct {
+	BITMAPINFOHEADER
+	BV4RedMask    uint32
+	BV4GreenMask  uint32
+	BV4BlueMask   uint32
+	BV4AlphaMask  uint32
+	BV4CSType     uint32
+	BV4Endpoints  CIEXYZTRIPLE
+	BV4GammaRed   uint32
+	BV4GammaGreen uint32
+	BV4GammaBlue  uint32
+}
+
+type BITMAPV5HEADER struct {
+	BITMAPV4HEADER
+	BV5Intent      uint32
+	BV5ProfileData uint32
+	BV5ProfileSize uint32
+	BV5Reserved    uint32
+}
+
+type RGBQUAD struct {
+	RgbBlue     byte
+	RgbGreen    byte
+	RgbRed      byte
+	RgbReserved byte
+}
+
+type BITMAPINFO struct {
+	BmiHeader BITMAPINFOHEADER
+	BmiColors *RGBQUAD
+}
+
+type BITMAP struct {
+	BmType       int32
+	BmWidth      int32
+	BmHeight     int32
+	BmWidthBytes int32
+	BmPlanes     uint16
+	BmBitsPixel  uint16
+	BmBits       unsafe.Pointer
+}
+
+type DIBSECTION struct {
+	DsBm        BITMAP
+	DsBmih      BITMAPINFOHEADER
+	DsBitfields [3]uint32
+	DshSection  syscall.Handle
+	DsOffset    uint32
+}

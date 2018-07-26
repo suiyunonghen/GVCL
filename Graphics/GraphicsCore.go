@@ -199,7 +199,7 @@ func (fntMng *gGDIManager)AllocPenData(pdata *gPenData)  {
 				pdata.fHashCode = ""
 				if v.frefCount == 0{
 					if v.Handle != BlackPen && v.Handle != EmptyPen && v.Handle != WhitePen{
-						WinApi.DeleteObject(uintptr(v.Handle))
+						WinApi.DeleteObject(WinApi.HGDIOBJ(v.Handle))
 					}
 					delete(fntMng.fPens,oldHash)
 				}
@@ -243,7 +243,7 @@ func (fntMng *gGDIManager)AllocFontData(fntData *gFontData)  {
 				oldHash := fntData.fHashCode
 				fntData.fHashCode = ""
 				if v.frefCount == 0{
-					WinApi.DeleteObject(uintptr(v.FontHandle))
+					WinApi.DeleteObject(WinApi.HGDIOBJ(v.FontHandle))
 					delete(fntMng.fFonts,oldHash)
 				}
 			}
@@ -275,7 +275,7 @@ func (BrushMng *gGDIManager)AllocBrushData(brushData *gBrushData)  {
 					if v.Handle != EmptyBrush && v.Handle != WhiteBrush &&
 						v.Handle != GrayBrush && v.Handle != DkGrayBrush &&
 						v.Handle != BlackBrush && v.Handle != LtGrayBrush{
-						WinApi.DeleteObject(uintptr(v.Handle))
+						WinApi.DeleteObject(WinApi.HGDIOBJ(v.Handle))
 					}
 					delete(BrushMng.fBrushs,oldhash)
 				}
@@ -547,7 +547,7 @@ func (fnt *GFont)Destroy()  {
 		if v,ok := gdiManager.fFonts[fnt.fHashCode];ok{
 			v.frefCount--
 			if v.frefCount == 0{
-				WinApi.DeleteObject(uintptr(v.FontHandle))
+				WinApi.DeleteObject(WinApi.HGDIOBJ(v.FontHandle))
 				delete(gdiManager.fFonts,fnt.fHashCode)
 			}
 		}
@@ -636,7 +636,7 @@ func (brush *GBrush)Destroy()  {
 		if v,ok := gdiManager.fBrushs[brush.fHashCode];ok{
 			v.frefCount--
 			if v.frefCount == 0{
-				WinApi.DeleteObject(uintptr(v.Handle))
+				WinApi.DeleteObject(WinApi.HGDIOBJ(v.Handle))
 				delete(gdiManager.fBrushs,brush.fHashCode)
 			}
 		}
@@ -736,7 +736,7 @@ func (pen *GPen)Destroy()  {
 		if v,ok := gdiManager.fPens[pen.fHashCode];ok{
 			v.frefCount--
 			if v.frefCount == 0{
-				WinApi.DeleteObject(uintptr(v.Handle))
+				WinApi.DeleteObject(WinApi.HGDIOBJ(v.Handle))
 				delete(gdiManager.fPens,pen.fHashCode)
 			}
 		}

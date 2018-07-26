@@ -1637,10 +1637,6 @@ func ExcludeClipRect(dc HDC,LeftRect, TopRect, RightRect, BottomRect int) int{
 	return int(ret)
 }
 
-func DeleteObject(Hgdiobj uintptr)bool  {
-	ret,_,_:=syscall.Syscall(fnDeleteObject,1,Hgdiobj,0,0)
-	return ret!=0
-}
 
 func IsIconic(hwnd syscall.Handle)bool  {
 	ret,_,_:=syscall.Syscall(fnIsIconic,1,uintptr(hwnd),0,0)
