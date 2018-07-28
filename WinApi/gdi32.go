@@ -793,3 +793,32 @@ func CreateDIBSection(dc HDC,p2 *BITMAPINFO,p3 uint,p4 *uintptr,p5 syscall.Handl
 	ret,_,_ := syscall.Syscall6(fnCreateDIBSection,6,uintptr(dc),uintptr(unsafe.Pointer(p2)),uintptr(p3),uintptr(unsafe.Pointer(p4)),uintptr(p5),uintptr(p6))
 	return HBITMAP(ret)
 }
+
+
+func CreatePalette(LogPalette *LOGPALETTE)HPALETTE  {
+	ret,_,_ := syscall.Syscall(fnCreatePalette,1,uintptr(unsafe.Pointer(LogPalette)),0,0)
+	return HPALETTE(ret)
+}
+
+func SelectPalette(dc HDC,palete HPALETTE,ForceBackground bool) HPALETTE  {
+	var ret uintptr
+	if ForceBackground{
+		ret,_,_ = syscall.Syscall(fnSelectPalette,3,uintptr(dc),uintptr(palete),1)
+	}else{
+		ret,_,_ = syscall.Syscall(fnSelectPalette,3,uintptr(dc),uintptr(palete),0)
+	}
+
+	return HPALETTE(ret)
+}
+
+func RealizePalette(dc HDC) uint  {
+	ret,_,_ := syscall.Syscall(fnRealizePalette,1,uintptr(dc),0,0)
+	return uint(ret)
+}
+
+
+func GetDIBColorTable(dc HDC,p2,p3 uint, RGBQuadStructs *uintptr)  uint{
+	ret,_,_ := syscall.Syscall6(fnGetDIBColorTable,4,uintptr(dc),uintptr(p2),
+		uintptr(p3),uintptr(unsafe.Pointer(RGBQuadStructs)),0,0,)
+	return uint(ret)
+}

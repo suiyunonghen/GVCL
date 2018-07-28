@@ -26,6 +26,14 @@ func (cv GColorValue) A() byte {
 	return (*GColor)(unsafe.Pointer(&cv)).A
 }
 
+func (cv *GColorValue)RGBA() (r, g, b, a uint32)  {
+	r = uint32((*GColor)(unsafe.Pointer(&cv)).R)
+	g = uint32((*GColor)(unsafe.Pointer(&cv)).G)
+	b = uint32((*GColor)(unsafe.Pointer(&cv)).B)
+	a = uint32((*GColor)(unsafe.Pointer(&cv)).A)
+	return
+}
+
 type GColor struct {
 	R byte
 	G byte
@@ -164,6 +172,24 @@ func (c *GColor) GColor2ColorValue() GColorValue {
 
 func Uint32ToGColor(ClValue *uint32) *GColor {
 	return (*GColor)(unsafe.Pointer(ClValue))
+}
+
+func (c *GColor)GColor2WinRGB()WinApi.RGBQUAD  {
+	var result WinApi.RGBQUAD
+	result.RgbBlue = c.B
+	result.RgbRed = c.R
+	result.RgbGreen = c.G
+	result.RgbReserved = 255
+	return result
+}
+
+func RGBQUAD2Color(winrgb WinApi.RGBQUAD)GColor  {
+	var result GColor
+	result.R = winrgb.RgbRed
+	result.G = winrgb.RgbGreen
+	result.B = winrgb.RgbBlue
+	result.A = winrgb.RgbReserved
+	return result
 }
 
 var(

@@ -18,6 +18,7 @@ type HOOK uintptr
 type LRESULT int
 type HBITMAP uintptr
 type HGDIOBJ uintptr
+type HPALETTE	uintptr
 
 func HiWord(L uint32) uint16 {
 	return uint16(L >> 16)
@@ -408,9 +409,36 @@ type RGBQUAD struct {
 	RgbReserved byte
 }
 
+func (rgb RGBQUAD)RGBA() (r, g, b, a uint32)  {
+	return uint32(rgb.RgbRed),uint32(rgb.RgbGreen),uint32(rgb.RgbBlue),uint32(rgb.RgbReserved)
+}
+
+type PALETTEENTRY struct {
+	Red			byte
+	Green		byte
+	Blue		byte
+	Flags		byte
+}
+
+func (rgb PALETTEENTRY)RGBA() (r, g, b, a uint32)  {
+	return uint32(rgb.Red),uint32(rgb.Green),uint32(rgb.Blue),uint32(rgb.Flags)
+}
+
+type LOGPALETTE struct {
+	Version		uint16
+	NumEntries	uint16
+	PalEntry	[256]PALETTEENTRY
+}
+
+
 type BITMAPINFO struct {
 	BmiHeader BITMAPINFOHEADER
-	BmiColors *RGBQUAD
+	BmiColors RGBQUAD
+}
+
+type BITMAPINFO8 struct {
+	BmiHeader BITMAPINFOHEADER
+	BmiColors [256]RGBQUAD
 }
 
 type BITMAP struct {
@@ -430,3 +458,4 @@ type DIBSECTION struct {
 	DshSection  syscall.Handle
 	DsOffset    uint32
 }
+
