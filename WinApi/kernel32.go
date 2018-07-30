@@ -666,6 +666,9 @@ var (
 	fnGetNamedPipeClientComputerNameW   uintptr
 	fnGetNamedPipeClientComputerNameA   uintptr
 	fnMoveMemory						uintptr
+	fnCopyMemory						uintptr
+	fnZeroMemory						uintptr
+	fnFillMemory						uintptr
 )
 
 func init() {
@@ -1336,14 +1339,60 @@ func initKernel32() {
 	fnGetNamedPipeClientComputerNameW, _ = syscall.GetProcAddress(libkernel32, "GetNamedPipeClientComputerNameW")
 	fnGetNamedPipeClientComputerNameA, _ = syscall.GetProcAddress(libkernel32, "GetNamedPipeClientComputerNameA")
 	fnMoveMemory, _ = syscall.GetProcAddress(libkernel32, "RtlMoveMemory")
+	if fnMoveMemory == 0{
+		fnMoveMemory, _ = syscall.GetProcAddress(libkernel32, "MoveMemory")
+	}
+	fnCopyMemory, _ = syscall.GetProcAddress(libkernel32, "RtlCopyMemory")
+	if fnCopyMemory == 0{
+		fnCopyMemory, _ = syscall.GetProcAddress(libkernel32, "CopyMemory")
+	}
+	fnZeroMemory, _ = syscall.GetProcAddress(libkernel32, "RtlZeroMemory")
+	if fnZeroMemory == 0{
+		fnZeroMemory, _ = syscall.GetProcAddress(libkernel32, "ZeroMemory")
+	}
+	fnFillMemory, _ = syscall.GetProcAddress(libkernel32, "RtlFillMemory")
+	if fnFillMemory == 0{
+		fnFillMemory, _ = syscall.GetProcAddress(libkernel32, "FillMemory")
+	}
 }
 
-func MoveMemory(destination, source unsafe.Pointer, length uintptr) {
-	syscall.Syscall(fnMoveMemory, 3,
-		uintptr(unsafe.Pointer(destination)),
-		uintptr(source),
-		uintptr(length))
+func MoveMemory(destination, source unsafe.Pointer, length int) {
+	if fnMoveMemory != 0{
+		syscall.Syscall(fnMoveMemory, 3,
+			uintptr(unsafe.Pointer(destination)),
+			uintptr(source),
+			uintptr(length))
+	}
+
 }
+
+func CopyMemory(destination, source unsafe.Pointer, length int) {
+	if fnCopyMemory != 0{
+		syscall.Syscall(fnCopyMemory, 3,
+			uintptr(destination),
+			uintptr(source),
+			uintptr(length))
+	}
+
+}
+
+
+func ZeroMemory(destination unsafe.Pointer, length int) {
+	if fnZeroMemory != 0 {
+		syscall.Syscall(fnZeroMemory, 2,
+			uintptr(destination),
+			uintptr(length), 0)
+	}
+}
+
+func FillMemory(destination unsafe.Pointer, length int,fill byte) {
+	if fnFillMemory != 0 {
+		syscall.Syscall(fnFillMemory, 2,
+			uintptr(destination),
+			uintptr(length), uintptr(fill))
+	}
+}
+
 
 func GetModuleHandle(lpModuleName string) syscall.Handle {
 	initKernel32()

@@ -797,3 +797,11 @@ func NewPen()*GPen{
 	pen.Change()
 	return pen
 }
+
+
+type IGraphic interface {
+	Handle()syscall.Handle
+	Size()(w,h int)
+	Draw(x,y int,dc WinApi.HDC)
+	DrawToDest(srcRect WinApi.Rect,destRect WinApi.Rect,destDc WinApi.HDC)
+}

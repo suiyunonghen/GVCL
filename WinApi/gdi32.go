@@ -822,3 +822,9 @@ func GetDIBColorTable(dc HDC,p2,p3 uint, RGBQuadStructs *uintptr)  uint{
 		uintptr(p3),uintptr(unsafe.Pointer(RGBQuadStructs)),0,0,)
 	return uint(ret)
 }
+
+func PatBlt(dc HDC,x,y,width,height int,Rop uint32)bool  {
+	ret,_,_ := syscall.Syscall6(fnPatBlt,6,uintptr(dc),uintptr(x),
+		uintptr(y),uintptr(width),uintptr(height),uintptr(Rop))
+	return ret != 0
+}

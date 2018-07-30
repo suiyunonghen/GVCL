@@ -8,10 +8,25 @@ import (
 	"reflect"
 	"image"
 	"image/color"
+	"os"
+	"image/png"
+	"image/jpeg"
 )
 
-var ErrUnsupportedBmp = errors.New("bmp: unsupported BMP image")
+var (
+	ErrUnsupportedBmp = errors.New("bmp: unsupported BMP image")
+	ErrNotBmpFormat = errors.New("bmp: invalid format")
+)
 
+
+const (
+	fileHeaderLen = 14
+	infoHeaderLen = 40
+)
+
+var(
+	RGBQUADSize = unsafe.Sizeof(WinApi.RGBQUAD{})
+)
 
 type GBitmapCanvas struct {
 	*GCanvas
@@ -27,6 +42,7 @@ func (cvs *GBitmapCanvas)Free()  {
 		WinApi.DeleteDC(cvs.fmemDc)
 		cvs.fmemDc = 0
 	}
+	cvs.GCanvas.Free()
 }
 
 func readUint16(b []byte) uint16 {
@@ -38,7 +54,6 @@ func readUint32(b []byte) uint32 {
 }
 
 type   GBitmap struct {
-	topDown				bool
 	fBufferBmp			WinApi.HBITMAP
 	fPalate				WinApi.HPALETTE
 	fbmpBuffer			[]byte
@@ -47,17 +62,18 @@ type   GBitmap struct {
 }
 
 func (bmp *GBitmap)BmpHeader()*WinApi.BITMAPINFOHEADER  {
-	if len(bmp.fbmpBuffer)>0{
-		return (*WinApi.BITMAPINFOHEADER)(unsafe.Pointer(&(bmp.fbmpBuffer[0])))
+	if bmp.fbmpBuffer == nil{
+		bmp.fbmpBuffer = make([]byte,1280)
+		(*WinApi.BITMAPINFOHEADER)(unsafe.Pointer(&(bmp.fbmpBuffer[0]))).BiSize = infoHeaderLen
 	}
-	return nil
+	return (*WinApi.BITMAPINFOHEADER)(unsafe.Pointer(&(bmp.fbmpBuffer[0])))
 }
 
 func (bmp *GBitmap)BmpInfo()*WinApi.BITMAPINFO  {
-	if len(bmp.fbmpBuffer)>0{
-		return (*WinApi.BITMAPINFO)(unsafe.Pointer(&(bmp.fbmpBuffer[0])))
+	if bmp.fbmpBuffer == nil{
+		bmp.fbmpBuffer = make([]byte,1280)
 	}
-	return nil
+	return (*WinApi.BITMAPINFO)(unsafe.Pointer(&(bmp.fbmpBuffer[0])))
 }
 
 /*func (bmp *GBitmap)Pix()[]uint8  {
@@ -87,6 +103,9 @@ func (bmp *GBitmap)ColorModel() color.Model{
 
 func (bmp *GBitmap)At(x, y int) color.Color{
 	bmph := bmp.BmpHeader()
+	if bmp.BmpHeader().BiHeight > 0{ //排列是从下到上
+		y = int(bmp.BmpHeader().BiHeight) - y - 1
+	}
 	var pix reflect.SliceHeader
 	switch bmph.BiBitCount{
 	case 8:
@@ -144,7 +163,14 @@ func (bmp *GBitmap)Free()  {
 	}
 	if bmp.fcanvas != nil{
 		bmp.fcanvas.Free()
+		bmp.fcanvas = nil
 	}
+	if bmp.fPalate != 0{
+		WinApi.DeleteObject(WinApi.HGDIOBJ(bmp.fPalate))
+		bmp.fPalate = 0
+	}
+	bmp.fbmpBuffer = nil
+	bmp.fBmpData = 0
 }
 //返回颜色表
 func (bmp *GBitmap)ColorTable(bmpinfo *WinApi.BITMAPINFO)[]WinApi.RGBQUAD  {
@@ -159,6 +185,26 @@ func (bmp *GBitmap)ColorTable(bmpinfo *WinApi.BITMAPINFO)[]WinApi.RGBQUAD  {
 		return *(*[]WinApi.RGBQUAD)(unsafe.Pointer(&ctable))
 	}
 	return nil
+}
+
+func createPalate(bmpinfo *WinApi.BITMAPINFO)(result WinApi.HPALETTE)  {
+	result = 0
+	if bmpinfo.BmiHeader.BiBitCount < 24{ //颜色表
+		var logplate WinApi.LOGPALETTE
+		datalen := 1 << bmpinfo.BmiHeader.BiBitCount
+		for i := 0;i< datalen;i++{
+			Rgbquad := (*WinApi.RGBQUAD)(unsafe.Pointer( uintptr(unsafe.Pointer(&bmpinfo.BmiColors))+RGBQUADSize))
+			logplate.PalEntry[i].Red = Rgbquad.RgbRed
+			logplate.PalEntry[i].Green = Rgbquad.RgbGreen
+			logplate.PalEntry[i].Blue = Rgbquad.RgbBlue
+			logplate.PalEntry[i].Flags = Rgbquad.RgbReserved
+		}
+		//创建调色板
+		logplate.Version = 0x300
+		logplate.NumEntries = uint16(datalen)
+		result = WinApi.CreatePalette(&logplate)
+	}
+	return result
 }
 
 func (bmp *GBitmap)createPalate(bmpinfo *WinApi.BITMAPINFO)  {
@@ -189,6 +235,16 @@ func (bmp *GBitmap)createPalate(bmpinfo *WinApi.BITMAPINFO)  {
 	}
 }
 
+func (bmp *GBitmap)Size()(w,h int)  {
+	bmph := bmp.BmpHeader()
+	w = int(bmph.BiWidth)
+	h = int(bmph.BiHeight)
+	if h < 0{
+		h = -h
+	}
+	return
+}
+
 func (bmp *GBitmap)newCompatibleBmp()(error) {
 	tmpdc := WinApi.GetDC(0)
 	defer WinApi.ReleaseDC(0,tmpdc)
@@ -205,16 +261,12 @@ func (bmp *GBitmap)newCompatibleBmp()(error) {
 }
 
 func (bmp *GBitmap)decodeConfig(r io.Reader)error  {
-	const (
-		fileHeaderLen = 14
-		infoHeaderLen = 40
-	)
 	var b [fileHeaderLen+infoHeaderLen]byte
 	if _, err := io.ReadFull(r, b[:fileHeaderLen+infoHeaderLen]); err != nil {
 		return  err
 	}
 	if string(b[:2]) != "BM" {
-		return errors.New("bmp: invalid format")
+		return ErrNotBmpFormat
 	}
 	offset := readUint32(b[10:14])
 	if readUint32(b[14:18]) != infoHeaderLen {
@@ -224,11 +276,7 @@ func (bmp *GBitmap)decodeConfig(r io.Reader)error  {
 		bmp.fbmpBuffer = make([]byte,1280)
 	}
 	copy(bmp.fbmpBuffer[:40],b[14:])
-	bmp.topDown = false
 	bmpheader := bmp.BmpHeader()
-	if bmpheader.BiHeight < 0 {
-		bmpheader.BiHeight, bmp.topDown = -bmpheader.BiHeight, true
-	}
 	if bmpheader.BiWidth < 0 || bmpheader.BiHeight < 0 {
 		return ErrUnsupportedBmp
 	}
@@ -258,20 +306,68 @@ func (bmp *GBitmap)decodeConfig(r io.Reader)error  {
 	return ErrUnsupportedBmp
 }
 
-func (bmp *GBitmap)Draw(dc WinApi.HDC,x,y int)  {
+
+func (bmp *GBitmap)DrawToDest(srcRect WinApi.Rect,destRect WinApi.Rect,destDc WinApi.HDC){
+	
+}
+
+func (bmp *GBitmap)Draw(x,y int,dc WinApi.HDC)  {
 	var oldplate WinApi.HPALETTE
 	if bmp.fPalate != 0{
 		oldplate = WinApi.SelectPalette(dc,bmp.fPalate,true)
 		WinApi.RealizePalette(dc)
 	}
-	canvas := bmp.Canvas()
-	/*r := WinApi.Rect{20,20,100,100}
-	canvas.Brush().BrushStyle = BSClear
-	WinApi.DrawText(canvas.GetHandle(),"asdfasdf",-1,&r,WinApi.DT_CENTER | WinApi.DT_VCENTER | WinApi.DT_SINGLELINE)*/
 	bmpHeader := bmp.BmpHeader()
-	WinApi.BitBlt(dc, x, y, int(bmpHeader.BiWidth), int(bmpHeader.BiHeight), canvas.GetHandle(), 0, 0, WinApi.SRCCOPY)
-	if oldplate != 0{
-		WinApi.SelectPalette(dc,oldplate,true)
+	w,h := bmp.Size()
+	if bmpHeader.BiBitCount < 32{
+		canvas := bmp.Canvas()
+		WinApi.BitBlt(dc, x, y, w,h, canvas.GetHandle(), 0, 0, WinApi.SRCCOPY)
+		if oldplate != 0{
+			WinApi.SelectPalette(dc,oldplate,true)
+		}
+	}else{ //具备有透明通道，需要绘制透明通道
+		BufferBits := uintptr(0)
+		var bmpinfo WinApi.BITMAPINFO
+		bmpinfo.BmiHeader = *bmpHeader
+		BufferDC := WinApi.CreateCompatibleDC(0)
+		if BufferDC == 0{
+			return
+		}
+		BufferBitmap := WinApi.CreateDIBSection(BufferDC, &bmpinfo, WinApi.DIB_RGB_COLORS,
+			&BufferBits, 0, 0)
+		if BufferBitmap == 0 || BufferBits == 0{
+			if BufferBitmap != 0 {
+				WinApi.DeleteObject(WinApi.HGDIOBJ(BufferBitmap))
+			}
+			WinApi.DeleteDC(BufferDC)
+		}
+		OldBitmap := WinApi.SelectObject(BufferDC, uintptr(BufferBitmap))
+		WinApi.BitBlt(BufferDC, 0, 0, w, h, dc, x, y, WinApi.SRCCOPY)
+
+		//根据透明色重新计算颜色
+		pixsize := unsafe.Sizeof(WinApi.RGBQUAD{})
+		srcData := bmp.fBmpData
+		destData := BufferBits
+		for row := 0;row < h;row++{
+			for col := 0;col < w;col++{
+				srcrgba := (*WinApi.RGBQUAD)(unsafe.Pointer(srcData))
+				destrgba := (*WinApi.RGBQUAD)(unsafe.Pointer(destData))
+				if srcrgba.RgbReserved != 255{ //根据透明度融合背景色
+					destrgba.RgbRed = byte((0x7F + int(srcrgba.RgbReserved)*int(srcrgba.RgbRed) + int(destrgba.RgbRed)*int(^srcrgba.RgbReserved)) / 0xFF)
+					destrgba.RgbGreen = byte((0x7F + int(srcrgba.RgbReserved)*int(srcrgba.RgbGreen) + int(destrgba.RgbGreen)*int(^srcrgba.RgbReserved)) / 0xFF)
+					destrgba.RgbBlue = byte((0x7F + int(srcrgba.RgbReserved)*int(srcrgba.RgbBlue) + int(destrgba.RgbBlue)*int(^srcrgba.RgbReserved)) / 0xFF)
+					destrgba.RgbReserved = byte(^((0x7F + int(^destrgba.RgbReserved)*int(^srcrgba.RgbReserved)) / 0xFF))
+				}else{
+					*destrgba = *srcrgba
+				}
+				srcData += pixsize
+				destData += pixsize
+			}
+		}
+		WinApi.BitBlt(dc,x,y,w,h,BufferDC,0,0,WinApi.SRCCOPY)
+		WinApi.SelectObject(BufferDC,OldBitmap)
+		WinApi.DeleteDC(BufferDC)
+		WinApi.DeleteObject(WinApi.HGDIOBJ(BufferBitmap))
 	}
 }
 
@@ -310,14 +406,7 @@ func (bmp *GBitmap)decodeNRGBA(r io.Reader)error  {
 }
 
 func (bmp *GBitmap)Decode(r io.Reader) error {
-	if bmp.fBufferBmp != 0{
-		WinApi.DeleteObject(WinApi.HGDIOBJ(bmp.fBufferBmp))
-		bmp.fBufferBmp = 0
-	}
-	if bmp.fPalate != 0{
-		WinApi.DeleteObject(WinApi.HGDIOBJ(bmp.fPalate))
-		bmp.fPalate = 0
-	}
+	bmp.Free()
 	err := bmp.decodeConfig(r)
 	if err != nil{
 		return err
@@ -331,4 +420,175 @@ func (bmp *GBitmap)Decode(r io.Reader) error {
 		return bmp.decodeNRGBA(r)
 	}
 	return ErrUnsupportedBmp
+}
+
+func (bmp *GBitmap)SetSize(w,h int)error  {
+	screenDC := WinApi.GetDC(0)
+	tmpdc := WinApi.CreateCompatibleDC(0)
+	defer func() {
+		WinApi.DeleteDC(tmpdc)
+		WinApi.ReleaseDC(0,screenDC)
+	}()
+
+	oldbmphandle := bmp.fBufferBmp
+	fbmpBuffer := make([]byte,1280)
+	nbmpinfo := (*WinApi.BITMAPINFO)(unsafe.Pointer(&(fbmpBuffer[0])))
+	if oldbmphandle != 0{
+		nbmpinfo.BmiHeader = *bmp.BmpHeader()
+	}else{
+		nbmpinfo.BmiHeader.BiSize = infoHeaderLen
+		nbmpinfo.BmiHeader.BiBitCount = 24
+		nbmpinfo.BmiHeader.BiPlanes = 1
+		nbmpinfo.BmiHeader.BiCompression = WinApi.BI_RGB
+	}
+	nbmpinfo.BmiHeader.BiHeight = int32(h)
+	nbmpinfo.BmiHeader.BiWidth = int32(w)
+	newpalate := WinApi.HPALETTE(0)
+	//设置调色板
+	if bmp.fPalate != 0{
+		copy(fbmpBuffer[fileHeaderLen+infoHeaderLen:],bmp.fbmpBuffer[fileHeaderLen+infoHeaderLen:fileHeaderLen+infoHeaderLen+1024])
+		newpalate = createPalate(nbmpinfo)
+	}
+
+	fBmpData := uintptr(0)
+
+	fBufferBmp := WinApi.CreateDIBSection(tmpdc, nbmpinfo, WinApi.DIB_RGB_COLORS,
+		&fBmpData, 0, 0)
+	if fBufferBmp == 0 || fBufferBmp == 0{
+		return errors.New("Create Compatible Bitmap Failed")
+	}
+	WinApi.SelectObject(tmpdc,uintptr(fBufferBmp))
+	WinApi.PatBlt(tmpdc,0,0,w,h,WinApi.WHITENESS)
+	if oldbmphandle != 0{
+		WinApi.BitBlt(tmpdc,0,0,w,h,bmp.Canvas().GetHandle(),0,0,WinApi.SRCCOPY)
+	}
+	bmp.Free()
+
+	bmp.fPalate = newpalate
+	bmp.fbmpBuffer = fbmpBuffer
+	bmp.fBufferBmp = fBufferBmp
+	bmp.fBmpData = fBmpData
+	return nil
+}
+
+func (bmp *GBitmap)LoadFromFile(filename string) error {
+	f,err := os.Open(filename)
+	if err != nil{
+		return err
+	}
+	defer f.Close()
+	err = bmp.Decode(f)
+	var img image.Image
+	if err != nil{
+		//判断其他的格式
+		var b [4]byte
+		f.Seek(0,io.SeekStart)
+		_,err = f.Read(b[:])
+		if b[0]== 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G'{
+			f.Seek(0,io.SeekStart)
+			img,err = png.Decode(f)
+			if err == nil{
+				return bmp.FromImage(img)
+			}
+		}else if b[0] == 0xFF && b[1] == 0xD8{
+			f.Seek(-2,io.SeekEnd)
+			f.Read(b[:2])
+			if b[0] == 0xFF && b[1] == 0xD9{ //jpg
+				f.Seek(0,io.SeekStart)
+				img,err = jpeg.Decode(f)
+				if err == nil{
+					return bmp.FromImage(img)
+				}
+			}
+		}
+
+	}
+	return err
+}
+
+func (bmp *GBitmap)from32imageData(w,h int, pix []byte)error  {
+	bmp.Free()
+	bmpInfo := bmp.BmpInfo()
+	bmpInfo.BmiHeader.BiSize = infoHeaderLen
+	bmpInfo.BmiHeader.BiBitCount = 32
+	bmpInfo.BmiHeader.BiPlanes = 1
+	bmpInfo.BmiHeader.BiCompression = WinApi.BI_RGB
+	bmpInfo.BmiHeader.BiHeight = int32(-h)
+	bmpInfo.BmiHeader.BiWidth = int32(w)
+	bmpInfo.BmiHeader.BiSizeImage = uint32(bmpInfo.BmiHeader.BiHeight*bmpInfo.BmiHeader.BiWidth * 4)
+	//填充内容数据
+	err := bmp.newCompatibleBmp()
+	if err != nil{
+		return err
+	}
+	sourcdata := uintptr(unsafe.Pointer(&pix[0]))
+	destdata := bmp.fBmpData
+	for row := 0;row < int(-bmpInfo.BmiHeader.BiHeight);row++ {
+		for col := 0; col < int(bmpInfo.BmiHeader.BiWidth); col++ {
+			srgb := (*color.RGBA)(unsafe.Pointer(sourcdata))
+			drgn := (*WinApi.RGBQUAD)(unsafe.Pointer(destdata))
+			drgn.RgbRed = srgb.R
+			drgn.RgbGreen = srgb.G
+			drgn.RgbBlue = srgb.B
+			drgn.RgbReserved = srgb.A
+			sourcdata += RGBQUADSize
+			destdata += RGBQUADSize
+		}
+	}
+	return nil
+}
+
+func (bmp *GBitmap)fromYcbcr(img *image.YCbCr) error {
+	return nil
+}
+
+func (bmp *GBitmap)FromImage(img image.Image)error  {
+	switch v := img.(type) {
+	case *image.RGBA:
+		return bmp.from32imageData(v.Rect.Max.X - v.Rect.Min.X,v.Rect.Max.Y - v.Rect.Min.Y, v.Pix)
+	case *image.NRGBA:
+		return bmp.from32imageData(v.Rect.Max.X - v.Rect.Min.X,v.Rect.Max.Y - v.Rect.Min.Y,v.Pix)
+	case *image.YCbCr:
+		return bmp.fromYcbcr(v)
+	case *image.Paletted:
+		//构建8位位图
+		bmp.Free()
+		bmpInfo := bmp.BmpInfo()
+		bmpInfo.BmiHeader.BiSize = infoHeaderLen
+		bmpInfo.BmiHeader.BiBitCount = 8
+		bmpInfo.BmiHeader.BiPlanes = 1
+		bmpInfo.BmiHeader.BiCompression = WinApi.BI_RGB
+		bmpInfo.BmiHeader.BiClrUsed = 256
+		bmpInfo.BmiHeader.BiHeight = int32(v.Rect.Min.Y - v.Rect.Max.Y)
+		bmpInfo.BmiHeader.BiWidth = int32(v.Rect.Max.X - v.Rect.Min.X)
+		bmpInfo.BmiHeader.BiSizeImage = uint32(len(v.Pix))
+		//填充调色板
+		platdata := uintptr(unsafe.Pointer(&bmpInfo.BmiColors))
+		for i := 0;i< len(v.Palette);i++{
+			r,g,b,a := v.Palette[i].RGBA()
+			rgba := (*WinApi.RGBQUAD)(unsafe.Pointer(platdata))
+			rgba.RgbRed = byte(r)
+			rgba.RgbGreen = byte(g)
+			rgba.RgbBlue = byte(b)
+			rgba.RgbReserved = byte(a)
+			platdata+=RGBQUADSize
+		}
+		err := bmp.newCompatibleBmp()
+		if err != nil{
+			return err
+		}
+		scanline := bmpInfo.BmiHeader.BiWidth / 4
+		if bmpInfo.BmiHeader.BiWidth % 4 > 0{
+			scanline = (scanline + 1) * 4
+		}
+		h := int(-bmpInfo.BmiHeader.BiHeight)
+		destdata := bmp.fBmpData
+		for i := 0;i<h;i++{
+			p := v.Pix[i*int(bmpInfo.BmiHeader.BiWidth) : i*int(bmpInfo.BmiHeader.BiWidth)+int(bmpInfo.BmiHeader.BiWidth)]
+			WinApi.CopyMemory(unsafe.Pointer(destdata),unsafe.Pointer(&p[0]),int(bmpInfo.BmiHeader.BiWidth))
+			destdata += uintptr(scanline)
+		}
+		return nil
+	}
+	return errors.New("cannot Convert to BMP")
 }

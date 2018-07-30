@@ -11,6 +11,7 @@ type GCanvas struct {
 	fPen   *GPen
 }
 
+
 type ICanvas interface {
 	GetHandle()WinApi.HDC
 	SetHandle(dc WinApi.HDC)
@@ -26,6 +27,7 @@ type ICanvas interface {
 	TextExtent(str string,size *WinApi.GSize)bool
 	TextWidth(str string)(int32,bool)
 	TextHeight(str string)(int32,bool)
+	Draw(x,y int,graphic IGraphic)
 }
 
 func NewCanvas()*GCanvas  {
@@ -61,6 +63,15 @@ func (cvs *GCanvas) TextWidth(str string)(w int32,b bool) {
 	}
 	return
 }
+
+func (cvs *GCanvas)Draw(x,y int,graphic IGraphic){
+	dc := cvs.GetHandle()
+	if dc != 0{
+		graphic.Draw(x,y,cvs.GetHandle())
+	}
+}
+
+
 
 func (cvs *GCanvas) TextHeight(str string)(h int32, b bool) {
 	h = 0
