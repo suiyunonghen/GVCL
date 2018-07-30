@@ -11,6 +11,8 @@ import (
 	"os"
 	"image/png"
 	"image/jpeg"
+	"golang.org/x/image/bmp"
+	"fmt"
 )
 
 var (
@@ -59,6 +61,7 @@ type   GBitmap struct {
 	fbmpBuffer			[]byte
 	fcanvas				*GBitmapCanvas
 	fBmpData			uintptr			//位图数据位置
+	fcolorMode			color.Model
 }
 
 func (bmp *GBitmap)BmpHeader()*WinApi.BITMAPINFOHEADER  {
@@ -86,14 +89,26 @@ func (bmp *GBitmap)Bounds()(result image.Rectangle)  {
 	bmpheader := bmp.BmpHeader()
 	result.Max.X = int(bmpheader.BiWidth)
 	result.Max.Y = int(bmpheader.BiHeight)
+	if result.Max.Y < 0{
+		result.Max.Y = -result.Max.Y
+	}
 	return
 }
 
 func (bmp *GBitmap)ColorModel() color.Model{
+	if bmp.fcolorMode != nil{
+		return bmp.fcolorMode
+	}
 	bmph := bmp.BmpHeader()
 	switch bmph.BiBitCount{
 	case 8:
-		//return color.
+		pcm := make(color.Palette, 256)
+		colortable := bmp.ColorTable(nil)
+		for i := range pcm {
+			pcm[i] = color.RGBA{colortable[i].RgbRed, colortable[i].RgbGreen, colortable[i].RgbBlue, 0xFF}
+		}
+		bmp.fcolorMode = pcm
+		return bmp.fcolorMode
 	case 24,32:
 		return color.RGBAModel
 	}
@@ -125,6 +140,9 @@ func (bmp *GBitmap)At(x, y int) color.Color{
 		offset := uintptr(y*scanline + x*3)
 		rgb = *(*WinApi.RGBQUAD)(unsafe.Pointer(bmp.fBmpData + offset))
 		rgb.RgbReserved = 0xff
+		if x == 0 && y == 1000{
+			fmt.Println("Asdf")
+		}
 		return rgb
 	case 32:
 		var rgb WinApi.RGBQUAD
@@ -171,7 +189,9 @@ func (bmp *GBitmap)Free()  {
 	}
 	bmp.fbmpBuffer = nil
 	bmp.fBmpData = 0
+	bmp.fcolorMode = nil
 }
+
 //返回颜色表
 func (bmp *GBitmap)ColorTable(bmpinfo *WinApi.BITMAPINFO)[]WinApi.RGBQUAD  {
 	if bmpinfo == nil{
@@ -308,7 +328,7 @@ func (bmp *GBitmap)decodeConfig(r io.Reader)error  {
 
 
 func (bmp *GBitmap)DrawToDest(srcRect WinApi.Rect,destRect WinApi.Rect,destDc WinApi.HDC){
-	
+
 }
 
 func (bmp *GBitmap)Draw(x,y int,dc WinApi.HDC)  {
@@ -545,11 +565,21 @@ func (bmp *GBitmap)fromYcbcr(img *image.YCbCr) error {
 func (bmp *GBitmap)FromImage(img image.Image)error  {
 	switch v := img.(type) {
 	case *image.RGBA:
-		return bmp.from32imageData(v.Rect.Max.X - v.Rect.Min.X,v.Rect.Max.Y - v.Rect.Min.Y, v.Pix)
+		err := bmp.from32imageData(v.Rect.Max.X - v.Rect.Min.X,v.Rect.Max.Y - v.Rect.Min.Y, v.Pix)
+		if err == nil{
+			bmp.fcolorMode = img.ColorModel()
+		}
+		return err
 	case *image.NRGBA:
-		return bmp.from32imageData(v.Rect.Max.X - v.Rect.Min.X,v.Rect.Max.Y - v.Rect.Min.Y,v.Pix)
+		err := bmp.from32imageData(v.Rect.Max.X - v.Rect.Min.X,v.Rect.Max.Y - v.Rect.Min.Y,v.Pix)
+		if err == nil{
+			bmp.fcolorMode = img.ColorModel()
+		}
+		return err
 	case *image.YCbCr:
 		return bmp.fromYcbcr(v)
+	case *image.Gray:
+
 	case *image.Paletted:
 		//构建8位位图
 		bmp.Free()
@@ -588,7 +618,34 @@ func (bmp *GBitmap)FromImage(img image.Image)error  {
 			WinApi.CopyMemory(unsafe.Pointer(destdata),unsafe.Pointer(&p[0]),int(bmpInfo.BmiHeader.BiWidth))
 			destdata += uintptr(scanline)
 		}
+		bmp.fcolorMode = img.ColorModel()
 		return nil
 	}
 	return errors.New("cannot Convert to BMP")
+}
+
+func (bmpobj *GBitmap)Encode(w io.Writer) error {
+	return bmp.Encode(w,bmpobj)
+}
+
+func (bmpobj *GBitmap)EncodePNG(w io.Writer)error  {
+	return png.Encode(w,bmpobj)
+}
+
+func (bmpobj *GBitmap)SaveToFile(fileName string)error  {
+	if file, err := os.OpenFile(fileName, os.O_CREATE|os.O_TRUNC, 0644); err == nil {
+		defer file.Close()
+		return bmpobj.Encode(file)
+	}else{
+		return err
+	}
+}
+
+func (bmpobj *GBitmap)SaveToPngFile(fileName string)error  {
+	if file, err := os.OpenFile(fileName, os.O_CREATE|os.O_TRUNC, 0644); err == nil {
+		defer file.Close()
+		return bmpobj.EncodePNG(file)
+	}else{
+		return err
+	}
 }

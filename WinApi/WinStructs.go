@@ -410,7 +410,7 @@ type RGBQUAD struct {
 }
 
 func (rgb RGBQUAD)RGBA() (r, g, b, a uint32)  {
-	return uint32(rgb.RgbRed),uint32(rgb.RgbGreen),uint32(rgb.RgbBlue),uint32(rgb.RgbReserved)
+	return uint32(rgb.RgbRed)<< 8,uint32(rgb.RgbGreen)<< 8,uint32(rgb.RgbBlue)<< 8,uint32(rgb.RgbReserved)<< 8
 }
 
 type PALETTEENTRY struct {
@@ -421,7 +421,7 @@ type PALETTEENTRY struct {
 }
 
 func (rgb PALETTEENTRY)RGBA() (r, g, b, a uint32)  {
-	return uint32(rgb.Red),uint32(rgb.Green),uint32(rgb.Blue),uint32(rgb.Flags)
+	return uint32(rgb.Red)<< 8,uint32(rgb.Green)<< 8,uint32(rgb.Blue)<< 8,uint32(rgb.Flags)<< 8
 }
 
 type LOGPALETTE struct {
