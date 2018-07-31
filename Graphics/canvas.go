@@ -72,7 +72,6 @@ func (cvs *GCanvas)Draw(x,y int,graphic IGraphic){
 }
 
 
-
 func (cvs *GCanvas) TextHeight(str string)(h int32, b bool) {
 	h = 0
 	b = cvs.GetHandle() != 0

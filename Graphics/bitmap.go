@@ -12,7 +12,7 @@ import (
 	"image/png"
 	"image/jpeg"
 	"golang.org/x/image/bmp"
-	"fmt"
+	"syscall"
 )
 
 var (
@@ -62,6 +62,7 @@ type   GBitmap struct {
 	fcanvas				*GBitmapCanvas
 	fBmpData			uintptr			//位图数据位置
 	fcolorMode			color.Model
+	OnChange			NotifyEvent
 }
 
 func (bmp *GBitmap)BmpHeader()*WinApi.BITMAPINFOHEADER  {
@@ -77,6 +78,11 @@ func (bmp *GBitmap)BmpInfo()*WinApi.BITMAPINFO  {
 		bmp.fbmpBuffer = make([]byte,1280)
 	}
 	return (*WinApi.BITMAPINFO)(unsafe.Pointer(&(bmp.fbmpBuffer[0])))
+}
+
+func (bmp *GBitmap)Empty()bool{
+	w,h := bmp.Size()
+	return w==0 || h == 0
 }
 
 /*func (bmp *GBitmap)Pix()[]uint8  {
@@ -140,9 +146,6 @@ func (bmp *GBitmap)At(x, y int) color.Color{
 		offset := uintptr(y*scanline + x*3)
 		rgb = *(*WinApi.RGBQUAD)(unsafe.Pointer(bmp.fBmpData + offset))
 		rgb.RgbReserved = 0xff
-		if x == 0 && y == 1000{
-			fmt.Println("Asdf")
-		}
 		return rgb
 	case 32:
 		var rgb WinApi.RGBQUAD
@@ -328,7 +331,28 @@ func (bmp *GBitmap)decodeConfig(r io.Reader)error  {
 
 
 func (bmp *GBitmap)DrawToDest(srcRect WinApi.Rect,destRect WinApi.Rect,destDc WinApi.HDC){
+	var oldplate WinApi.HPALETTE
+	if bmp.fPalate != 0{
+		oldplate = WinApi.SelectPalette(destDc,bmp.fPalate,true)
+		WinApi.RealizePalette(destDc)
+	}
+	bmpHeader := bmp.BmpHeader()
+	//w,h := bmp.Size()
+	if bmpHeader.BiBitCount < 32{
+		OldStretchBltMode := WinApi.SetStretchBltMode(destDc, WinApi.STRETCH_DELETESCANS)
+		if oldplate != 0{
+			WinApi.SelectPalette(destDc,oldplate,true)
+		}
+		WinApi.StretchBlt(destDc,int(destRect.Left),int(destRect.Top),int(destRect.Width()),int(destRect.Height()),
+			bmp.Canvas().GetHandle(),int(srcRect.Left),int(srcRect.Top),int(srcRect.Width()),int(srcRect.Height()),WinApi.SRCCOPY)
+		WinApi.SetStretchBltMode(destDc,OldStretchBltMode)
+	}else{
 
+	}
+}
+
+func (bmp *GBitmap)Handle()syscall.Handle{
+	return syscall.Handle(bmp.fBufferBmp)
 }
 
 func (bmp *GBitmap)Draw(x,y int,dc WinApi.HDC)  {
@@ -404,6 +428,9 @@ func (bmp *GBitmap)decodePaletted(r io.Reader)error  {
 	if _, err := io.ReadFull(r,Pix);err!=nil{
 		return err
 	}
+	if bmp.OnChange != nil{
+		bmp.OnChange(bmp)
+	}
 	return nil
 }
 
@@ -417,6 +444,9 @@ func (bmp *GBitmap)decodeRGB(r io.Reader)error  {
 	Pix := *(*[]byte)(unsafe.Pointer(&pix))
 	if _, err := io.ReadFull(r,Pix);err!=nil{
 		return err
+	}
+	if bmp.OnChange != nil{
+		bmp.OnChange(bmp)
 	}
 	return nil
 }
@@ -488,6 +518,9 @@ func (bmp *GBitmap)SetSize(w,h int)error  {
 	bmp.fbmpBuffer = fbmpBuffer
 	bmp.fBufferBmp = fBufferBmp
 	bmp.fBmpData = fBmpData
+	if bmp.OnChange != nil{
+		bmp.OnChange(bmp)
+	}
 	return nil
 }
 
@@ -555,6 +588,9 @@ func (bmp *GBitmap)from32imageData(w,h int, pix []byte)error  {
 			destdata += RGBQUADSize
 		}
 	}
+	if bmp.OnChange != nil{
+		bmp.OnChange(bmp)
+	}
 	return nil
 }
 
@@ -619,6 +655,9 @@ func (bmp *GBitmap)FromImage(img image.Image)error  {
 			destdata += uintptr(scanline)
 		}
 		bmp.fcolorMode = img.ColorModel()
+		if bmp.OnChange != nil{
+			bmp.OnChange(bmp)
+		}
 		return nil
 	}
 	return errors.New("cannot Convert to BMP")

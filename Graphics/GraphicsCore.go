@@ -8,6 +8,15 @@ import (
 	"fmt"
 )
 
+type GDrawStyle byte
+
+const(
+	GDS_NORMAL GDrawStyle = iota
+	GDS_CENTER
+	GDS_FILL
+	GDS_STRETCH
+)
+
 type GColorValue uint32
 
 func (cv GColorValue) R() byte {
@@ -804,4 +813,5 @@ type IGraphic interface {
 	Size()(w,h int)
 	Draw(x,y int,dc WinApi.HDC)
 	DrawToDest(srcRect WinApi.Rect,destRect WinApi.Rect,destDc WinApi.HDC)
+	Empty()bool
 }
