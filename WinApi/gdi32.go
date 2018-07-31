@@ -828,3 +828,20 @@ func PatBlt(dc HDC,x,y,width,height int,Rop uint32)bool  {
 		uintptr(y),uintptr(width),uintptr(height),uintptr(Rop))
 	return ret != 0
 }
+
+func SetStretchBltMode(dc HDC,StretchMode int)int  {
+	ret,_,_ := syscall.Syscall(fnSetStretchBltMode,2,uintptr(dc),uintptr(StretchMode),0)
+	return int(ret)
+}
+
+func GetStretchBltMode(dc HDC)int  {
+	ret,_,_ := syscall.Syscall(fnGetStretchBltMode,1,uintptr(dc),0,0)
+	return int(ret)
+}
+
+func StretchBlt(destdc HDC,x,y,w,h int,srcdc HDC,srcx,srcy,srcW,srch int,Rop uint32)bool  {
+	ret,_,_ := syscall.Syscall12(fnStretchBlt,11,uintptr(destdc),
+		uintptr(x),uintptr(y),uintptr(w),uintptr(h),
+			uintptr(srcdc),uintptr(srcx),uintptr(srcy),uintptr(srcW),uintptr(srch),uintptr(Rop),0)
+	return ret !=0
+}
