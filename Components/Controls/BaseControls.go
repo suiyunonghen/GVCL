@@ -763,7 +763,7 @@ func (ctrl *GWinControl)IsPopup()bool  {
 	if ctrl.fIsForm{
 		return true
 	}
-	wstyle := WinApi.GetWindowLong(ctrl.GetWindowHandle(),WinApi.GWL_STYLE)
+	wstyle := uint(WinApi.GetWindowLong(ctrl.GetWindowHandle(),WinApi.GWL_STYLE))
 	if WinApi.WS_CHILD & wstyle != WinApi.WS_CHILD || WinApi.WS_CHILDWINDOW & wstyle != WinApi.WS_CHILDWINDOW{
 		return WinApi.WS_POPUP & wstyle == WinApi.WS_POPUP || WinApi.WS_POPUPWINDOW & wstyle == WinApi.WS_POPUPWINDOW ||
 			WinApi.WS_OVERLAPPEDWINDOW & wstyle == WinApi.WS_OVERLAPPEDWINDOW

@@ -1873,3 +1873,10 @@ func GetWindow(hWnd syscall.Handle,uCmd uint)syscall.Handle  {
 	ret,_,_:=syscall.Syscall(fnGetWindow,2,uintptr(hWnd),uintptr(uCmd),0)
 	return syscall.Handle(ret)
 }
+
+func UpdateLayeredWindow(handle syscall.Handle,hdcDest HDC,pptDst *POINT,psize *GSize,hdcsrc HDC,pptsrc *POINT,crKey uint32,pblend *BLENDFUNCTION,dwFlags uint32)bool  {
+	ret,_,_ := syscall.Syscall9(fnUpdateLayeredWindow,9,uintptr(handle),
+		uintptr(hdcDest),uintptr(unsafe.Pointer(pptDst)),uintptr(unsafe.Pointer(psize)),
+		uintptr(hdcsrc),uintptr(unsafe.Pointer(pptsrc)),uintptr(crKey),uintptr(unsafe.Pointer(pblend)),uintptr(dwFlags))
+	return ret != 0
+}

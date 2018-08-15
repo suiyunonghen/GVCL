@@ -1444,6 +1444,12 @@ func MulDiv(nNumber, nNumerator, nDenominator int32)int32  {
 	return int32(r1)
 }
 
+func TerminateProcess(hProcess syscall.Handle,exitCode uint)bool  {
+	initKernel32()
+	r1, _, _ := syscall.Syscall(fnTerminateProcess, 2, uintptr(hProcess),uintptr(exitCode),0)
+	return r1 != 0
+}
+
 func GetLastError()uint32  {
 	initKernel32()
 	r1, _, _ := syscall.Syscall(fnGetLastError, 0, 0,0,0)

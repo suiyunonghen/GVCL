@@ -420,6 +420,7 @@ type PALETTEENTRY struct {
 	Flags		byte
 }
 
+//为了兼容go自带的image接口，然后做相关的encode，所以，必须将所获分量全部左移8位
 func (rgb PALETTEENTRY)RGBA() (r, g, b, a uint32)  {
 	return uint32(rgb.Red)<< 8,uint32(rgb.Green)<< 8,uint32(rgb.Blue)<< 8,uint32(rgb.Flags)<< 8
 }
@@ -459,3 +460,10 @@ type DIBSECTION struct {
 	DsOffset    uint32
 }
 
+
+type BLENDFUNCTION struct {
+	BlendOp			byte
+	BlendFlags		byte
+	SourceConstantAlpha	byte
+	AlphaFormat		byte
+}

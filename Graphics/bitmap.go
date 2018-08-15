@@ -392,6 +392,7 @@ func (bmp *GBitmap)Draw(x,y int,dc WinApi.HDC)  {
 		pixsize := unsafe.Sizeof(WinApi.RGBQUAD{})
 		srcData := bmp.fBmpData
 		destData := BufferBits
+		//m := uint32(1<<16 - 1)
 		for row := 0;row < h;row++{
 			for col := 0;col < w;col++{
 				srcrgba := (*WinApi.RGBQUAD)(unsafe.Pointer(srcData))
@@ -401,6 +402,16 @@ func (bmp *GBitmap)Draw(x,y int,dc WinApi.HDC)  {
 					destrgba.RgbGreen = byte((0x7F + int(srcrgba.RgbReserved)*int(srcrgba.RgbGreen) + int(destrgba.RgbGreen)*int(^srcrgba.RgbReserved)) / 0xFF)
 					destrgba.RgbBlue = byte((0x7F + int(srcrgba.RgbReserved)*int(srcrgba.RgbBlue) + int(destrgba.RgbBlue)*int(^srcrgba.RgbReserved)) / 0xFF)
 					destrgba.RgbReserved = byte(^((0x7F + int(^destrgba.RgbReserved)*int(^srcrgba.RgbReserved)) / 0xFF))
+
+					/*sr,sg,sb,sa := srcrgba.RGBA()
+					dr,dg,db,da := destrgba.RGBA()
+
+					a := (m - sa) * 0x101
+					destrgba.RgbRed = uint8((dr*a/m + sr) >> 8)
+					destrgba.RgbGreen = uint8((dg*a/m + sg) >> 8)
+					destrgba.RgbBlue = uint8((db*a/m + sb) >> 8)
+					destrgba.RgbReserved = uint8((da*a/m + sa) >> 8)*/
+
 				}else{
 					*destrgba = *srcrgba
 				}
@@ -472,7 +483,7 @@ func (bmp *GBitmap)Decode(r io.Reader) error {
 	return ErrUnsupportedBmp
 }
 
-func (bmp *GBitmap)SetSize(w,h int)error  {
+func (bmp *GBitmap)SetSize(w,h int,bit32 bool)error  {
 	screenDC := WinApi.GetDC(0)
 	tmpdc := WinApi.CreateCompatibleDC(0)
 	defer func() {
@@ -487,7 +498,11 @@ func (bmp *GBitmap)SetSize(w,h int)error  {
 		nbmpinfo.BmiHeader = *bmp.BmpHeader()
 	}else{
 		nbmpinfo.BmiHeader.BiSize = infoHeaderLen
-		nbmpinfo.BmiHeader.BiBitCount = 24
+		if bit32{
+			nbmpinfo.BmiHeader.BiBitCount = 32
+		}else{
+			nbmpinfo.BmiHeader.BiBitCount = 24
+		}
 		nbmpinfo.BmiHeader.BiPlanes = 1
 		nbmpinfo.BmiHeader.BiCompression = WinApi.BI_RGB
 	}
@@ -541,6 +556,22 @@ func (bmp *GBitmap)LoadFromFile(filename string) error {
 			f.Seek(0,io.SeekStart)
 			img,err = png.Decode(f)
 			if err == nil{
+				switch v := img.(type) {
+				case *image.RGBA:
+					err := bmp.from32imageData(v.Rect.Max.X-v.Rect.Min.X, v.Rect.Max.Y-v.Rect.Min.Y, v.Pix)
+					if err == nil {
+						bmp.fcolorMode = img.ColorModel()
+					}
+					return err
+				case *image.NRGBA:
+					err := bmp.from32imageData(v.Rect.Max.X-v.Rect.Min.X, v.Rect.Max.Y-v.Rect.Min.Y, v.Pix)
+					if err == nil {
+						bmp.fcolorMode = img.ColorModel()
+					}
+					return err
+				case *image.Paletted:
+					return bmp.fromPngPalette(v)
+				}
 				return bmp.FromImage(img)
 			}
 		}else if b[0] == 0xFF && b[1] == 0xD8{
@@ -595,6 +626,47 @@ func (bmp *GBitmap)from32imageData(w,h int, pix []byte)error  {
 }
 
 func (bmp *GBitmap)fromYcbcr(img *image.YCbCr) error {
+	return nil
+}
+
+func (bmp *GBitmap)fromPngPalette(platte *image.Paletted)error  {
+	//构建8位位图
+	bmp.Free()
+	bmpInfo := bmp.BmpInfo()
+	bmpInfo.BmiHeader.BiSize = infoHeaderLen
+	bmpInfo.BmiHeader.BiBitCount = 32
+	bmpInfo.BmiHeader.BiPlanes = 1
+	bmpInfo.BmiHeader.BiCompression = WinApi.BI_RGB
+	bmpInfo.BmiHeader.BiHeight = int32(platte.Rect.Min.Y - platte.Rect.Max.Y)
+	bmpInfo.BmiHeader.BiWidth = int32(platte.Rect.Max.X - platte.Rect.Min.X)
+	err := bmp.newCompatibleBmp()
+	if err != nil{
+		return err
+	}
+	//填充颜色
+	destdata := bmp.fBmpData
+	scanline := bmpInfo.BmiHeader.BiWidth / 4
+	if bmpInfo.BmiHeader.BiWidth % 4 > 0{
+		scanline = (scanline + 1) * 4
+	}
+
+	for row := 0;row < int(-bmpInfo.BmiHeader.BiHeight);row++ {
+		for col := 0; col < int(bmpInfo.BmiHeader.BiWidth); col++ {
+			colorindex := platte.Pix[row*int(bmpInfo.BmiHeader.BiWidth)+col]
+			color := platte.Palette[colorindex]
+			drgn := (*WinApi.RGBQUAD)(unsafe.Pointer(destdata))
+			r,g,b,a := color.RGBA()
+
+			drgn.RgbRed = byte(r)
+			drgn.RgbGreen = byte(g)
+			drgn.RgbBlue = byte(b)
+			drgn.RgbReserved = byte(a)
+			destdata += RGBQUADSize
+		}
+	}
+	if bmp.OnChange != nil{
+		bmp.OnChange(bmp)
+	}
 	return nil
 }
 
