@@ -9,6 +9,8 @@ import (
 	"image/png"
 	"github.com/suiyunonghen/GVCL/Graphics"
 	"fmt"
+	"github.com/suiyunonghen/GVCL/Components/DxControls/WindowLessControls"
+	"time"
 )
 
 func main()  {
@@ -17,6 +19,15 @@ func main()  {
 	m.SetLeft(200)
 	m.SetTop(50)
 	m.SetCaption("测试窗体")
+	m.SetColor(Graphics.ClGreen)
+
+
+	img := WindowLessControls.NewImage(m,Graphics.GDS_NORMAL)
+	img.Picture.LoadFromFile(`E:\Delphi\SuperTech\TJDun\LocalServer\Res\001.png`)
+	img.SetLeft(20)
+	img.SetTop(20)
+	img.SetWidth(400)
+	img.SetHeight(400)
 
 	btn := controls.NewButton(m)
 	btn.SetCaption("画图")
@@ -118,8 +129,23 @@ func main()  {
 
 
 	btn.OnClick = func(sender interface{}) {
+		go func() {
+			str := ""
+			for i := 1;i<=21;i++{
+				if i < 9{
+					str= fmt.Sprintf(`E:\Delphi\SuperTech\TJDun\LocalServer\Res\00%d.png`,i)
+				}else{
+					str = fmt.Sprintf(`E:\Delphi\SuperTech\TJDun\LocalServer\Res\0%d.png`,i)
+				}
+				img.Picture.LoadFromFile(str)
+				time.Sleep(time.Millisecond*80)
+			}
+		}()
+
+
+		return
 		var Bitmap Graphics.GBitmap
-		Bitmap.LoadFromFile("E:\\2.png")
+		Bitmap.LoadFromFile(`E:\2.png`)
 		//Bitmap.SetSize(300,300)
 		/*f,_ := os.Open(`E:\3.bmp`)
 		img,_ := bmp.Decode(f)
