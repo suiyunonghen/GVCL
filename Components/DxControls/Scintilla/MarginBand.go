@@ -173,8 +173,9 @@ func (band *GDxMarginBand)Update()  {
 
 	//代码折叠
 	if band.ShowCodeFlod{
+		c := uint(SC_MASK_FOLDERS)
 		band.fcodeEditor.SendEditor(SCI_SETMARGINTYPEN, int(band.fFoldIndex), SC_MARGIN_SYMBOL)
-		band.fcodeEditor.SendEditor(SCI_SETMARGINMASKN, int(band.fFoldIndex), SC_MASK_FOLDERS)
+		band.fcodeEditor.SendEditor(SCI_SETMARGINMASKN, int(band.fFoldIndex), int(c))
 		band.fcodeEditor.SendEditor(SCI_SETMARGINWIDTHN, int(band.fFoldIndex), 11) //页宽
 		band.fcodeEditor.SendEditor(SCI_SETMARGINSENSITIVEN, int(band.fFoldIndex), 1)
 		band.fcodeEditor.SendEditor(SCI_SETMARGINCURSORN,int(band.fFoldIndex), SC_CURSORARROW)
