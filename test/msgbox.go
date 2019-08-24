@@ -9,6 +9,7 @@ import (
 	"github.com/suiyunonghen/GVCL/Components/Controls"
 	"github.com/suiyunonghen/GVCL/Components/DxControls/Scintilla"
 	"github.com/suiyunonghen/GVCL/Components/DxControls/WindowLessControls"
+	"github.com/suiyunonghen/GVCL/Components/DxControls/gminiblink"
 	"github.com/suiyunonghen/GVCL/Components/NVisbleControls"
 	"github.com/suiyunonghen/GVCL/Graphics"
 	_ "github.com/suiyunonghen/GVCL/Graphics"
@@ -81,18 +82,36 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 	return frm
 }
 
+type GForm2 struct {
+	controls.GForm
+	Browser *gminiblink.GBlinkWebBrowser
+}
+
+func NewForm2(app *controls.WApplication) *GForm2 {
+	frm := new(GForm2)
+	frm.SubInit()
+	frm.Browser = gminiblink.NewBlinkWebBrowser(frm,nil)
+	frm.OnShow = func(sender interface{}) {
+		frm.Browser.Navigate("www.baidu.com")
+	}
+	frm.OnClose = func(sender interface{}, closAction *int8) {
+		*closAction = controls.CAFree
+	}
+	frm.OnResize = func(sender interface{}) {
+		frm.Browser.SetWidth(frm.Width())
+		frm.Browser.SetHeight(frm.Height())
+	}
+	frm.Browser.OnConsole = func(webView gminiblink.WkeWebView, level gminiblink.WkeConsoleLevel, msg, sourceName string, sourceline uint32, stackTrace string) {
+		fmt.Println(level)
+		fmt.Println("ConsoleMsg：",msg)
+		fmt.Println("ConsolesourceName：",sourceName,"，sourceline：",sourceline)
+		fmt.Println("stackTrace:",stackTrace)
+	}
+	return frm
+}
+
 func main() {
-	/*lst := DxCommonLib.GStringList{}
-	lst.LineBreak = "\r\n"
-	lst.LoadFromFile("I:\\平面类资料\\test.txt")
-	lst.Add("不得闲测试内容")
-	lst.Add("不得闲测试内容")
-	lst.Add("不得闲测试内容")
-	lst.Add("不得闲测试内容")
-	lst.Add("不得闲测试内容啊手动阀手动阀")
-	lst.Insert(2,"插入的内容")
-	fmt.Println(lst.Strings(0))
-	lst.SaveToFile("I:\\平面类资料\\test.txt")*/
+	gminiblink.BlinkLib.LoadBlink(`E:\miniblink-190630\node.dll`)
 	app := controls.NewApplication()
 	m := app.CreateForm()
 	m.SetLeft(200)
@@ -170,6 +189,16 @@ func main() {
 			WinApi.MessageBox(tmpm.GetWindowHandle(), "程序确定退出", "消息", 64)
 		}
 
+
+	}
+
+	bBrowser  := controls.NewButton(m)
+	bBrowser.SetLeft(240)
+	bBrowser.SetCaption("miniBlink")
+	bBrowser.OnClick = func(sender interface{}) {
+		tmpm := NewForm2(app)
+		tmpm.SetCaption("测试MiniBlink")
+		tmpm.ShowModal()
 	}
 
 	b1 := controls.NewButton(m)

@@ -30,6 +30,7 @@ type GForm struct {
 	OnClose OnFormCloseEvent
 	fisDialog	bool
 	OnCreate Graphics.NotifyEvent
+	OnShow	Graphics.NotifyEvent
 }
 
 const(
@@ -217,7 +218,7 @@ func (frm *GForm)Show()  {
 	frm.fisModalform = false
 	frm.SetVisible(true)
 	WinApi.SetWindowPos(frm.fHandle, WinApi.HWND_TOP, 0, 0, 0, 0,
-		WinApi.SWP_NOMOVE + WinApi.SWP_NOSIZE);
+		WinApi.SWP_NOMOVE + WinApi.SWP_NOSIZE)
 }
 
 
@@ -306,15 +307,19 @@ func (frm *GForm) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, m
 			if frm.fisModalform {
 				frm.SetVisible(false)
 			}
+			frm.fModalResult = MrClose
 			return
 		case CAHide:
 			frm.SetVisible(false)
 		case CAFree:
+			frm.SetVisible(false)
 			WinApi.DestroyWindow(frm.fHandle)
+			frm.fModalResult = MrClose
 			return
 		case CAMinimize:
 			if frm.fisModalform {
 				frm.SetVisible(false)
+				frm.fModalResult = MrClose
 				return
 			}
 			WinApi.ShowWindow(frm.GetWindowHandle(),WinApi.SW_SHOWMINIMIZED)
@@ -326,6 +331,10 @@ func (frm *GForm) WndProc(msg uint32, wparam, lparam uintptr) (result uintptr, m
 		}
 	case WinApi.WM_NULL:
 		application.checkSyncMethod()
+	case WinApi.WM_SHOWWINDOW:
+		if wparam == 1 && frm.OnShow != nil{
+			frm.OnShow(frm)
+		}
 	case WinApi.WM_SETFOCUS:
 		application.ActiveForm = frm
 	default:
@@ -413,7 +422,7 @@ func (app *WApplication) ProcessMessage(msg *WinApi.MSG) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			//处理异常
-			println("异常")
+			println("异常：",r)
 		}
 	}()
 	if msg.PeekMessage(0, 0, 0, WinApi.PM_REMOVE) {

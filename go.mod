@@ -3,12 +3,12 @@ module github.com/suiyunonghen/GVCL
 go 1.12
 
 require (
-	github.com/suiyunonghen/DxCommonLib v0.1.3
+	github.com/suiyunonghen/DxCommonLib v0.1.4
 	golang.org/x/image v0.0.1
 )
 
 replace (
-	github.com/suiyunonghen/DxCommonLib => /../DxCommonLib
+	//github.com/suiyunonghen/DxCommonLib => /../DxCommonLib
 	golang.org/x/crypto => github.com/golang/crypto v0.0.0-20190820162420-60c769a6c586
 	golang.org/x/image => github.com/golang/image v0.0.0-20190802002840-cff245a6509b
 	golang.org/x/net => github.com/golang/net v0.0.0-20190813141303-74dc4d7220e7
