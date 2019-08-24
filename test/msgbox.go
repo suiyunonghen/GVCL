@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	_ "fmt"
+	"github.com/suiyunonghen/DxCommonLib"
+	_ "github.com/suiyunonghen/DxCommonLib"
 	_ "github.com/suiyunonghen/GVCL/Components"
 	"github.com/suiyunonghen/GVCL/Components/Controls"
 	"github.com/suiyunonghen/GVCL/Components/DxControls/Scintilla"
+	"github.com/suiyunonghen/GVCL/Components/DxControls/WindowLessControls"
 	"github.com/suiyunonghen/GVCL/Components/NVisbleControls"
 	"github.com/suiyunonghen/GVCL/Graphics"
 	_ "github.com/suiyunonghen/GVCL/Graphics"
@@ -13,9 +16,6 @@ import (
 	_ "github.com/suiyunonghen/GVCL/WinApi"
 	_ "reflect"
 	_ "time"
-	_"github.com/suiyunonghen/DxCommonLib"
-	"github.com/suiyunonghen/DxCommonLib"
-	"github.com/suiyunonghen/GVCL/Components/DxControls/WindowLessControls"
 )
 
 type GForm1 struct {
