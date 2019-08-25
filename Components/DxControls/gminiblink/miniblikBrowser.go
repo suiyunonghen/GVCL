@@ -1,7 +1,6 @@
 package gminiblink
 
 import (
-	"fmt"
 	"github.com/suiyunonghen/GVCL/Components"
 	"github.com/suiyunonghen/GVCL/Components/Controls"
 	"github.com/suiyunonghen/GVCL/Graphics"
@@ -45,13 +44,10 @@ func wrapBindFuncs(es JSExecState, param uintptr) JSValue{
 	paramCount := BlinkLib.JsArgCount(es)
 	params := make([]interface{},paramCount)
 	for i := 0;i<paramCount;i++{
-		fmt.Println("paramType ",BlinkLib.JsArgType(es,i))
 		jsv := BlinkLib.JsArg(es, i)
-		fmt.Println(jsv)
 		params[i] = BlinkLib.JSValue2Interface(es,jsv)
-		fmt.Println(params[i])
 	}
-	result := bindFunc.BindHandle(params)
+	result := bindFunc.BindHandle(params...)
 	return BlinkLib.Value2JSValue(es,result)
 }
 
@@ -291,7 +287,6 @@ func (webBrowser *GBlinkWebBrowser) WndProc(msg uint32, wparam, lparam uintptr) 
 
 func (webBrowser *GBlinkWebBrowser)Navigate(url string)  {
 	if webBrowser.HandleAllocated(){
-		fmt.Println(url)
 		BlinkLib.WkeLoadURL(webBrowser.webView,url)
 	}
 }

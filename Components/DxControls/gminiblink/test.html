@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script type="text/javascript">
-        function testGoFunc() {
-            GoMsgBox("测试阿斯蒂芬")
-            //alert(GoMax(2,3,4))
-            alert("asdf")
+        function testGofunc() {
+            alert("JS内部函数")
+            GoMsgBox("这个是Go实现的函数")
+            alert("请求Go函数Gosum(1,2,3,4,5)="+Gosum(1,2,3,4,5))
         }
     </script>
 </head>
 <body>
-    <button onclick="testGoFunc()">测试Go的函数脚本</button>
+    <button onclick="testGofunc()">测试Go原生函数</button>
 </body>
 </html>

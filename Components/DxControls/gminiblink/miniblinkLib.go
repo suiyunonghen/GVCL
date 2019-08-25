@@ -594,6 +594,7 @@ func (blink *MiniBlinkLib) WkeLoadFile(wkeWebView WkeWebView, fileName string) {
 		fileLen := len(bt)
 		mb := make([]byte,fileLen+1)
 		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(fileLen))
+		fmt.Println(string(mb))
 		syscall.Syscall(blink.wkeLoadFile, 2, uintptr(wkeWebView), uintptr(unsafe.Pointer(&mb[0])), 0)
 	}
 }
@@ -1697,7 +1698,6 @@ func (blink *MiniBlinkLib) JsArgType(es JSExecState, argIdx int) JSType {
 func (blink *MiniBlinkLib) JsArg(es JSExecState, argIdx int) JSValue {
 	if blink.libminiblink != 0 && blink.jsArg != 0 {
 		ret, _, _ := syscall.Syscall(blink.jsArg, 2, uintptr(es), uintptr(argIdx), 0)
-		fmt.Println("JsArg , argidx=",argIdx," value=",ret)
 		return JSValue(ret)
 	}
 	return 0
@@ -1706,7 +1706,6 @@ func (blink *MiniBlinkLib) JsArg(es JSExecState, argIdx int) JSValue {
 func (blink *MiniBlinkLib) JsTypeOf(v JSValue) JSType {
 	if blink.libminiblink != 0 && blink.jsTypeOf != 0 {
 		ret, _, _ := syscall.Syscall(blink.jsTypeOf, 1, uintptr(v), 0, 0)
-		fmt.Println("jsTypeOf",v)
 		return JSType(ret)
 	}
 	return JSTYPE_UNDEFINED
@@ -1937,12 +1936,11 @@ func (blink *MiniBlinkLib)JSValue2Interface(es JSExecState,v JSValue)interface{}
 		return nil
 	}
 	jtype := blink.JsTypeOf(v)
-	fmt.Println("JSValue2Interface ",jtype)
 	switch jtype {
 	case JSTYPE_BOOLEAN: return blink.JsIsTrue(v)
 	case JSTYPE_STRING: return blink.JsToString(es,v)
 	case JSTYPE_NULL,JSTYPE_UNDEFINED: return nil
-	case JSTYPE_NUMBER: return blink.JsToDouble(es,v)
+	case JSTYPE_NUMBER: return blink.JsToInt(es,v)
 	}
 	return nil
 }

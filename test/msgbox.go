@@ -121,7 +121,7 @@ var(
 
 func main() {
 
-	gminiblink.BlinkLib.LoadBlink(`E:\Delphi\Controls\UI\DxSkinctrl\miniblink-190630\node.dll`)
+	gminiblink.BlinkLib.LoadBlink(`E:\GoLib\miniblink64_20190810\miniblink64\node.dll`)
 	app := controls.NewApplication()
 	m := app.CreateForm()
 	m.SetLeft(200)
@@ -141,11 +141,23 @@ func main() {
 	BindFunctions = make(map[string]*gminiblink.JSBindFunction)
 	func1 := new(gminiblink.JSBindFunction)
 	func1.BindHandle = func(params ...interface{}) interface{} {
-		WinApi.MessageBox(app.MainForm().GetWindowHandle(),params[0].(string),"asdf",64)
+		h := app.MainForm().GetWindowHandle()
+		WinApi.MessageBox(h,params[0].(string),"asdf",64)
 		return 0
 	}
 	func1.ParamCount = 1
 	BindFunctions["GoMsgBox"] = func1
+
+	func1 = new(gminiblink.JSBindFunction)
+	func1.BindHandle = func(params ...interface{}) interface{} {
+		sum := 0
+		for _,v := range params{
+			sum += v.(int)
+		}
+		return sum
+	}
+	func1.ParamCount = 0
+	BindFunctions["Gosum"] = func1
 
 
 
