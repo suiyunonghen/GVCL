@@ -110,7 +110,9 @@ func NewForm2(app *controls.WApplication) *GForm2 {
 		fmt.Println("stackTrace:",stackTrace)
 	}
 	frm.Browser.OnDocumentCompleted = func(sender interface{}) {
-		fmt.Println("页面加载完成")
+		htmlinterface := frm.Browser.JsCallGlobal("JsHtml")
+		WinApi.MessageBox(frm.GetWindowHandle(),"页面加载完成，调用内部JS获取网页源码\r\n"+htmlinterface.(string),"Html源码",64)
+
 	}
 	return frm
 }
