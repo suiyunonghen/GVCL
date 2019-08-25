@@ -1,7 +1,6 @@
 package gminiblink
 
 import (
-	"fmt"
 	"github.com/suiyunonghen/DxCommonLib"
 	"github.com/suiyunonghen/GVCL/WinApi"
 	"syscall"
@@ -594,7 +593,6 @@ func (blink *MiniBlinkLib) WkeLoadFile(wkeWebView WkeWebView, fileName string) {
 		fileLen := len(bt)
 		mb := make([]byte,fileLen+1)
 		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(fileLen))
-		fmt.Println(string(mb))
 		syscall.Syscall(blink.wkeLoadFile, 2, uintptr(wkeWebView), uintptr(unsafe.Pointer(&mb[0])), 0)
 	}
 }

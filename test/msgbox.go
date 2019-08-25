@@ -142,7 +142,7 @@ func main() {
 	func1 := new(gminiblink.JSBindFunction)
 	func1.BindHandle = func(params ...interface{}) interface{} {
 		h := app.MainForm().GetWindowHandle()
-		WinApi.MessageBox(h,params[0].(string),"asdf",64)
+		WinApi.MessageBox(h,params[0].(string),"Go内部函数",64)
 		return 0
 	}
 	func1.ParamCount = 1
