@@ -2,10 +2,13 @@ package gminiblink
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
 func TestMiniBlinkLib_JsArg(t *testing.T) {
+	fmt.Println(strings.Split("test.mm.bb","."))
+	fmt.Println(strings.Split("test","."))
 	BlinkLib.LoadBlink(`E:\Delphi\Controls\UI\DxSkinctrl\miniblink-190630\node.dll`)
 	fmt.Println(BlinkLib.VersionString())
 	fmt.Println("start")

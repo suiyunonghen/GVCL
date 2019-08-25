@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/suiyunonghen/GVCL/Components"
 	"github.com/suiyunonghen/GVCL/Components/Controls"
+	"github.com/suiyunonghen/GVCL/Graphics"
 	"github.com/suiyunonghen/GVCL/WinApi"
 	"reflect"
+	"strings"
 	"unsafe"
 )
 
@@ -23,6 +25,8 @@ type GBlinkWebBrowser struct {
 	fDirectWeb		bool
 	webView			WkeWebView
 	OnConsole		WebConsoleEvent
+	OnDocumentCompleted	Graphics.NotifyEvent
+
 }
 
 func (webBrowser *GBlinkWebBrowser) SubInit() {
@@ -41,8 +45,11 @@ func wrapBindFuncs(es JSExecState, param uintptr) JSValue{
 	paramCount := BlinkLib.JsArgCount(es)
 	params := make([]interface{},paramCount)
 	for i := 0;i<paramCount;i++{
+		fmt.Println("paramType ",BlinkLib.JsArgType(es,i))
 		jsv := BlinkLib.JsArg(es, i)
+		fmt.Println(jsv)
 		params[i] = BlinkLib.JSValue2Interface(es,jsv)
+		fmt.Println(params[i])
 	}
 	result := bindFunc.BindHandle(params)
 	return BlinkLib.Value2JSValue(es,result)
@@ -77,10 +84,11 @@ func (webBrowser *GBlinkWebBrowser)createWebView()  {
 	BlinkLib.WkeOnWindowDestroy(webBrowser.webView, onDestroyWkeWindow, uintptr(unsafe.Pointer(webBrowser)))
 	BlinkLib.WkeOnWindowClosing(webBrowser.webView, onClosingWkeWindow, uintptr(unsafe.Pointer(webBrowser)))*/
 
+	BlinkLib.WkeOnDocumentReady(webBrowser.webView,wkeOnDocumentReadycallBack,uintptr(unsafe.Pointer(webBrowser)))
+
 	BlinkLib.WkeOnConsole(webBrowser.webView, doConsole, uintptr(unsafe.Pointer(webBrowser)))
 	BlinkLib.WkeSetCspCheckEnable(webBrowser.webView, false)
 }
-
 
 
 func (webBrowser *GBlinkWebBrowser) CreateWindowHandle(params *Components.GCreateParams)bool{
@@ -95,6 +103,176 @@ func (webBrowser *GBlinkWebBrowser)destroyWebView()  {
 	if webBrowser.webView != 0{
 		BlinkLib.WkeDestroyWebWindow(webBrowser.webView)
 		webBrowser.webView = 0
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)StopLoading()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeStopLoading(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)Reload()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeReload(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)ContentWidth()int  {
+	if webBrowser.webView != 0{
+		return BlinkLib.WkeGetContentWidth(webBrowser.webView)
+	}
+	return 0
+}
+
+func (webBrowser *GBlinkWebBrowser)ContentHeight()int  {
+	if webBrowser.webView != 0{
+		return BlinkLib.WkeGetContentHeight(webBrowser.webView)
+	}
+	return 0
+}
+
+func (webBrowser *GBlinkWebBrowser)WebViewDC()WinApi.HDC  {
+	if webBrowser.webView != 0{
+		return BlinkLib.WkeGetViewDC(webBrowser.webView)
+	}
+	return 0
+}
+
+func (webBrowser *GBlinkWebBrowser)CanGoBack()bool  {
+	if webBrowser.webView != 0{
+		return BlinkLib.WkeCanGoBack(webBrowser.webView)
+	}
+	return false
+}
+
+func (webBrowser *GBlinkWebBrowser)CanGoForward()bool  {
+	if webBrowser.webView != 0{
+		return BlinkLib.WkeCanGoForward(webBrowser.webView)
+	}
+	return false
+}
+
+func (webBrowser *GBlinkWebBrowser)GoBack()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeGoBack(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)GoForward()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeGoForward(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)SelectAll()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeEditorSelectAll(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)UnSelect()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeEditorUnSelect(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)Copy()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeEditorCopy(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)Cut()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeEditorCut(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)Delete()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeEditorDelete(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)Undo()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeEditorUndo(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)Redo()  {
+	if webBrowser.webView != 0{
+		BlinkLib.WkeEditorRedo(webBrowser.webView)
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)ExecuteJavascript(js string)bool  {
+	if webBrowser.webView != 0{
+		v := BlinkLib.WkeRunJS(webBrowser.webView,"try { " + js + " return 1; } catch(err){ return 0;}")
+		return BlinkLib.JsIsNumber(v) && BlinkLib.JsToInt(BlinkLib.WkeGlobalExec(webBrowser.webView), v) == 1
+	}
+	return false
+}
+
+func (webBrowser *GBlinkWebBrowser)JsCallGlobal(funcName string,params ...interface{})interface{}  {
+	if webBrowser.webView != 0{
+		es := BlinkLib.WkeGlobalExec(webBrowser.webView)
+		funcs := strings.Split(funcName,".")
+		funcCount := len(funcs)
+		jsFunc := JSValue(-1)
+		for i,procName := range funcs{
+			if i == 0{
+				jsFunc = BlinkLib.JsGetGlobal(es,procName)
+			}else{
+				jsFunc = BlinkLib.JsGet(es,jsFunc,procName)
+			}
+			funcType := BlinkLib.JsTypeOf(jsFunc)
+			if i == funcCount - 1{
+				if funcType == JSTYPE_FUNCTION{
+					pcount := len(params)
+					if len(params) == 0{
+						return BlinkLib.JSValue2Interface(es,BlinkLib.JsCallGlobal(es,jsFunc,nil,0))
+					}else{
+						paramsp := make([]JSValue,pcount)
+						for i,v := range params {
+							paramsp[i] = BlinkLib.Value2JSValue(es,v)
+						}
+						return BlinkLib.JSValue2Interface(es,BlinkLib.JsCallGlobal(es,jsFunc,paramsp,pcount))
+					}
+				}
+			}else if funcType != JSTYPE_OBJECT{
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
+func (webBrowser *GBlinkWebBrowser)MainWebView()WkeWebView  {
+	return webBrowser.webView
+}
+
+func (webBrowser *GBlinkWebBrowser)LoadFromFile(webView WkeWebView, fileName string)  {
+	if webBrowser.webView != 0{
+		if webView != 0{
+			BlinkLib.WkeLoadFile(webView,fileName)
+		}else{
+			BlinkLib.WkeLoadFile(webBrowser.webView,fileName)
+		}
+	}
+}
+
+func (webBrowser *GBlinkWebBrowser)LoadHtml(webView WkeWebView,html,baseurlPath string)  {
+	if webBrowser.webView != 0{
+		if webView == 0{
+			webView = webBrowser.webView
+		}
+		if baseurlPath != ""{
+			BlinkLib.WkeLoadHtmlWithBaseUrl(webView,html,baseurlPath)
+		}else{
+			BlinkLib.WkeLoadHTML(webView,html)
+		}
 	}
 }
 
@@ -142,6 +320,13 @@ func doConsole(webView WkeWebView, param uintptr, level WkeConsoleLevel, msg, so
 	webBrowser := (*GBlinkWebBrowser)(unsafe.Pointer(param))
 	if webBrowser.OnConsole != nil{
 		webBrowser.OnConsole(webView,level,msg,sourceName,sourceline,stackTrace)
+	}
+}
+
+func wkeOnDocumentReadycallBack(webview WkeWebView, param uintptr, frameid WkeFrameHwnd){
+	webBrowser := (*GBlinkWebBrowser)(unsafe.Pointer(param))
+	if webBrowser.OnDocumentCompleted != nil{
+		webBrowser.OnDocumentCompleted(webBrowser)
 	}
 }
 /*func loadUrlBegin(webView WkeWebView, param uintptr, url string, job uintptr) bool{

@@ -90,16 +90,18 @@ type GForm2 struct {
 func NewForm2(app *controls.WApplication) *GForm2 {
 	frm := new(GForm2)
 	frm.SubInit()
-	frm.Browser = gminiblink.NewBlinkWebBrowser(frm,nil)
+	frm.Browser = gminiblink.NewBlinkWebBrowser(frm,BindFunctions)
 	frm.OnShow = func(sender interface{}) {
-		frm.Browser.Navigate("www.baidu.com")
+		//frm.Browser.Navigate("www.baidu.com")
+		frm.Browser.LoadFromFile(0,`E:\GoLib\src\github.com\suiyunonghen\GVCL\Components\DxControls\gminiblink\test.html`)
 	}
 	frm.OnClose = func(sender interface{}, closAction *int8) {
 		*closAction = controls.CAFree
 	}
 	frm.OnResize = func(sender interface{}) {
-		frm.Browser.SetWidth(frm.Width())
-		frm.Browser.SetHeight(frm.Height())
+		r := frm.ClientRect()
+		frm.Browser.SetWidth(r.Width())
+		frm.Browser.SetHeight(r.Height())
 	}
 	frm.Browser.OnConsole = func(webView gminiblink.WkeWebView, level gminiblink.WkeConsoleLevel, msg, sourceName string, sourceline uint32, stackTrace string) {
 		fmt.Println(level)
@@ -107,11 +109,19 @@ func NewForm2(app *controls.WApplication) *GForm2 {
 		fmt.Println("ConsolesourceName：",sourceName,"，sourceline：",sourceline)
 		fmt.Println("stackTrace:",stackTrace)
 	}
+	frm.Browser.OnDocumentCompleted = func(sender interface{}) {
+		fmt.Println("页面加载完成")
+	}
 	return frm
 }
 
+var(
+	BindFunctions	map[string]*gminiblink.JSBindFunction
+)
+
 func main() {
-	gminiblink.BlinkLib.LoadBlink(`E:\miniblink-190630\node.dll`)
+
+	gminiblink.BlinkLib.LoadBlink(`E:\Delphi\Controls\UI\DxSkinctrl\miniblink-190630\node.dll`)
 	app := controls.NewApplication()
 	m := app.CreateForm()
 	m.SetLeft(200)
@@ -128,6 +138,14 @@ func main() {
 	lbl.SetTop(40)
 
 
+	BindFunctions = make(map[string]*gminiblink.JSBindFunction)
+	func1 := new(gminiblink.JSBindFunction)
+	func1.BindHandle = func(params ...interface{}) interface{} {
+		WinApi.MessageBox(app.MainForm().GetWindowHandle(),params[0].(string),"asdf",64)
+		return 0
+	}
+	func1.ParamCount = 1
+	BindFunctions["GoMsgBox"] = func1
 
 
 
