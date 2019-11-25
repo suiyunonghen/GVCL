@@ -303,6 +303,7 @@ var (
 	fnGetThreadTimes                    uintptr
 	fnGetThreadUILanguage               uintptr
 	fnGetTickCount                      uintptr
+	fnGetTickCount64					uintptr
 	fnGetTimeFormatW                    uintptr
 	fnGetTimeFormatA                    uintptr
 	fnGetTimeFormatEx                   uintptr
@@ -976,6 +977,7 @@ func initKernel32() {
 	fnGetThreadTimes, _ = syscall.GetProcAddress(libkernel32, "GetThreadTimes")
 	fnGetThreadUILanguage, _ = syscall.GetProcAddress(libkernel32, "GetThreadUILanguage")
 	fnGetTickCount, _ = syscall.GetProcAddress(libkernel32, "GetTickCount")
+	fnGetTickCount64, _ = syscall.GetProcAddress(libkernel32, "GetTickCount64")
 	fnGetTimeFormatW, _ = syscall.GetProcAddress(libkernel32, "GetTimeFormatW")
 	fnGetTimeFormatA, _ = syscall.GetProcAddress(libkernel32, "GetTimeFormatA")
 	fnGetTimeFormatEx, _ = syscall.GetProcAddress(libkernel32, "GetTimeFormatEx")
@@ -1454,4 +1456,20 @@ func GetLastError()uint32  {
 	initKernel32()
 	r1, _, _ := syscall.Syscall(fnGetLastError, 0, 0,0,0)
 	return uint32(r1)
+}
+
+func GetProcessTimes(hProcess syscall.Handle,lpCreationTime, lpExitTime, lpKernelTime, lpUserTime *GFileTime)bool  {
+	initKernel32()
+	r1, _, _ := syscall.Syscall6(fnGetProcessTimes, 5, uintptr(hProcess),uintptr(unsafe.Pointer(lpCreationTime)),uintptr(unsafe.Pointer(lpExitTime)),
+		uintptr(unsafe.Pointer(lpKernelTime)),uintptr(unsafe.Pointer(lpUserTime)),0)
+	return r1!=0
+}
+
+func GetTickCount()int64  {
+	if fnGetTickCount64 != 0{
+		r1, _, _ := syscall.Syscall(fnGetTickCount64,0,0,0,0)
+		return int64(r1)
+	}
+	r1, _, _ := syscall.Syscall(fnGetTickCount,0,0,0,0)
+	return int64(r1)
 }

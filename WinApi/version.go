@@ -1,6 +1,7 @@
 package WinApi
 
 import (
+	"fmt"
 	"syscall"
 	"unsafe"
 )
@@ -35,6 +36,17 @@ type GVSFixedFileInfo struct{
 	DWFileDateLS  uint32
 }
 
+type GVersion struct {
+	Major		uint16
+	Minor		uint16
+	SmallVer	uint16
+	Build		uint16
+}
+
+func (v GVersion)String() string {
+	return fmt.Sprintf("%d.%d.%d.%d",v.Major,v.Minor,v.SmallVer, v.Build)
+}
+
 func init() {
 	libversion, _ = syscall.LoadLibrary("version.dll")
 	fnGetFileVersionInfoW, _ = syscall.GetProcAddress(libversion, "GetFileVersionInfoW")
@@ -66,9 +78,8 @@ func VerQueryValue(pBlock uintptr,lpSubBlock *uint16,lplpBuffer uintptr,puLen *u
 	return ret !=0
 }
 
-func GetProductVersion(fileName string)(AMajor, AMinor, ABuild uint16,ok bool)  {
+func GetProductVersion(fileName string)(fileVersion GVersion,prodVersion GVersion,ok bool)  {
 	ok = false
-	AMajor, AMinor, ABuild = 0,0,0
 	fileptr := syscall.StringToUTF16Ptr(fileName)
 	var wnd uint32
 	if InfoSize := GetFileVersionInfoSize(fileptr,&wnd);InfoSize != 0{
@@ -78,12 +89,19 @@ func GetProductVersion(fileName string)(AMajor, AMinor, ABuild uint16,ok bool)  
 		if GetFileVersionInfo(fileptr,wnd,InfoSize,unsafe.Pointer(&verbuffer[0]))&&
 		   VerQueryValue(uintptr(unsafe.Pointer(&verbuffer[0])),syscall.StringToUTF16Ptr("\\"),uintptr(unsafe.Pointer(&FI)),
 			   &VerSize){
-			AMajor = HiWord(FI.DWProductVersionMS);
-			AMinor = LoWord(FI.DWProductVersionMS);
-			ABuild = HiWord(FI.DWProductVersionLS);
+			fileVersion.Major = HiWord(FI.DWFileVersionMS)
+			fileVersion.Minor = LoWord(FI.DWFileVersionMS)
+			fileVersion.SmallVer = HiWord(FI.DWFileVersionLS)
+			fileVersion.Build = LoWord(FI.DWFileVersionLS)
+
+			prodVersion.Major = HiWord(FI.DWProductVersionMS)
+			prodVersion.Minor = LoWord(FI.DWProductVersionMS)
+			prodVersion.SmallVer = HiWord(FI.DWProductVersionLS)
+			prodVersion.Build = LoWord(FI.DWProductVersionLS)
 			ok = true
 			return
 		}
 	}
 	return
 }
+
