@@ -670,6 +670,8 @@ var (
 	fnCopyMemory						uintptr
 	fnZeroMemory						uintptr
 	fnFillMemory						uintptr
+	fnGetDiskFreeSpaceEx				uintptr
+	fnLocalFileTimeToFileTime			uintptr
 )
 
 func init() {
@@ -1356,6 +1358,9 @@ func initKernel32() {
 	if fnFillMemory == 0{
 		fnFillMemory, _ = syscall.GetProcAddress(libkernel32, "FillMemory")
 	}
+	fnGetDiskFreeSpaceEx, _ = syscall.GetProcAddress(libkernel32, "GetDiskFreeSpaceExW")
+	fnLocalFileTimeToFileTime, _ = syscall.GetProcAddress(libkernel32, "LocalFileTimeToFileTime")
+	fnSetFileTime, _ = syscall.GetProcAddress(libkernel32, "SetFileTime")
 }
 
 func MoveMemory(destination, source unsafe.Pointer, length int) {
@@ -1466,10 +1471,27 @@ func GetProcessTimes(hProcess syscall.Handle,lpCreationTime, lpExitTime, lpKerne
 }
 
 func GetTickCount()int64  {
+	initKernel32()
 	if fnGetTickCount64 != 0{
 		r1, _, _ := syscall.Syscall(fnGetTickCount64,0,0,0,0)
 		return int64(r1)
 	}
 	r1, _, _ := syscall.Syscall(fnGetTickCount,0,0,0,0)
 	return int64(r1)
+}
+
+func GetDiskFreeSpaceEx(disk string)(retok bool, lpFreeBytesAvailable int64,lpTotalNumberOfBytes int64,lpTotalNumberOfFreeBytes int64)  {
+	lpFreeBytesAvailable = int64(0)
+	lpTotalNumberOfBytes = int64(0)
+	lpTotalNumberOfFreeBytes = int64(0)
+	diskptr := uintptr(0)
+	if disk != ""{
+		diskptr = uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(disk)))
+	}
+	r1,_,_ :=syscall.Syscall6(uintptr(fnGetDiskFreeSpaceEx), 4, diskptr,
+		uintptr(unsafe.Pointer(&lpFreeBytesAvailable)),
+		uintptr(unsafe.Pointer(&lpTotalNumberOfBytes)),
+		uintptr(unsafe.Pointer(&lpTotalNumberOfFreeBytes)), 0, 0)
+	retok = r1!=0
+	return
 }
