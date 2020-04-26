@@ -85,7 +85,7 @@ type  (
 	fappIcon     WinApi.HICON
 	fcancelFunc	 context.CancelFunc
 	fcontext  	 context.Context
-	synchronizeSignal		chan *syncObject  //用来做goroutine同步的通道信号,一般发送的是要同步的函数和一个等待关闭的chan信号
+	synchronizeSignal		chan syncObject  //用来做goroutine同步的通道信号,一般发送的是要同步的函数和一个等待关闭的chan信号
 	}
 )
 
@@ -102,7 +102,7 @@ func NewApplication()*WApplication  {
 	app := new(WApplication)
 	app.fcontext,app.fcancelFunc = context.WithCancel(context.Background())
 	app.ShowMainForm =true
-	app.synchronizeSignal = make(chan *syncObject,1)
+	app.synchronizeSignal = make(chan syncObject,1)
 	application = app
 	return app
 }
@@ -367,7 +367,7 @@ func (app *WApplication)Synchronize(syncMnd SyncMethod,params ...interface{})  {
 	//通信发送
 	if app.fMainForm == nil || app.fMainForm.HandleAllocated(){
 		notifychan := make(chan struct{})
-		app.synchronizeSignal <- &syncObject{syncMnd,params,notifychan}
+		app.synchronizeSignal <- syncObject{syncMnd,params,notifychan}
 		app.WakeMainThread() //唤醒主线程
 		select{
 		case <-notifychan:
