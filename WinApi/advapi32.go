@@ -2,6 +2,7 @@ package WinApi
 
 import (
 	"syscall"
+	"time"
 	"unsafe"
 )
 
@@ -19,6 +20,18 @@ type GSecurityAttributes  struct{
 type GFileTime struct {
 	LowDateTime uint32
 	HighDateTime uint32
+}
+
+func (gfileTime GFileTime)ToInt64()int64  {
+	return int64(gfileTime.HighDateTime) >> 32 | int64(gfileTime.LowDateTime)
+}
+
+func (gfileTime GFileTime)ToGoTime()time.Time  {
+	var sysTime GSystemTime
+	if FileTimeToSystemTime(&gfileTime,&sysTime){
+		return sysTime.Time()
+	}
+	return time.Time{}
 }
 
 type GACL struct {

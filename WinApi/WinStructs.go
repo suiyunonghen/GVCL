@@ -2,6 +2,7 @@ package WinApi
 
 import (
 	"syscall"
+	"time"
 	"unsafe"
 )
 
@@ -466,4 +467,32 @@ type BLENDFUNCTION struct {
 	BlendFlags		byte
 	SourceConstantAlpha	byte
 	AlphaFormat		byte
+}
+
+type GSystemTime struct {
+	Year		uint16
+	Month		uint16
+	DayOfWeek	uint16
+	Day			uint16
+	Hour		uint16
+	Minute		uint16
+	Second		uint16
+	Milliseconds uint16
+}
+
+func (sysTime GSystemTime)Time()time.Time  {
+	return time.Date(int(sysTime.Year),time.Month(sysTime.Month),int(sysTime.Day),int(sysTime.Hour),int(sysTime.Minute),
+		int(sysTime.Second),int(time.Duration(sysTime.Milliseconds) * time.Millisecond),time.Local)
+}
+
+func (sysTime *GSystemTime)From(t time.Time)  {
+	year,month,day := t.Date()
+	sysTime.Year = uint16(year)
+	sysTime.Month = uint16(month)
+	sysTime.Day = uint16(day)
+	year,m,day := t.Clock()
+	sysTime.Hour = uint16(year)
+	sysTime.Minute = uint16(m)
+	sysTime.Second = uint16(day)
+	sysTime.Milliseconds = uint16(time.Duration(t.Nanosecond()) / time.Millisecond)
 }

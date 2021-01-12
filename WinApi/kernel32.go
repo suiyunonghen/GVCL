@@ -187,6 +187,7 @@ var (
 	fnGetCurrencyFormatEx               uintptr
 	fnGetCurrentDirectoryW              uintptr
 	fnGetCurrentDirectoryA              uintptr
+	fnFileTimeToSystemTime				uintptr
 	fnGetCurrentProcess                 uintptr
 	fnGetCurrentProcessId               uintptr
 	fnGetCurrentThread                  uintptr
@@ -837,6 +838,7 @@ func initKernel32() {
 	fnGetCPInfo, _ = syscall.GetProcAddress(libkernel32, "GetCPInfo")
 	fnGetCPInfoExW, _ = syscall.GetProcAddress(libkernel32, "GetCPInfoExW")
 	fnGetCPInfoExA, _ = syscall.GetProcAddress(libkernel32, "GetCPInfoExA")
+	fnFileTimeToSystemTime, _ = syscall.GetProcAddress(libkernel32, "FileTimeToSystemTime")
 	fnGetCommandLineW, _ = syscall.GetProcAddress(libkernel32, "GetCommandLineW")
 	fnGetCommandLineA, _ = syscall.GetProcAddress(libkernel32, "GetCommandLineA")
 	fnGetCommConfig, _ = syscall.GetProcAddress(libkernel32, "GetCommConfig")
@@ -1470,6 +1472,12 @@ func GetProcessTimes(hProcess syscall.Handle,lpCreationTime, lpExitTime, lpKerne
 	return r1!=0
 }
 
+func GetSystemTimes(lpIdleTime, lpKernelTime, lpUserTime *GFileTime)bool  {
+	initKernel32()
+	r1, _, _ := syscall.Syscall(fnGetSystemTimes, 3, uintptr(unsafe.Pointer(lpIdleTime)),uintptr(unsafe.Pointer(lpKernelTime)),uintptr(unsafe.Pointer(lpUserTime)))
+	return r1!=0
+}
+
 func GetTickCount()int64  {
 	initKernel32()
 	if fnGetTickCount64 != 0{
@@ -1494,4 +1502,20 @@ func GetDiskFreeSpaceEx(disk string)(retok bool, lpFreeBytesAvailable int64,lpTo
 		uintptr(unsafe.Pointer(&lpTotalNumberOfFreeBytes)), 0, 0)
 	retok = r1!=0
 	return
+}
+
+
+func OpenProcess(dwDesiredAccess uint32,bInheritHandle bool,dwProcessId uint32)syscall.Handle  {
+	if bInheritHandle{
+		r1,_,_ :=syscall.Syscall(fnOpenProcess,3,uintptr(dwDesiredAccess),uintptr(1),uintptr(dwProcessId))
+		return syscall.Handle(r1)
+	}
+	r1,_,_ :=syscall.Syscall(fnOpenProcess,3,uintptr(dwDesiredAccess),uintptr(0),uintptr(dwProcessId))
+	return syscall.Handle(r1)
+}
+
+func FileTimeToSystemTime(lpFileTime *GFileTime,lpSystemTime *GSystemTime)bool  {
+	initKernel32()
+	r1,_,_ := syscall.Syscall(fnFileTimeToSystemTime,2,uintptr(unsafe.Pointer(lpFileTime)),uintptr(unsafe.Pointer(&lpSystemTime)),0)
+	return r1 != 0
 }
