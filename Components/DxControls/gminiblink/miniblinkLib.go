@@ -886,7 +886,7 @@ func (blink *MiniBlinkLib) WkeFireKeyDownEvent(webView WkeWebView, virtualKeyCod
 
 func (blink *MiniBlinkLib) WkeFireWindowsMessage(webView WkeWebView, hWnd syscall.Handle, message uint, wParam, lParam uintptr, result *WinApi.LRESULT) bool {
 	if blink.libminiblink != 0 && blink.wkeFireWindowsMessage != 0 {
-		ret, _, _ := syscall.Syscall6(blink.wkeFireWindowsMessage, 5, uintptr(webView), uintptr(hWnd),
+		ret, _, _ := syscall.Syscall6(blink.wkeFireWindowsMessage, 6, uintptr(webView), uintptr(hWnd),
 			uintptr(message), wParam, lParam, uintptr(unsafe.Pointer(result)))
 		return ret != 0
 	}

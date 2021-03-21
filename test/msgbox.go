@@ -88,6 +88,7 @@ type GForm2 struct {
 }
 
 func NewForm2(app *controls.WApplication) *GForm2 {
+
 	frm := new(GForm2)
 	frm.SubInit()
 	frm.Browser = gminiblink.NewBlinkWebBrowser(frm,BindFunctions)
@@ -124,6 +125,27 @@ var(
 func main() {
 
 	gminiblink.BlinkLib.LoadBlink(`E:\GoLib\miniblink64_20190810\miniblink64\node.dll`)
+	wv := gminiblink.BlinkLib.WkeCreateWebWindow(gminiblink.WKE_WINDOW_TYPE_POPUP, 0, 0, 0, 640, 480)
+	gminiblink.BlinkLib.WkeShowWindow(wv, true)
+	gminiblink.BlinkLib.WkeLoadURL(wv, "https://www.baidu.com")
+
+	msg := new(WinApi.MSG)
+	for{
+		if msg.PeekMessage(0, 0, 0, WinApi.PM_REMOVE) {
+			if msg.Message != WinApi.WM_TIMER{
+				fmt.Println(msg.Message)
+			}
+			if msg.Message == WinApi.WM_QUIT {
+				break
+			}
+			msg.TranslateMessage()
+			msg.DispatchMessage()
+		}else{
+			WinApi.WaitMessage()
+		}
+	}
+	return
+
 	app := controls.NewApplication()
 	m := app.CreateForm()
 	m.SetLeft(200)
@@ -138,6 +160,8 @@ func main() {
 	//lbl.SetAutoSize(true)
 	lbl.SetColor(Graphics.ClRed)
 	lbl.SetTop(40)
+	app.Run()
+	return
 
 
 	BindFunctions = make(map[string]*gminiblink.JSBindFunction)
@@ -168,8 +192,9 @@ func main() {
 	tmpitem := pop.Items().AddItem("测试1")
 	citem := tmpitem.AddItem("子测试1")
 	citem.OnClick = func(sender interface{}) {
-		if AMajor, AMinor, ABuild, ok := WinApi.GetProductVersion("D:\\DevTools\\Microsoft VS Code\\Code.exe"); ok {
-			st := fmt.Sprintf("%d.%d.%d", AMajor, AMinor, ABuild)
+		if fileVersion,_, ok := WinApi.GetProductVersion("D:\\DevTools\\Microsoft VS Code\\Code.exe"); ok {
+
+			st := fmt.Sprintf("%d.%d.%d", fileVersion.Major, fileVersion.Minor, fileVersion.Build)
 			WinApi.MessageBox(m.GetWindowHandle(), st+sender.(*NVisbleControls.GMenuItem).Caption(), "消息", 64)
 		} else {
 			WinApi.MessageBox(m.GetWindowHandle(), "菜单测试"+sender.(*NVisbleControls.GMenuItem).Caption(), "消息", 64)
