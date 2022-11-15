@@ -8,7 +8,7 @@ require (
 )
 
 replace (
-	github.com/suiyunonghen/DxCommonLib => /../DxCommonLib
+	//github.com/suiyunonghen/DxCommonLib => /../DxCommonLib
 	golang.org/x/crypto => github.com/golang/crypto v0.2.0
 	golang.org/x/image => github.com/golang/image v0.1.0
 	golang.org/x/net => github.com/golang/net v0.2.0
