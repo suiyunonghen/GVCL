@@ -1,60 +1,61 @@
 package controls
+
 import (
-	"github.com/suiyunonghen/GVCL/Components"
-	"reflect"
-	"fmt"
-	"github.com/suiyunonghen/GVCL/WinApi"
-	"github.com/suiyunonghen/GVCL/Graphics"
-	"github.com/suiyunonghen/DxCommonLib"
-	"unsafe"
-	"syscall"
 	"bytes"
+	"fmt"
+	"github.com/suiyunonghen/DxCommonLib"
+	"github.com/suiyunonghen/GVCL/Components"
+	"github.com/suiyunonghen/GVCL/Graphics"
+	"github.com/suiyunonghen/GVCL/WinApi"
+	"reflect"
 	"strings"
+	"syscall"
+	"unsafe"
 )
 
 type (
 	ListBoxStyle int16
 
-	gListBoxStrings struct{
+	gListBoxStrings struct {
 		DxCommonLib.GStringList
-		fListBox			*GListBox
+		fListBox *GListBox
 	}
 	GListBox struct {
-	GWinControl
-	fItemIndex	int
-	fItems		*gListBoxStrings
-	OnItemClick 	Graphics.NotifyEvent
-	OnItemDblClick	Graphics.NotifyEvent
-	fStyle		ListBoxStyle
+		GWinControl
+		fItemIndex     int
+		fItems         *gListBoxStrings
+		OnItemClick    Graphics.NotifyEvent
+		OnItemDblClick Graphics.NotifyEvent
+		fStyle         ListBoxStyle
 	}
 )
 
-const(
-	LBStandard ListBoxStyle=iota
+const (
+	LBStandard ListBoxStyle = iota
 	LBOwnerDrawFixed
 	LBOwnerDrawVariable
 	LBVirtual
 	LBVirtualOwnerDraw
 )
 
-func (list *gListBoxStrings)Count() int  {
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) Count() int {
+	if list.fListBox.fHandle == 0 {
 		return list.GStringList.Count()
 	}
 	return int(WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_GETCOUNT, 0, 0))
 }
 
-func (list *gListBoxStrings)Strings(index int) string  {
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) Strings(index int) string {
+	if list.fListBox.fHandle == 0 {
 		return list.GStringList.Strings(index)
 	}
-	if list.fListBox.fStyle >= LBVirtual{
+	if list.fListBox.fStyle >= LBVirtual {
 		return "" //虚拟自填充数据的暂时不处理
-	}else{
+	} else {
 		l := WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_GETTEXTLEN, uintptr(index), 0)
 		if l == -1 {
 			panic("指定的索引不存在")
-		}else if l != 0{
+		} else if l != 0 {
 			mp := make([]uint16, l+1)
 			WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_GETTEXT, uintptr(index), uintptr(unsafe.Pointer(&mp[0])))
 			return syscall.UTF16ToString(mp)
@@ -63,136 +64,136 @@ func (list *gListBoxStrings)Strings(index int) string  {
 	return ""
 }
 
-func (list *gListBoxStrings)SetStrings(index int, str string){
-	if list.fListBox.fHandle == 0{
-		list.GStringList.SetStrings(index,str)
+func (list *gListBoxStrings) SetStrings(index int, str string) {
+	if list.fListBox.fHandle == 0 {
+		list.GStringList.SetStrings(index, str)
 		return
 	}
 	i := list.fListBox.GetItemIndex()
 	tmpdata := list.fListBox.GetItemData(index)
-	list.fListBox.SetItemData(index,0)
+	list.fListBox.SetItemData(index, 0)
 	list.Delete(index)
-	list.Insert(index,str)
-	list.fListBox.SetItemData(index,tmpdata)
+	list.Insert(index, str)
+	list.fListBox.SetItemData(index, tmpdata)
 	list.fListBox.SetItemIndex(i)
 }
 
-func (list *gListBoxStrings)Text() string{
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) Text() string {
+	if list.fListBox.fHandle == 0 {
 		return list.GStringList.Text()
 	}
 	var bf bytes.Buffer
 	tc := list.Count()
-	for i := 0;i<tc;i++{
+	for i := 0; i < tc; i++ {
 		bf.WriteString(list.Strings(i))
-		if i < tc-1{
+		if i < tc-1 {
 			bf.WriteString(`\r\n`)
 		}
 	}
 	return bf.String()
 }
 
-func (list *gListBoxStrings)Add(str string){
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) Add(str string) {
+	if list.fListBox.fHandle == 0 {
 		list.GStringList.Add(str)
 		return
 	}
-	if list.fListBox.fStyle < LBVirtual{
+	if list.fListBox.fStyle < LBVirtual {
 		mp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(str)))
 		WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_ADDSTRING, 0, mp)
 	}
 }
 
-func (list *gListBoxStrings)SetText(text string){
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) SetText(text string) {
+	if list.fListBox.fHandle == 0 {
 		list.GStringList.SetText(text)
 		return
 	}
 	list.Clear()
 	strs := strings.Split(text, `\r\n`)
-	for _,str := range strs{
+	for _, str := range strs {
 		list.Add(str)
 	}
 }
 
-func (list *gListBoxStrings)LoadFromFile(fileName string){
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) LoadFromFile(fileName string) {
+	if list.fListBox.fHandle == 0 {
 		list.GStringList.LoadFromFile(fileName)
 		return
 	}
 }
 
-func (list *gListBoxStrings)SaveToFile(fileName string){
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) SaveToFile(fileName string) {
+	if list.fListBox.fHandle == 0 {
 		list.GStringList.SaveToFile(fileName)
 		return
 	}
 }
 
-func (list *gListBoxStrings)Clear()  {
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) Clear() {
+	if list.fListBox.fHandle == 0 {
 		list.GStringList.Clear()
 		return
 	}
-	if list.fListBox.fStyle < LBVirtual{
+	if list.fListBox.fStyle < LBVirtual {
 		WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_RESETCONTENT, 0, 0)
 	}
 }
 
-func (list *gListBoxStrings)Insert(Index int, str string){
-	if list.fListBox.fHandle == 0{
-		list.GStringList.Insert(Index,str)
+func (list *gListBoxStrings) Insert(Index int, str string) {
+	if list.fListBox.fHandle == 0 {
+		list.GStringList.Insert(Index, str)
 		return
 	}
-	if list.fListBox.fStyle < LBVirtual{
+	if list.fListBox.fStyle < LBVirtual {
 		mp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(str)))
 		WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_INSERTSTRING, uintptr(Index), mp)
 	}
 }
 
-func (list *gListBoxStrings)Delete(index int){
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) Delete(index int) {
+	if list.fListBox.fHandle == 0 {
 		list.GStringList.Delete(index)
 		return
 	}
 	WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_DELETESTRING, uintptr(index), 0)
 }
 
-func (list *gListBoxStrings)AddStrings(strs DxCommonLib.IStrings){
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) AddStrings(strs DxCommonLib.IStrings) {
+	if list.fListBox.fHandle == 0 {
 		list.GStringList.AddStrings(strs)
 		return
 	}
-	for i := 0;i < strs.Count();i++{
+	for i := 0; i < strs.Count(); i++ {
 		list.Add(strs.Strings(i))
 	}
 }
 
-func (list *gListBoxStrings)IndexOf(str string) int{
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) IndexOf(str string) int {
+	if list.fListBox.fHandle == 0 {
 		return list.GStringList.IndexOf(str)
 	}
-	if list.fListBox.fStyle < LBVirtual{
+	if list.fListBox.fStyle < LBVirtual {
 		mp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(str)))
 		m := -1
-		return  int(WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_FINDSTRINGEXACT, uintptr(m), mp))
+		return int(WinApi.SendMessage(list.fListBox.fHandle, WinApi.LB_FINDSTRINGEXACT, uintptr(m), mp))
 	}
 	return -1
 }
 
-func (list *gListBoxStrings)AddPair(Name, Value string){
-	if list.fListBox.fHandle == 0{
-		list.GStringList.AddPair(Name,Value)
+func (list *gListBoxStrings) AddPair(Name, Value string) {
+	if list.fListBox.fHandle == 0 {
+		list.GStringList.AddPair(Name, Value)
 		return
 	}
 	list.Add(fmt.Sprintf("%s=%s", Name, Value))
 }
 
-func (lst *gListBoxStrings)IndexOfName(Name string) int{
-	if lst.fListBox.fHandle == 0{
+func (lst *gListBoxStrings) IndexOfName(Name string) int {
+	if lst.fListBox.fHandle == 0 {
 		return lst.GStringList.IndexOfName(Name)
 	}
-	for i:=0;i<lst.Count();i++{
+	for i := 0; i < lst.Count(); i++ {
 		v := lst.Strings(i)
 		if eidx := strings.IndexByte(v, '='); eidx > 0 {
 			bt := []byte(v)
@@ -204,8 +205,8 @@ func (lst *gListBoxStrings)IndexOfName(Name string) int{
 	return -1
 }
 
-func (lst *gListBoxStrings)ValueFromIndex(index int) string{
-	if lst.fListBox.fHandle == 0{
+func (lst *gListBoxStrings) ValueFromIndex(index int) string {
+	if lst.fListBox.fHandle == 0 {
 		return lst.GStringList.ValueFromIndex(index)
 	}
 	tc := lst.Count()
@@ -223,11 +224,11 @@ func (lst *gListBoxStrings)ValueFromIndex(index int) string{
 	return ""
 }
 
-func (list *gListBoxStrings)ValueByName(Name string) string{
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) ValueByName(Name string) string {
+	if list.fListBox.fHandle == 0 {
 		return list.GStringList.ValueByName(Name)
 	}
-	for i := 0;i<list.Count();i++{
+	for i := 0; i < list.Count(); i++ {
 		v := list.Strings(i)
 		if eidx := strings.IndexByte(v, '='); eidx > 0 {
 			bt := []byte(v)
@@ -239,8 +240,8 @@ func (list *gListBoxStrings)ValueByName(Name string) string{
 	return ""
 }
 
-func (list *gListBoxStrings)Names(Index int) string{
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) Names(Index int) string {
+	if list.fListBox.fHandle == 0 {
 		return list.GStringList.Names(Index)
 	}
 	if list.Count() == 0 {
@@ -257,48 +258,46 @@ func (list *gListBoxStrings)Names(Index int) string{
 	return ""
 }
 
-func (list *gListBoxStrings)AsSlice() []string{
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) AsSlice() []string {
+	if list.fListBox.fHandle == 0 {
 		return list.GStringList.AsSlice()
 	}
 	tc := list.Count()
-	result := make([]string,tc)
-	for i := 0;i<tc;i++{
+	result := make([]string, tc)
+	for i := 0; i < tc; i++ {
 		result[i] = list.Strings(i)
 	}
 	return result
 }
 
-func (list *gListBoxStrings)AddSlice(strs []string){
-	if list.fListBox.fHandle == 0{
+func (list *gListBoxStrings) AddSlice(strs []string) {
+	if list.fListBox.fHandle == 0 {
 		list.GStringList.AddSlice(strs)
 		return
 	}
-	for _,str := range strs{
+	for _, str := range strs {
 		list.Add(str)
 	}
 }
 
 func (lstbox *GListBox) SubInit() {
-	if lstbox.fItems == nil{
-		lstbox.fItems = &gListBoxStrings{fListBox:lstbox}
+	if lstbox.fItems == nil {
+		lstbox.fItems = &gListBoxStrings{fListBox: lstbox}
 	}
 	lstbox.GWinControl.SubInit()
 	lstbox.GComponent.SubInit(lstbox)
 }
 
-
-
-func (lstbox *GListBox)GetItemIndex()int{
+func (lstbox *GListBox) GetItemIndex() int {
 	return int(WinApi.SendMessage(lstbox.fHandle, WinApi.LB_GETCURSEL, 0, 0))
 }
 
-func (lstbox *GListBox)SetItemIndex(idx int){
-	if lstbox.HandleAllocated(){
-		if lstbox.GetItemIndex() != idx{
+func (lstbox *GListBox) SetItemIndex(idx int) {
+	if lstbox.HandleAllocated() {
+		if lstbox.GetItemIndex() != idx {
 			WinApi.SendMessage(lstbox.fHandle, WinApi.LB_SETCURSEL, uintptr(idx), 0)
 		}
-	}else{
+	} else {
 		lstbox.fItemIndex = idx
 	}
 }
@@ -306,7 +305,7 @@ func (lstbox *GListBox)SetItemIndex(idx int){
 func (lstbox *GListBox) CreateParams(params *Components.GCreateParams) {
 	lstbox.GWinControl.CreateParams(params)
 	lstbox.InitSubclassParams(params, "LISTBOX")
-	var lstyle int32=0
+	var lstyle int32 = 0
 	switch lstbox.fStyle {
 	case LBStandard:
 		lstyle = 0
@@ -320,23 +319,24 @@ func (lstbox *GListBox) CreateParams(params *Components.GCreateParams) {
 	params.ExStyle = params.ExStyle | WinApi.WS_EX_CLIENTEDGE
 	lstyle = ^(WinApi.CS_HREDRAW | WinApi.CS_VREDRAW)
 	params.WindowClass.Style = params.WindowClass.Style & uint32(lstyle)
+	params.WinClassName = "GListBox"
 }
 
-func (lstbox *GListBox)GetItemData(index int) int{
+func (lstbox *GListBox) GetItemData(index int) int {
 	return int(WinApi.SendMessage(lstbox.fHandle, WinApi.LB_GETITEMDATA, uintptr(index), 0))
 }
 
-func (lstbox *GListBox)SetItemData(index,AData int)  {
+func (lstbox *GListBox) SetItemData(index, AData int) {
 	WinApi.SendMessage(lstbox.fHandle, WinApi.LB_SETITEMDATA, uintptr(index), uintptr(AData))
 }
 
-func (lstbox *GListBox)Items()DxCommonLib.IStrings{
+func (lstbox *GListBox) Items() DxCommonLib.IStrings {
 	return lstbox.fItems
 }
 
-func (lstbox *GListBox) CreateWindowHandle(params *Components.GCreateParams)bool{
-	if lstbox.GWinControl.CreateWindowHandle(params){
-		for i := 0;i<lstbox.fItems.GStringList.Count();i++{
+func (lstbox *GListBox) CreateWindowHandle(params *Components.GCreateParams) bool {
+	if lstbox.GWinControl.CreateWindowHandle(params) {
+		for i := 0; i < lstbox.fItems.GStringList.Count(); i++ {
 			lp := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(lstbox.fItems.GStringList.Strings(i))))
 			WinApi.SendMessage(lstbox.fHandle, WinApi.LB_ADDSTRING, 0, lp)
 		}
@@ -355,15 +355,15 @@ func (lstbox *GListBox) WndProc(msg uint32, wparam, lparam uintptr) (result uint
 		notifycode := WinApi.HiWord(uint32(wparam))
 		switch notifycode {
 		case WinApi.LBN_SELCHANGE:
-			if lstbox.OnItemClick != nil{
+			if lstbox.OnItemClick != nil {
 				lstbox.OnItemClick(lstbox)
 			}
 		case WinApi.LBN_DBLCLK:
-			if lstbox.OnItemDblClick != nil{
+			if lstbox.OnItemDblClick != nil {
 				lstbox.OnItemDblClick(lstbox)
 			}
 		case WinApi.LBN_SELCANCEL:
-			if lstbox.OnItemClick != nil{
+			if lstbox.OnItemClick != nil {
 				lstbox.OnItemClick(lstbox)
 			}
 		}
@@ -373,37 +373,36 @@ func (lstbox *GListBox) WndProc(msg uint32, wparam, lparam uintptr) (result uint
 	return
 }
 
-func (lstbox *GListBox)GetTopIndex()int  {
+func (lstbox *GListBox) GetTopIndex() int {
 	return int(WinApi.SendMessage(lstbox.fHandle, WinApi.LB_GETTOPINDEX, 0, 0))
 }
 
-func (lstbox *GListBox)SetTopIndex(v int)  {
+func (lstbox *GListBox) SetTopIndex(v int) {
 	WinApi.SendMessage(lstbox.fHandle, WinApi.LB_SETTOPINDEX, uintptr(v), 0)
 }
 
-func (lstbox *GListBox)ItemAtPos(x,y int)int  {
+func (lstbox *GListBox) ItemAtPos(x, y int) int {
 	r := WinApi.Rect{}
-	p := WinApi.POINT{int32(x),int32(y)}
-	if r.GetClientRect(lstbox.fHandle) && r.PtInRect(&p){
-		for tpidx:=int(WinApi.SendMessage(lstbox.fHandle, WinApi.LB_GETTOPINDEX, 0, 0));
-			tpidx < lstbox.fItems.Count();tpidx++{
-				lstbox.Perform(WinApi.LB_GETITEMRECT,uintptr(tpidx),uintptr(unsafe.Pointer(&r)))
-				if r.PtInRect(&p){
-					return tpidx
-				}
+	p := WinApi.POINT{int32(x), int32(y)}
+	if r.GetClientRect(lstbox.fHandle) && r.PtInRect(&p) {
+		for tpidx := int(WinApi.SendMessage(lstbox.fHandle, WinApi.LB_GETTOPINDEX, 0, 0)); tpidx < lstbox.fItems.Count(); tpidx++ {
+			lstbox.Perform(WinApi.LB_GETITEMRECT, uintptr(tpidx), uintptr(unsafe.Pointer(&r)))
+			if r.PtInRect(&p) {
+				return tpidx
+			}
 		}
 	}
-	return  -1
+	return -1
 }
 
-func (lstbox *GListBox)ItemRect(Index int)WinApi.Rect  {
-	r :=WinApi.Rect{}
+func (lstbox *GListBox) ItemRect(Index int) WinApi.Rect {
+	r := WinApi.Rect{}
 	Count := lstbox.fItems.Count()
-	if Index < Count{
-		lstbox.Perform(WinApi.LB_GETITEMRECT,uintptr(Index),uintptr(unsafe.Pointer(&r)))
-	}else if Index == Count{
-		lstbox.Perform(WinApi.LB_GETITEMRECT,uintptr(Index - 1),uintptr(unsafe.Pointer(&r)))
-		r.OffsetRect(0,int(r.Height()))
+	if Index < Count {
+		lstbox.Perform(WinApi.LB_GETITEMRECT, uintptr(Index), uintptr(unsafe.Pointer(&r)))
+	} else if Index == Count {
+		lstbox.Perform(WinApi.LB_GETITEMRECT, uintptr(Index-1), uintptr(unsafe.Pointer(&r)))
+		r.OffsetRect(0, int(r.Height()))
 	}
 	return r
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	_ "fmt"
 	"github.com/suiyunonghen/DxCommonLib"
-	_ "github.com/suiyunonghen/DxCommonLib"
 	_ "github.com/suiyunonghen/GVCL/Components"
 	"github.com/suiyunonghen/GVCL/Components/Controls"
 	"github.com/suiyunonghen/GVCL/Components/DxControls/Scintilla"
@@ -34,14 +33,14 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 	frm.Button1.SetCaption("确定关闭")
 
 	frm.Edit1 = Scintilla.NewScintillaEditor(frm)
-	frm.Edit1.SetColor(Graphics.RGB(184,220,220))
+	frm.Edit1.SetColor(Graphics.RGB(184, 220, 220))
 	frm.Edit1.MarginBand.ShowCodeFlod = true
 
 	pop := NVisbleControls.NewPopupMenu(frm)
 	TargetBookmarkItem := pop.Items().AddItem("设置书签")
 	GotoBookmarkItem := pop.Items().AddItem("跳转书签")
-	for i :=0;i<10;i++{
-		str := fmt.Sprintf("%s%d","书签",i)
+	for i := 0; i < 10; i++ {
+		str := fmt.Sprintf("%s%d", "书签", i)
 		bookmarkitem := TargetBookmarkItem.AddItem(str)
 		bookmarkitem.TagData = i
 		bookmarkitem.OnClick = func(sender interface{}) {
@@ -72,12 +71,12 @@ func NewForm1(app *controls.WApplication) *GForm1 {
 		frm.Button1.SetLeft(frm.Width() - 90)
 		frm.Button1.SetTop(frm.Height() - 80)
 		frm.Edit1.SetWidth(frm.Width() - 20)
-		frm.Edit1.SetHeight(frm.Height()-80)
+		frm.Edit1.SetHeight(frm.Height() - 80)
 	}
 	frm.Button1.OnClick = func(sender interface{}) {
 		str := frm.Edit1.CodeLines.Strings(0)
-		WinApi.MessageBox(frm.GetWindowHandle(),"测试",str , 64)
-		frm.Edit1.CodeLines.SetStrings(0,"不得闲测试")
+		WinApi.MessageBox(frm.GetWindowHandle(), "测试", str, 64)
+		frm.Edit1.CodeLines.SetStrings(0, "不得闲测试")
 	}
 	return frm
 }
@@ -91,10 +90,10 @@ func NewForm2(app *controls.WApplication) *GForm2 {
 
 	frm := new(GForm2)
 	frm.SubInit()
-	frm.Browser = gminiblink.NewBlinkWebBrowser(frm,BindFunctions)
+	frm.Browser = gminiblink.NewBlinkWebBrowser(frm, BindFunctions)
 	frm.OnShow = func(sender interface{}) {
 		//frm.Browser.Navigate("www.baidu.com")
-		frm.Browser.LoadFromFile(0,`E:\GoLib\src\github.com\suiyunonghen\GVCL\Components\DxControls\gminiblink\test.html`)
+		frm.Browser.LoadFromFile(0, `E:\GoLib\src\github.com\suiyunonghen\GVCL\Components\DxControls\gminiblink\test.html`)
 	}
 	frm.OnClose = func(sender interface{}, closAction *int8) {
 		*closAction = controls.CAFree
@@ -106,33 +105,33 @@ func NewForm2(app *controls.WApplication) *GForm2 {
 	}
 	frm.Browser.OnConsole = func(webView gminiblink.WkeWebView, level gminiblink.WkeConsoleLevel, msg, sourceName string, sourceline uint32, stackTrace string) {
 		fmt.Println(level)
-		fmt.Println("ConsoleMsg：",msg)
-		fmt.Println("ConsolesourceName：",sourceName,"，sourceline：",sourceline)
-		fmt.Println("stackTrace:",stackTrace)
+		fmt.Println("ConsoleMsg：", msg)
+		fmt.Println("ConsolesourceName：", sourceName, "，sourceline：", sourceline)
+		fmt.Println("stackTrace:", stackTrace)
 	}
 	frm.Browser.OnDocumentCompleted = func(sender interface{}) {
 		htmlinterface := frm.Browser.JsCallGlobal("JsHtml")
-		WinApi.MessageBox(frm.GetWindowHandle(),"页面加载完成，调用内部JS获取网页源码\r\n"+htmlinterface.(string),"Html源码",64)
+		WinApi.MessageBox(frm.GetWindowHandle(), "页面加载完成，调用内部JS获取网页源码\r\n"+htmlinterface.(string), "Html源码", 64)
 
 	}
 	return frm
 }
 
-var(
-	BindFunctions	map[string]*gminiblink.JSBindFunction
+var (
+	BindFunctions map[string]*gminiblink.JSBindFunction
 )
 
 func main() {
 
-	gminiblink.BlinkLib.LoadBlink(`E:\GoLib\miniblink64_20190810\miniblink64\node.dll`)
+	/*gminiblink.BlinkLib.LoadBlink(`E:\GoLib\miniblink64_20190810\miniblink64\node.dll`)
 	wv := gminiblink.BlinkLib.WkeCreateWebWindow(gminiblink.WKE_WINDOW_TYPE_POPUP, 0, 0, 0, 640, 480)
 	gminiblink.BlinkLib.WkeShowWindow(wv, true)
 	gminiblink.BlinkLib.WkeLoadURL(wv, "https://www.baidu.com")
 
 	msg := new(WinApi.MSG)
-	for{
+	for {
 		if msg.PeekMessage(0, 0, 0, WinApi.PM_REMOVE) {
-			if msg.Message != WinApi.WM_TIMER{
+			if msg.Message != WinApi.WM_TIMER {
 				fmt.Println(msg.Message)
 			}
 			if msg.Message == WinApi.WM_QUIT {
@@ -140,11 +139,11 @@ func main() {
 			}
 			msg.TranslateMessage()
 			msg.DispatchMessage()
-		}else{
+		} else {
 			WinApi.WaitMessage()
 		}
 	}
-	return
+	return*/
 
 	app := controls.NewApplication()
 	m := app.CreateForm()
@@ -156,19 +155,38 @@ func main() {
 	lbl.SetCaption("说明 ")
 	lbl.SetTrasparent(true)
 
-
 	//lbl.SetAutoSize(true)
 	lbl.SetColor(Graphics.ClRed)
 	lbl.SetTop(40)
+
+	b1 := controls.NewButton(m)
+	b1.SetCaption("关闭")
+	b1.Font.BeginUpdate()
+	b1.Font.SetSize(10)
+	b1.Font.Underline = 1
+	b1.Font.SetBold(true)
+	b1.Font.EndUpdate()
+	b1.SetLeft(100)
+	b1.SetTop(40)
+
+	cmb := controls.NewCombobox(m, controls.CSDropDownList)
+	cmb.SetTop(80)
+	cmb.SetLeft(180)
+	listitems := cmb.Items()
+	for i := 0; i < 10; i++ {
+		listitems.Add("asfasf")
+		listitems.Add("测试二恶")
+	}
+	cmb.SetItemIndex(1)
+
 	app.Run()
 	return
-
 
 	BindFunctions = make(map[string]*gminiblink.JSBindFunction)
 	func1 := new(gminiblink.JSBindFunction)
 	func1.BindHandle = func(params ...interface{}) interface{} {
 		h := app.MainForm().GetWindowHandle()
-		WinApi.MessageBox(h,params[0].(string),"Go内部函数",64)
+		WinApi.MessageBox(h, params[0].(string), "Go内部函数", 64)
 		return 0
 	}
 	func1.ParamCount = 1
@@ -177,7 +195,7 @@ func main() {
 	func1 = new(gminiblink.JSBindFunction)
 	func1.BindHandle = func(params ...interface{}) interface{} {
 		sum := 0
-		for _,v := range params{
+		for _, v := range params {
 			sum += v.(int)
 		}
 		return sum
@@ -185,14 +203,12 @@ func main() {
 	func1.ParamCount = 0
 	BindFunctions["Gosum"] = func1
 
-
-
 	//菜单
 	pop := NVisbleControls.NewPopupMenu(m)
 	tmpitem := pop.Items().AddItem("测试1")
 	citem := tmpitem.AddItem("子测试1")
 	citem.OnClick = func(sender interface{}) {
-		if fileVersion,_, ok := WinApi.GetProductVersion("D:\\DevTools\\Microsoft VS Code\\Code.exe"); ok {
+		if fileVersion, _, ok := WinApi.GetProductVersion("D:\\DevTools\\Microsoft VS Code\\Code.exe"); ok {
 
 			st := fmt.Sprintf("%d.%d.%d", fileVersion.Major, fileVersion.Minor, fileVersion.Build)
 			WinApi.MessageBox(m.GetWindowHandle(), st+sender.(*NVisbleControls.GMenuItem).Caption(), "消息", 64)
@@ -246,10 +262,9 @@ func main() {
 			WinApi.MessageBox(tmpm.GetWindowHandle(), "程序确定退出", "消息", 64)
 		}
 
-
 	}
 
-	bBrowser  := controls.NewButton(m)
+	bBrowser := controls.NewButton(m)
 	bBrowser.SetLeft(240)
 	bBrowser.SetCaption("miniBlink")
 	bBrowser.OnClick = func(sender interface{}) {
@@ -258,7 +273,7 @@ func main() {
 		tmpm.ShowModal()
 	}
 
-	b1 := controls.NewButton(m)
+	b1 = controls.NewButton(m)
 	b1.SetCaption("关闭")
 	b1.Font.BeginUpdate()
 	b1.Font.SetSize(10)
@@ -268,24 +283,23 @@ func main() {
 	b1.SetLeft(100)
 	b1.SetTop(40)
 
-
-	lstBox	:= controls.NewListBox(m)
+	lstBox := controls.NewListBox(m)
 	lstBox.SetTop(80)
 	lstBox.SetLeft(40)
 	//lstBox.SetWidth(200)
 	//lstBox.SetHeight(200)
-	listitems := lstBox.Items()
+	listitems = lstBox.Items()
 	listitems.Add("asfasf")
 	listitems.Add("测试二恶")
 
 	lstBox.OnItemDblClick = func(sender interface{}) {
 		mb := sender.(*controls.GListBox)
-		WinApi.MessageBox(mb.GetWindowHandle(),mb.Items().Strings(mb.GetItemIndex()),"消息",64)
+		WinApi.MessageBox(mb.GetWindowHandle(), mb.Items().Strings(mb.GetItemIndex()), "消息", 64)
 	}
 
 	checkbox := WindowLessControls.NewCheckBox(m)
-	checkbox.SetLeft(lbl.Left()+10)
-	checkbox.SetTop(lstBox.Top()+lstBox.Height()+10)
+	checkbox.SetLeft(lbl.Left() + 10)
+	checkbox.SetTop(lstBox.Top() + lstBox.Height() + 10)
 	checkbox.SetCaption("测试选择框")
 	checkbox.SetChecked(true)
 
@@ -313,16 +327,6 @@ func main() {
 		lbl.Font.SetBold(true)
 		lbl.Font.EndUpdate()
 	}
-
-	cmb := controls.NewCombobox(m,controls.CSDropDownList)
-	cmb.SetTop(80)
-	cmb.SetLeft(180)
-	listitems = cmb.Items()
-	for i := 0;i<10;i++{
-		listitems.Add("asfasf")
-		listitems.Add("测试二恶")
-	}
-	cmb.SetItemIndex(1)
 
 	app.Run()
 }

@@ -537,10 +537,10 @@ func (blink *MiniBlinkLib) WkeSetCookie(webview WkeWebView, url, cookie string) 
 		btcookie := DxCommonLib.FastString2Byte(cookie)
 		urllen := len(bturl)
 		cookielen := len(btcookie)
-		mburl := make([]byte,urllen+1)
-		mbcookie := make([]byte,cookielen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mburl[0]),unsafe.Pointer(&bturl[0]),uintptr(urllen))
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mbcookie[0]),unsafe.Pointer(&btcookie[0]),uintptr(cookielen))
+		mburl := make([]byte, urllen+1)
+		mbcookie := make([]byte, cookielen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mburl[0]), unsafe.Pointer(&bturl[0]), uintptr(urllen))
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mbcookie[0]), unsafe.Pointer(&btcookie[0]), uintptr(cookielen))
 		syscall.Syscall(blink.wkeSetCookie, 3, uintptr(webview), uintptr(unsafe.Pointer(&mburl[0])), uintptr(unsafe.Pointer(&mbcookie[0])))
 	}
 }
@@ -567,8 +567,8 @@ func (blink *MiniBlinkLib) WkeLoadHTML(wkeWebView WkeWebView, html string) {
 	if blink.libminiblink != 0 && blink.wkeLoadHTML != 0 {
 		bthtml := DxCommonLib.FastString2Byte(html)
 		htmllen := len(bthtml)
-		mburl := make([]byte,htmllen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mburl[0]),unsafe.Pointer(&mburl[0]),uintptr(htmllen))
+		mburl := make([]byte, htmllen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mburl[0]), unsafe.Pointer(&mburl[0]), uintptr(htmllen))
 		syscall.Syscall(blink.wkeLoadHTML, 2, uintptr(wkeWebView), uintptr(unsafe.Pointer(&mburl[0])), 0)
 	}
 }
@@ -579,10 +579,10 @@ func (blink *MiniBlinkLib) WkeLoadHtmlWithBaseUrl(wkeWebView WkeWebView, html, b
 		btbaseUrl := DxCommonLib.FastString2Byte(baseUrl)
 		htmllen := len(bthtml)
 		baseUrllen := len(btbaseUrl)
-		mhtml := make([]byte,htmllen+1)
-		mbbaseUrl := make([]byte,baseUrllen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mhtml[0]),unsafe.Pointer(&bthtml[0]),uintptr(htmllen))
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mbbaseUrl[0]),unsafe.Pointer(&btbaseUrl[0]),uintptr(baseUrllen))
+		mhtml := make([]byte, htmllen+1)
+		mbbaseUrl := make([]byte, baseUrllen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mhtml[0]), unsafe.Pointer(&bthtml[0]), uintptr(htmllen))
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mbbaseUrl[0]), unsafe.Pointer(&btbaseUrl[0]), uintptr(baseUrllen))
 		syscall.Syscall(blink.wkeLoadHtmlWithBaseUrl, 3, uintptr(wkeWebView), uintptr(unsafe.Pointer(&mhtml[0])), uintptr(unsafe.Pointer(&mbbaseUrl[0])))
 	}
 }
@@ -591,8 +591,8 @@ func (blink *MiniBlinkLib) WkeLoadFile(wkeWebView WkeWebView, fileName string) {
 	if blink.libminiblink != 0 && blink.wkeLoadFile != 0 {
 		bt := DxCommonLib.FastString2Byte(fileName)
 		fileLen := len(bt)
-		mb := make([]byte,fileLen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(fileLen))
+		mb := make([]byte, fileLen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(fileLen))
 		syscall.Syscall(blink.wkeLoadFile, 2, uintptr(wkeWebView), uintptr(unsafe.Pointer(&mb[0])), 0)
 	}
 }
@@ -782,8 +782,8 @@ func wkeCookieVisitorCallBack(params uintptr, name, value, domain, path uintptr,
 	if BlinkLib.fCookieVisitorCallBack != nil {
 		if BlinkLib.fCookieVisitorCallBack(params, DxCommonLib.StringFromUtf8Pointer(name, 1024),
 			DxCommonLib.StringFromUtf8Pointer(value, 1024), DxCommonLib.StringFromUtf8Pointer(domain, 1024),
-			DxCommonLib.StringFromUtf8Pointer(path, 1024), secure, httpOnly, expires){
-				return 1
+			DxCommonLib.StringFromUtf8Pointer(path, 1024), secure, httpOnly, expires) {
+			return 1
 		}
 	}
 	return 0
@@ -954,7 +954,7 @@ func (blink *MiniBlinkLib) WkeGetString(str WkeString) string {
 
 type WkeTitleChanged func(webView WkeWebView, param uintptr, title string)
 
-func wkeTitleChangeCallBack(webview WkeWebView, param uintptr, title uintptr)uintptr {
+func wkeTitleChangeCallBack(webview WkeWebView, param uintptr, title uintptr) uintptr {
 	if BlinkLib.fOnTitleChanged != nil {
 		BlinkLib.fOnTitleChanged(webview, param, BlinkLib.WkeGetString(WkeString(title)))
 	}
@@ -971,7 +971,7 @@ func (blink *MiniBlinkLib) WkeOnTitleChanged(webView WkeWebView, callback WkeTit
 	}
 }
 
-func wkeOnMouseOverUrlChanged(webview WkeWebView, param uintptr, title uintptr)uintptr {
+func wkeOnMouseOverUrlChanged(webview WkeWebView, param uintptr, title uintptr) uintptr {
 	if BlinkLib.fOnMouseOverUrlChanged != nil {
 		BlinkLib.fOnMouseOverUrlChanged(webview, param, BlinkLib.WkeGetString(WkeString(title)))
 	}
@@ -988,7 +988,7 @@ func (blink *MiniBlinkLib) WkeOnMouseOverUrlChanged(webView WkeWebView, callback
 	}
 }
 
-func wkeOnURLChanged(webview WkeWebView, param uintptr, frameid WkeWebFrameHandle, url WkeString)uintptr {
+func wkeOnURLChanged(webview WkeWebView, param uintptr, frameid WkeWebFrameHandle, url WkeString) uintptr {
 	if BlinkLib.fOnURLChanged != nil {
 		BlinkLib.fOnURLChanged(webview, param, frameid, BlinkLib.WkeGetString(url))
 	}
@@ -1009,7 +1009,7 @@ func (blink *MiniBlinkLib) WkeOnURLChanged(webView WkeWebView, callback WkeURLCh
 
 type WkePaintUpdatedCallback func(webView WkeWebView, param uintptr, dc WinApi.HDC, x, y, cx, cy int)
 
-func wkePaintUpdatedCallback(webView WkeWebView, param uintptr, dc WinApi.HDC, x, y, cx, cy int)uintptr {
+func wkePaintUpdatedCallback(webView WkeWebView, param uintptr, dc WinApi.HDC, x, y, cx, cy int) uintptr {
 	if BlinkLib.fonPaintUpdatedCallback != nil {
 		BlinkLib.fonPaintUpdatedCallback(webView, param, dc, x, y, cx, cy)
 	}
@@ -1028,7 +1028,7 @@ func (blink *MiniBlinkLib) WkeOnPaintUpdated(webView WkeWebView, callback WkePai
 
 type WkePaintBitUpdatedCallback func(webview WkeWebView, param uintptr, buffer uintptr, rect *WkeRect, width, height int)
 
-func wkePaintBitUpdatedCallback(webview WkeWebView, param uintptr, buffer uintptr, rect uintptr, width, height int)uintptr {
+func wkePaintBitUpdatedCallback(webview WkeWebView, param uintptr, buffer uintptr, rect uintptr, width, height int) uintptr {
 	if BlinkLib.fOnPaintBitUpdated != nil {
 		BlinkLib.fOnPaintBitUpdated(webview, param, buffer, (*WkeRect)(unsafe.Pointer(rect)), width, height)
 	}
@@ -1047,14 +1047,14 @@ func (blink *MiniBlinkLib) WkeOnPaintBitUpdated(webView WkeWebView, callback Wke
 
 type WkeAlertBoxCallback func(webview WkeWebView, param uintptr, msg string)
 
-func wkeAlertBoxCallback(webview WkeWebView, param uintptr, msg WkeString)uintptr {
+func wkeAlertBoxCallback(webview WkeWebView, param uintptr, msg WkeString) uintptr {
 	if BlinkLib.fOnAlertBox != nil {
 		BlinkLib.fOnAlertBox(webview, param, BlinkLib.WkeGetString(msg))
 	}
 	return 0
 }
 
-func (blink *MiniBlinkLib) WkeOnAlertBox(webView WkeWebView, callback WkeAlertBoxCallback, param uintptr)uintptr {
+func (blink *MiniBlinkLib) WkeOnAlertBox(webView WkeWebView, callback WkeAlertBoxCallback, param uintptr) uintptr {
 	if blink.libminiblink != 0 && blink.wkeOnAlertBox != 0 {
 		if fOnAlertBox == 0 {
 			fOnAlertBox = syscall.NewCallbackCDecl(wkeAlertBoxCallback)
@@ -1069,8 +1069,8 @@ type WkeConfirmBoxCallback func(webview WkeWebView, param uintptr, msg string) b
 
 func wkeConfirmBoxCallback(webview WkeWebView, param uintptr, msg WkeString) uintptr {
 	if BlinkLib.fOnConfirmBox != nil {
-		if BlinkLib.fOnConfirmBox(webview, param, BlinkLib.WkeGetString(msg)){
-			return  1
+		if BlinkLib.fOnConfirmBox(webview, param, BlinkLib.WkeGetString(msg)) {
+			return 1
 		}
 	}
 	return 0
@@ -1091,8 +1091,8 @@ type WkePromptBoxCallback func(webview WkeWebView, param uintptr, msg, defaultre
 func wkePromptBoxCallback(webview WkeWebView, param uintptr, msg, defaultResult, sresult WkeString) uintptr {
 	if BlinkLib.fOnPromptBox != nil {
 		if BlinkLib.fOnPromptBox(webview, param, BlinkLib.WkeGetString(msg), BlinkLib.WkeGetString(defaultResult),
-			BlinkLib.WkeGetString(sresult)){
-				return 1
+			BlinkLib.WkeGetString(sresult)) {
+			return 1
 		}
 	}
 	return 0
@@ -1112,7 +1112,7 @@ type WkeNavigationCallback func(webview WkeWebView, param uintptr, navigationTyp
 
 func wkeNavigationCallback(webview WkeWebView, param uintptr, navigationType WkeNavigationType, url WkeString) uintptr {
 	if BlinkLib.fOnNavigation != nil {
-		if BlinkLib.fOnNavigation(webview, param, navigationType, BlinkLib.WkeGetString(url)){
+		if BlinkLib.fOnNavigation(webview, param, navigationType, BlinkLib.WkeGetString(url)) {
 			return 1
 		}
 	}
@@ -1150,7 +1150,7 @@ func (blink *MiniBlinkLib) WkeOnCreateView(webView WkeWebView, callback WkeCreat
 
 type WkeDocumentReadyCallback2 func(webview WkeWebView, param uintptr, frameid WkeFrameHwnd)
 
-func wkeDocumentReadyCallback2(webview WkeWebView, param uintptr, frameid WkeFrameHwnd)uintptr {
+func wkeDocumentReadyCallback2(webview WkeWebView, param uintptr, frameid WkeFrameHwnd) uintptr {
 	if BlinkLib.fOnDocumentReady != nil {
 		BlinkLib.fOnDocumentReady(webview, param, frameid)
 	}
@@ -1171,7 +1171,7 @@ type WkeDownloadCallback func(webView WkeWebView, param uintptr, url string) boo
 
 func wkeDownloadCallback(webView WkeWebView, param uintptr, url uintptr) uintptr {
 	if BlinkLib.fOnDownload != nil {
-		if BlinkLib.fOnDownload(webView, param, DxCommonLib.StringFromUtf8Pointer(url, 1024)){
+		if BlinkLib.fOnDownload(webView, param, DxCommonLib.StringFromUtf8Pointer(url, 1024)) {
 			return 1
 		}
 	}
@@ -1192,7 +1192,7 @@ type WkeNetResponseCallback func(webView WkeWebView, param uintptr, url string, 
 
 func wkeNetResponseCallback(webView WkeWebView, param uintptr, url uintptr, job uintptr) uintptr {
 	if BlinkLib.fNetOnResponse != nil {
-		if BlinkLib.fNetOnResponse(webView, param, DxCommonLib.StringFromUtf8Pointer(url, 1024), job){
+		if BlinkLib.fNetOnResponse(webView, param, DxCommonLib.StringFromUtf8Pointer(url, 1024), job) {
 			return 1
 		}
 	}
@@ -1211,7 +1211,7 @@ func (blink *MiniBlinkLib) WkeNetOnResponse(webView WkeWebView, callback WkeNetR
 
 type WkeConsoleCallback func(webView WkeWebView, param uintptr, level WkeConsoleLevel, msg, sourceName string, sourceline uint32, stackTrace string)
 
-func wkeConsoleCallback(webView WkeWebView, param uintptr, level WkeConsoleLevel, msg, sourceName WkeString, sourceLine uint32, stackTrace WkeString)uintptr {
+func wkeConsoleCallback(webView WkeWebView, param uintptr, level WkeConsoleLevel, msg, sourceName WkeString, sourceLine uint32, stackTrace WkeString) uintptr {
 	if BlinkLib.fOnConsole != nil {
 		BlinkLib.fOnConsole(webView, param, level, BlinkLib.WkeGetString(msg),
 			BlinkLib.WkeGetString(sourceName), sourceLine, BlinkLib.WkeGetString(stackTrace))
@@ -1231,7 +1231,7 @@ func (blink *MiniBlinkLib) WkeOnConsole(webView WkeWebView, callback WkeConsoleC
 
 func wkeLoadUrlBeginCallback(webView WkeWebView, param uintptr, url uintptr, job uintptr) uintptr {
 	if BlinkLib.fOnLoadUrlBegin != nil {
-		if BlinkLib.fOnLoadUrlBegin(webView, param, DxCommonLib.StringFromUtf8Pointer(url, 1024), job){
+		if BlinkLib.fOnLoadUrlBegin(webView, param, DxCommonLib.StringFromUtf8Pointer(url, 1024), job) {
 			return 1
 		}
 	}
@@ -1250,7 +1250,7 @@ func (blink *MiniBlinkLib) WkeOnLoadUrlBegin(webView WkeWebView, callback WkeNet
 
 type WkeLoadUrlEndCallback func(webView WkeWebView, param uintptr, url string, job uintptr, buf []byte)
 
-func wkeLoadUrlEndCallback(webView WkeWebView, param uintptr, url uintptr, job uintptr, buf uintptr, len uintptr)uintptr {
+func wkeLoadUrlEndCallback(webView WkeWebView, param uintptr, url uintptr, job uintptr, buf uintptr, len uintptr) uintptr {
 	if BlinkLib.fOnLoadUrlEnd != nil {
 		buffer := make([]byte, len)
 		DxCommonLib.CopyMemory(unsafe.Pointer(&buffer[0]), unsafe.Pointer(buf), len)
@@ -1271,7 +1271,7 @@ func (blink *MiniBlinkLib) WkeOnLoadUrlEnd(webView WkeWebView, callback WkeLoadU
 
 type WkeDidCreateScriptContextCallback func(webView WkeWebView, param uintptr, frameId WkeWebFrameHandle, context uintptr, extensionGroup int, worldId int)
 
-func wkeDidCreateScriptContextCallback(webView WkeWebView, param uintptr, frameId WkeWebFrameHandle, context uintptr, extensionGroup int, worldId int)uintptr {
+func wkeDidCreateScriptContextCallback(webView WkeWebView, param uintptr, frameId WkeWebFrameHandle, context uintptr, extensionGroup int, worldId int) uintptr {
 	if BlinkLib.fOnDidCreateScriptContext != nil {
 		BlinkLib.fOnDidCreateScriptContext(webView, param, frameId, context, extensionGroup, worldId)
 	}
@@ -1290,7 +1290,7 @@ func (blink *MiniBlinkLib) WkeOnDidCreateScriptContext(webView WkeWebView, callb
 
 type WkeWillReleaseScriptContextCallback func(webView WkeWebView, param uintptr, frameId WkeWebFrameHandle, context uintptr, worldId int)
 
-func wkeWillReleaseScriptContextCallback(webView WkeWebView, param uintptr, frameId WkeWebFrameHandle, context uintptr, worldId int)uintptr {
+func wkeWillReleaseScriptContextCallback(webView WkeWebView, param uintptr, frameId WkeWebFrameHandle, context uintptr, worldId int) uintptr {
 	if BlinkLib.fOnWillReleaseScriptContext != nil {
 		BlinkLib.fOnWillReleaseScriptContext(webView, param, frameId, context, worldId)
 	}
@@ -1309,7 +1309,7 @@ func (blink *MiniBlinkLib) WkeOnWillReleaseScriptContext(webView WkeWebView, cal
 
 type WkeWillMediaLoadCallback func(webView WkeWebView, param uintptr, url string, info *WkeMediaLoadInfo)
 
-func wkeWillMediaLoadCallback(webView WkeWebView, param uintptr, url uintptr, info uintptr)uintptr {
+func wkeWillMediaLoadCallback(webView WkeWebView, param uintptr, url uintptr, info uintptr) uintptr {
 	if BlinkLib.fOnWillMediaLoad != nil {
 		BlinkLib.fOnWillMediaLoad(webView, param, DxCommonLib.StringFromUtf8Pointer(url, 1024), (*WkeMediaLoadInfo)(unsafe.Pointer(info)))
 	}
@@ -1346,8 +1346,8 @@ func (blink *MiniBlinkLib) WkeRunJsByFrame(webView WkeWebView, frameId WkeWebFra
 	if blink.libminiblink != 0 && blink.wkeRunJsByFrame != 0 {
 		bt := DxCommonLib.FastString2Byte(script)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 		ret, _, _ := syscall.Syscall6(blink.wkeRunJsByFrame, 4, uintptr(webView), uintptr(frameId), uintptr(unsafe.Pointer(&mb[0])),
 			uintptr(DxCommonLib.Ord(isInClosure)), 0, 0)
 		return JSValue(ret)
@@ -1396,8 +1396,8 @@ func (blink *MiniBlinkLib) WkeSetUserKeyValue(webView WkeWebView, key string, va
 	if blink.libminiblink != 0 && blink.wkeSetUserKeyValue != 0 {
 		bt := DxCommonLib.FastString2Byte(key)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 		syscall.Syscall(blink.wkeSetUserKeyValue, 3, uintptr(webView), uintptr(unsafe.Pointer(&mb[0])), value)
 	}
 }
@@ -1406,8 +1406,8 @@ func (blink *MiniBlinkLib) WkeGetUserKeyValue(webView WkeWebView, key string) ui
 	if blink.libminiblink != 0 && blink.wkeGetUserKeyValue != 0 {
 		bt := DxCommonLib.FastString2Byte(key)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 		ret, _, _ := syscall.Syscall(blink.wkeGetUserKeyValue, 2, uintptr(webView), uintptr(unsafe.Pointer(&mb[0])), 0)
 		return ret
 	}
@@ -1427,14 +1427,14 @@ type WkeWindowDestroyCallback func(webView WkeWebView, param uintptr)
 
 func wkeWindowClosingCallback(webView WkeWebView, param uintptr) uintptr {
 	if BlinkLib.fOnWindowClosing != nil {
-		if BlinkLib.fOnWindowClosing(webView, param){
+		if BlinkLib.fOnWindowClosing(webView, param) {
 			return 1
 		}
 	}
 	return 0
 }
 
-func wkeWindowDestroyCallback(webView WkeWebView, param uintptr)uintptr {
+func wkeWindowDestroyCallback(webView WkeWebView, param uintptr) uintptr {
 	if BlinkLib.fOnWindowDestroy != nil {
 		BlinkLib.fOnWindowDestroy(webView, param)
 	}
@@ -1483,8 +1483,8 @@ func (blink *MiniBlinkLib) WkeSetWindowTitle(webView WkeWebView, title string) {
 	if blink.libminiblink != 0 && blink.wkeSetWindowTitle != 0 {
 		bt := DxCommonLib.FastString2Byte(title)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 		syscall.Syscall(blink.wkeSetWindowTitle, 2, uintptr(webView), uintptr(unsafe.Pointer(&mb[0])), 0)
 	}
 }
@@ -1493,13 +1493,13 @@ func (blink *MiniBlinkLib) WkeSetDeviceParameter(webView WkeWebView, device, par
 	if blink.libminiblink != 0 && blink.wkeSetDeviceParameter != 0 {
 		bt := DxCommonLib.FastString2Byte(device)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 
 		bt = DxCommonLib.FastString2Byte(paramStr)
 		btlen = len(bt)
-		mb1 := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb1[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb1 := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb1[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 		syscall.Syscall6(blink.wkeSetDeviceParameter, 5, uintptr(webView), uintptr(unsafe.Pointer(&mb[0])), uintptr(unsafe.Pointer(&mb1[0])),
 			uintptr(paramInt), uintptr(paramFloat), 0)
 	}
@@ -1577,13 +1577,13 @@ func (blink *MiniBlinkLib) WkeSetDebugConfig(webView WkeWebView, debugString, pa
 	if blink.libminiblink != 0 && blink.wkeSetDebugConfig != 0 {
 		bt := DxCommonLib.FastString2Byte(debugString)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 
 		bt = DxCommonLib.FastString2Byte(param)
 		btlen = len(bt)
-		mb1 := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb1[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb1 := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb1[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 
 		syscall.Syscall(blink.wkeSetDebugConfig, 3, uintptr(webView), uintptr(unsafe.Pointer(&mb[0])), uintptr(unsafe.Pointer(&mb1[0])))
 	}
@@ -1625,8 +1625,8 @@ func (blink *MiniBlinkLib) WkeSetUserAgent(webView WkeWebView, userAgent string)
 	if blink.libminiblink != 0 && blink.wkeSetUserAgent != 0 {
 		bt := DxCommonLib.FastString2Byte(userAgent)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 		syscall.Syscall(blink.wkeSetUserAgent, 2, uintptr(webView), uintptr(unsafe.Pointer(&mb[0])), 0)
 	}
 }
@@ -1658,8 +1658,8 @@ func (blink *MiniBlinkLib) WkeNetSetMIMEType(jobPtr uintptr, mimetype string) {
 	if blink.libminiblink != 0 && blink.wkeNetSetMIMEType != 0 {
 		bt := DxCommonLib.FastString2Byte(mimetype)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 
 		syscall.Syscall(blink.wkeNetSetMIMEType, 2, jobPtr, uintptr(unsafe.Pointer(&mb[0])), 0)
 	}
@@ -1813,13 +1813,12 @@ func (blink *MiniBlinkLib) JsBoolean(v bool) JSValue {
 	return 0
 }
 
-
 func (blink *MiniBlinkLib) JsString(es JSExecState, v string) JSValue {
 	if blink.libminiblink != 0 && blink.jsString != 0 {
 		bt := DxCommonLib.FastString2Byte(v)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 		ret, _, _ := syscall.Syscall(blink.jsString, 2, uintptr(es), uintptr(unsafe.Pointer(&mb[0])), 0)
 		return JSValue(ret)
 	}
@@ -1915,8 +1914,8 @@ func (blink *MiniBlinkLib) WkeJsBindFunction(funcName string, nativeFunction Wke
 		blink.frunNativefunc = nativeFunction
 		bt := DxCommonLib.FastString2Byte(funcName)
 		btlen := len(bt)
-		mbfuncName := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mbfuncName[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
+		mbfuncName := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mbfuncName[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
 		syscall.Syscall6(blink.wkeJsBindFunction, 4, uintptr(unsafe.Pointer(&mbfuncName[0])), frunNativefunc, param, uintptr(argCount), 0, 0)
 	}
 }
@@ -1929,73 +1928,89 @@ func (blink *MiniBlinkLib) JsGetLastErrorIfException(es JSExecState) *JsExceptio
 	return nil
 }
 
-func (blink *MiniBlinkLib)JSValue2Interface(es JSExecState,v JSValue)interface{}  {
-	if blink.libminiblink == 0{
+func (blink *MiniBlinkLib) JSValue2Interface(es JSExecState, v JSValue) interface{} {
+	if blink.libminiblink == 0 {
 		return nil
 	}
 	jtype := blink.JsTypeOf(v)
 	switch jtype {
-	case JSTYPE_BOOLEAN: return blink.JsIsTrue(v)
-	case JSTYPE_STRING: return blink.JsToString(es,v)
-	case JSTYPE_NULL,JSTYPE_UNDEFINED: return nil
-	case JSTYPE_NUMBER: return blink.JsToInt(es,v)
+	case JSTYPE_BOOLEAN:
+		return blink.JsIsTrue(v)
+	case JSTYPE_STRING:
+		return blink.JsToString(es, v)
+	case JSTYPE_NULL, JSTYPE_UNDEFINED:
+		return nil
+	case JSTYPE_NUMBER:
+		return blink.JsToInt(es, v)
 	}
 	return nil
 }
 
-func (blink *MiniBlinkLib)JsUndefined()JSValue  {
-	if blink.libminiblink != 0 && blink.jsUndefined != 0{
-		ret,_,_ := syscall.Syscall(blink.jsUndefined,0,0,0,0)
+func (blink *MiniBlinkLib) JsUndefined() JSValue {
+	if blink.libminiblink != 0 && blink.jsUndefined != 0 {
+		ret, _, _ := syscall.Syscall(blink.jsUndefined, 0, 0, 0, 0)
 		return JSValue(ret)
 	}
 	return 0
 }
 
-func (blink *MiniBlinkLib)JsGetGlobal(es JSExecState,prop string)JSValue  {
-	if blink.libminiblink != 0 && blink.jsGetGlobal != 0{
+func (blink *MiniBlinkLib) JsGetGlobal(es JSExecState, prop string) JSValue {
+	if blink.libminiblink != 0 && blink.jsGetGlobal != 0 {
 		bt := DxCommonLib.FastString2Byte(prop)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
-		ret,_,_ := syscall.Syscall(blink.jsGetGlobal,2,uintptr(es),uintptr(unsafe.Pointer(&mb[0])),0)
-		return  JSValue(ret)
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
+		ret, _, _ := syscall.Syscall(blink.jsGetGlobal, 2, uintptr(es), uintptr(unsafe.Pointer(&mb[0])), 0)
+		return JSValue(ret)
 	}
 	return 0
 }
 
-func (blink *MiniBlinkLib)JsGet(es JSExecState,obj JSValue, prop string)JSValue  {
-	if blink.libminiblink != 0 && blink.jsGet != 0{
+func (blink *MiniBlinkLib) JsGet(es JSExecState, obj JSValue, prop string) JSValue {
+	if blink.libminiblink != 0 && blink.jsGet != 0 {
 		bt := DxCommonLib.FastString2Byte(prop)
 		btlen := len(bt)
-		mb := make([]byte,btlen+1)
-		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]),unsafe.Pointer(&bt[0]),uintptr(btlen))
-		ret,_,_ := syscall.Syscall(blink.jsGet,3,uintptr(es),uintptr(obj),uintptr(unsafe.Pointer(&mb[0])))
-		return  JSValue(ret)
+		mb := make([]byte, btlen+1)
+		DxCommonLib.CopyMemory(unsafe.Pointer(&mb[0]), unsafe.Pointer(&bt[0]), uintptr(btlen))
+		ret, _, _ := syscall.Syscall(blink.jsGet, 3, uintptr(es), uintptr(obj), uintptr(unsafe.Pointer(&mb[0])))
+		return JSValue(ret)
 	}
 	return 0
 }
 
-func (blink *MiniBlinkLib)Value2JSValue(es JSExecState,v interface{})JSValue  {
+func (blink *MiniBlinkLib) Value2JSValue(es JSExecState, v interface{}) JSValue {
 	switch value := v.(type) {
-	case int:  return blink.JsInt(value)
-	case int32:  return blink.JsInt(int(value))
-	case *int: return blink.JsInt(*value)
-	case *int32: return blink.JsInt(int(*value))
-	case int8:  return blink.JsInt(int(value))
-	case int16:  return blink.JsInt(int(value))
-	case *int8: return blink.JsInt(int(*value))
-	case *int16: return blink.JsInt(int(*value))
-	case int64:  return blink.JSDouble(float64(value))
-	case *int64: return blink.JSDouble(float64(*value))
-	case bool: return blink.JsBoolean(value)
-	case *bool: return blink.JsBoolean(*value)
-	case string: return blink.JsString(es,value)
-	case *string: return blink.JsString(es,*value)
+	case int:
+		return blink.JsInt(value)
+	case int32:
+		return blink.JsInt(int(value))
+	case *int:
+		return blink.JsInt(*value)
+	case *int32:
+		return blink.JsInt(int(*value))
+	case int8:
+		return blink.JsInt(int(value))
+	case int16:
+		return blink.JsInt(int(value))
+	case *int8:
+		return blink.JsInt(int(*value))
+	case *int16:
+		return blink.JsInt(int(*value))
+	case int64:
+		return blink.JSDouble(float64(value))
+	case *int64:
+		return blink.JSDouble(float64(*value))
+	case bool:
+		return blink.JsBoolean(value)
+	case *bool:
+		return blink.JsBoolean(*value)
+	case string:
+		return blink.JsString(es, value)
+	case *string:
+		return blink.JsString(es, *value)
 	}
 	return blink.JsUndefined()
 }
-
-
 
 var (
 	BlinkLib                    MiniBlinkLib
