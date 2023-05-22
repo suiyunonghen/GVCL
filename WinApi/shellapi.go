@@ -68,12 +68,14 @@ var(
 	fnShell_NotifyIcon uintptr
 	libshell32 syscall.Handle
 	fnShellExecuteW uintptr
+	fnExtractIconExW uintptr
 )
 
 func init()  {
 	libshell32, _ = syscall.LoadLibrary("shell32.dll")
 	fnShell_NotifyIcon, _ = syscall.GetProcAddress(libshell32, "Shell_NotifyIconW")
 	fnShellExecuteW,_ = syscall.GetProcAddress(libshell32, "ShellExecuteW")
+	fnExtractIconExW,_= syscall.GetProcAddress(libshell32, "ExtractIconExW")
 }
 
 func Shell_NotifyIcon(dwMessage uint32, lpData *GNotifyIconData)bool{
@@ -84,4 +86,26 @@ func Shell_NotifyIcon(dwMessage uint32, lpData *GNotifyIconData)bool{
 func ShellExecute(hwnd syscall.Handle,Operation, FileName, Parameters,Directory uintptr,ShowCmd int)HINST  {
 	ret,_,_ := syscall.Syscall6(fnShellExecuteW,6,uintptr(hwnd),Operation, FileName, Parameters,Directory,uintptr(ShowCmd))
 	return HINST(ret)
+}
+
+func GetModuleFileName(hModule syscall.Handle) string  {
+	var fileName [260]uint16;
+	ret,_,_ := syscall.SyscallN(fnGetModuleFileNameW,uintptr(hModule),uintptr(unsafe.Pointer(&fileName[0])),uintptr(260))
+	if ret != 0{
+		return syscall.UTF16ToString(fileName[:ret])
+	}
+	return ""
+}
+
+func ExtractIconEx(fileName string,nIconIndex int,phiconLarge *HICON,phiconSmall *HICON,nIcons uint)uint  {
+	if fileName == ""{
+		fileName = GetModuleFileName(0)
+	}
+	pfileName,err := syscall.UTF16PtrFromString(fileName)
+	if err != nil{
+		return 0
+	}
+	ret,_,_ := syscall.SyscallN(fnExtractIconExW,uintptr(unsafe.Pointer(pfileName)),uintptr(nIconIndex),
+		uintptr(unsafe.Pointer(phiconLarge)),uintptr(unsafe.Pointer(phiconSmall)),uintptr(nIcons))
+	return uint(ret)
 }

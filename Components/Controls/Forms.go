@@ -146,6 +146,9 @@ func (app *WApplication) Run() {
 		if app.fappIcon==0{
 			if app.fappIcon = WinApi.LoadIcon(Hinstance,uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("MAINICON"))));app.fappIcon == 0{
 				app.fappIcon = WinApi.LoadIcon(Hinstance,uintptr(3))
+				if app.fappIcon == 0{
+					WinApi.ExtractIconEx("",0, nil, &app.fappIcon, 1);
+				}
 			}
 		}
 		WinApi.SendMessage(app.fMainForm.GetWindowHandle(),WinApi.WM_SETICON,uintptr(WinApi.ICON_BIG),uintptr(application.fappIcon))
@@ -166,6 +169,9 @@ func (app *WApplication)AppIcon()WinApi.HICON  {
 	if app.fappIcon == 0{
 		if app.fappIcon = WinApi.LoadIcon(Hinstance,uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("MAINICON"))));app.fappIcon == 0{
 			app.fappIcon = WinApi.LoadIcon(Hinstance,uintptr(3))
+			if app.fappIcon == 0{
+				WinApi.ExtractIconEx("",0, nil, &app.fappIcon, 1);
+			}
 		}
 	}
 	return app.fappIcon

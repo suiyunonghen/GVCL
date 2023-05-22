@@ -1058,9 +1058,9 @@ const (
 	FILE_TYPE_CHAR                        = 2
 	FILE_TYPE_PIPE                        = 3
 	FILE_TYPE_REMOTE                      = 0x8000
-	STD_INPUT_HANDLE                      = -10
-	STD_OUTPUT_HANDLE                     = -11
-	STD_ERROR_HANDLE                      = -12
+	STD_INPUT_HANDLE                      = 4294967286 //uint32(int32(-10))
+	STD_OUTPUT_HANDLE                     = 4294967285 //uint32(int32(-11))
+	STD_ERROR_HANDLE                      = 4294967285 //uint32(int32(-12))
 	NOPARITY                              = 0
 	ODDPARITY                             = 1
 	EVENPARITY                            = 2

@@ -1519,3 +1519,27 @@ func FileTimeToSystemTime(lpFileTime *GFileTime,lpSystemTime *GSystemTime)bool  
 	r1,_,_ := syscall.Syscall(fnFileTimeToSystemTime,2,uintptr(unsafe.Pointer(lpFileTime)),uintptr(unsafe.Pointer(&lpSystemTime)),0)
 	return r1 != 0
 }
+
+func FreeConsole() bool {
+	initKernel32()
+	r1,_,_ := syscall.SyscallN(fnFreeConsole)
+	return r1 != 0
+}
+
+func AllocConsole()bool  {
+	initKernel32()
+	r1,_,_ := syscall.SyscallN(fnAllocConsole)
+	return r1 != 0
+}
+
+func GetStdHandle(nstdHandle uint32)syscall.Handle  {
+	initKernel32()
+	r1,_,_ := syscall.SyscallN(fnGetStdHandle,uintptr(nstdHandle))
+	return syscall.Handle(r1)
+}
+
+func SetConsoleTitle(title string)bool{
+	initKernel32()
+	r1,_,_ := syscall.SyscallN(fnSetConsoleTitleW,uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(title))))
+	return r1 != 0
+}
